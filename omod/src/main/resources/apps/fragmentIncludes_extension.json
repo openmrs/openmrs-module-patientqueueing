@@ -1,0 +1,26 @@
+[
+  {
+    "id": "${project.parent.groupId}.${project.parent.artifactId}.patientDashboard.completePatientQueueFragment",
+    "extensionPointId": "patientDashboard.includeFragments",
+    "extensionParams": {
+      "provider": "patientqueueing",
+      "fragment": "completeQueue"
+    }
+  },
+  {
+    "id": "${project.parent.groupId}.${project.parent.artifactId}.patientDashboard.includeAddPatientQueueFragment",
+    "extensionPointId": "patientDashboard.includeFragments",
+    "extensionParams": {
+      "provider": "patientqueueing",
+      "fragment": "addPatientToQueue"
+    }
+  },
+  {
+    "id": "${project.parent.groupId}.${project.parent.artifactId}.clinicianDashboard.includeAddPatientQueueFragment",
+    "extensionPointId": "clinicianDashboard.includeFragments",
+    "extensionParams": {
+      "provider": "patientqueueing",
+      "fragment": "addPatientToQueue"
+    }
+  }
+]

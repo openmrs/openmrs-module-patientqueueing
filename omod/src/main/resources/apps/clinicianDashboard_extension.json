@@ -1,0 +1,20 @@
+[
+  {
+    "id": "patientqueueing.queueList.clinicianDashboardRightColumn",
+    "extensionPointId": "clinicianDashboard.rightColumnFragments",
+    "order": 1,
+    "extensionParams": {
+      "provider": "patientqueueing",
+      "fragment": "clinicianQueueList"
+    }
+  },
+  {
+    "id": "patientqueueing.alterts.clinicianDashboardLeftColumn",
+    "extensionPointId": "clinicianDashboard.leftColumnFragments",
+    "order": 1,
+    "extensionParams": {
+      "provider": "patientqueueing",
+      "fragment": "alerts"
+    }
+  }
+]

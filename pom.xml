@@ -1,0 +1,117 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.openmrs.maven.parents</groupId>
+        <artifactId>maven-parent-openmrs-module</artifactId>
+        <version>1.1.0</version>
+    </parent>
+
+	<groupId>org.openmrs.module</groupId>
+	<artifactId>patientqueueing</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>Patient Queueing</name>
+	<description>This Module Provides functionality to Queue Patient In a Hospital with a health care provider Dashboard to allow them to see the people in queue, message other providers and receive messages from other providers regarding patient care</description>
+
+	<url>https://wiki.openmrs.org/x/FQ4z</url>
+
+	<scm>
+		<connection>scm:git:git@github.com:openmrs/openmrs-module-patientqueueing.git</connection>
+		<developerConnection>scm:git:git@github.com:openmrs/openmrs-module-patientqueueing.git</developerConnection>
+		<url>https://github.com/openmrs/openmrs-module-patientqueueing/</url>
+	</scm>
+
+	<modules>
+		<module>api</module>
+		<module>omod</module>
+	</modules>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>appframework-api</artifactId>
+				<version>${appframeworkVersion}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>appui-omod</artifactId>
+				<version>${appuiVersion}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>appui-api</artifactId>
+				<version>${appuiVersion}</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>coreapps-omod</artifactId>
+				<version>${coreappsVersion}</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>coreapps-api</artifactId>
+				<version>1.20.0</version>
+				<scope>provided</scope>
+			</dependency>
+
+
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>emrapi-api</artifactId>
+				<version>${emrapiVersion}</version>
+				<scope>provided</scope>
+			</dependency>
+			<!-- Importing versions from refapp distro -->
+            <dependency>
+                <groupId>org.openmrs.distro</groupId>
+                <artifactId>referenceapplication</artifactId>
+                <version>2.5</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<repositories>
+		<repository>
+			<id>openmrs-repo</id>
+			<name>OpenMRS Nexus Repository</name>
+			<url>http://mavenrepo.openmrs.org/nexus/content/repositories/public</url>
+		</repository>
+		<repository>
+			<id>central</id>
+			<name>Maven Repository Switchboard</name>
+			<layout>default</layout>
+			<url>http://repo1.maven.org/maven2</url>
+		</repository>
+	</repositories>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>openmrs-repo</id>
+			<name>OpenMRS Nexus Repository</name>
+			<url>http://mavenrepo.openmrs.org/nexus/content/repositories/public</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</pluginRepository>
+	</pluginRepositories>
+
+	<properties>
+		<openmrsPlatformVersion>1.11.6</openmrsPlatformVersion>
+
+		<appframeworkVersion>2.11.0</appframeworkVersion>
+		<appuiVersion>1.9.0</appuiVersion>
+		<coreappsVersion>1.20.0</coreappsVersion>
+		<emrapiVersion>1.26.0</emrapiVersion>
+		<uiframeworkVersion>3.13.0</uiframeworkVersion>
+	</properties>
+</project>
