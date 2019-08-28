@@ -47,7 +47,7 @@ public class PatientQueue extends BaseOpenmrsData implements Serializable {
 
     @Column(name = "queue_number", length = 255)
     private String status;
-	
+
 	@Column(name = "status", length = 255)
 	private String queueNumber;
 
