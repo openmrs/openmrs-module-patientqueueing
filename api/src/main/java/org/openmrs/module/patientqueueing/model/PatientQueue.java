@@ -1,9 +1,22 @@
 package org.openmrs.module.patientqueueing.model;
 
-import org.openmrs.*;
 
-import javax.persistence.*;
+import org.openmrs.Patient;
+import org.openmrs.Provider;
+import org.openmrs.Location;
+import org.openmrs.Encounter;
+import org.openmrs.User;
+import org.openmrs.BaseOpenmrsData;
+
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.Id;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Column;
+import javax.persistence.ManyToOne;
+import javax.persistence.JoinColumn;
 import java.io.Serializable;
+
 
 @Entity(name = "patientqueueing.PatientQueue")
 @Table(name = "patient_queue")
