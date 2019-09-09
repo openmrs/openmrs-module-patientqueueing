@@ -108,14 +108,4 @@ public class PatientQueue extends BaseOpenmrsData implements Serializable {
 	public void setStatus(String status) {
 		this.status = status;
 	}
-	
-	@Override
-	public User getCreator() {
-		return creator;
-	}
-	
-	@Override
-	public void setCreator(User creator) {
-		this.creator = creator;
-	}
 }
