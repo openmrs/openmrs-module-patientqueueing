@@ -18,7 +18,7 @@ import org.openmrs.module.BaseModuleActivator;
  */
 public class PatientQueueingActivator extends BaseModuleActivator {
 	
-	private Log log = LogFactory.getLog(this.getClass());
+	private Log log = LogFactory.getLog(PatientQueueingActivator.class);
 	
 	/**
 	 * @see #started()
