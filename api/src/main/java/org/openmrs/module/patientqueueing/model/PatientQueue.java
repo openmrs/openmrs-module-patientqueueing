@@ -5,6 +5,7 @@ import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.Location;
 import org.openmrs.Encounter;
+import org.openmrs.User;
 import org.openmrs.BaseOpenmrsData;
 
 import javax.persistence.Entity;
@@ -15,7 +16,6 @@ import javax.persistence.Column;
 import javax.persistence.ManyToOne;
 import javax.persistence.JoinColumn;
 import java.io.Serializable;
-
 
 @Entity(name = "patientqueueing.PatientQueue")
 @Table(name = "patient_queue")
@@ -54,7 +54,7 @@ public class PatientQueue extends BaseOpenmrsData implements Serializable {
 
 	@Column(name = "priority_comment", length = 255)
 	private String priority_comment;
-	
+
 	public PatientQueue() {
 	}
 	
