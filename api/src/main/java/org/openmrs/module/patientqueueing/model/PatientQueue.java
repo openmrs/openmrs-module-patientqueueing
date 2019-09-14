@@ -5,7 +5,6 @@ import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.Location;
 import org.openmrs.Encounter;
-import org.openmrs.User;
 import org.openmrs.BaseOpenmrsData;
 
 import javax.persistence.Entity;
@@ -49,6 +48,12 @@ public class PatientQueue extends BaseOpenmrsData implements Serializable {
 	
 	@Column(name = "status", length = 255)
 	private String status;
+
+	@Column(name = "priority")
+	private Integer priority;
+
+	@Column(name = "priority_comment", length = 255)
+	private String priority_comment;
 	
 	public PatientQueue() {
 	}
@@ -100,7 +105,31 @@ public class PatientQueue extends BaseOpenmrsData implements Serializable {
 	public void setEncounter(Encounter encounter) {
 		this.encounter = encounter;
 	}
-	
+
+	public Integer getPatientQueueId() {
+		return patientQueueId;
+	}
+
+	public void setPatientQueueId(Integer patientQueueId) {
+		this.patientQueueId = patientQueueId;
+	}
+
+	public Integer getPriority() {
+		return priority;
+	}
+
+	public void setPriority(Integer priority) {
+		this.priority = priority;
+	}
+
+	public String getPriority_comment() {
+		return priority_comment;
+	}
+
+	public void setPriority_comment(String priority_comment) {
+		this.priority_comment = priority_comment;
+	}
+
 	public String getStatus() {
 		return status;
 	}
@@ -108,4 +137,6 @@ public class PatientQueue extends BaseOpenmrsData implements Serializable {
 	public void setStatus(String status) {
 		this.status = status;
 	}
+
+
 }
