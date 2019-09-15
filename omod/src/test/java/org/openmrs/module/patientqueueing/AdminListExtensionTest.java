@@ -14,8 +14,10 @@ import java.util.Map;
 import org.junit.Test;
 import org.openmrs.module.Extension;
 import org.openmrs.module.patientqueueing.extension.html.AdminList;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertThat;
 
 /**
  * This test validates the AdminList extension class
