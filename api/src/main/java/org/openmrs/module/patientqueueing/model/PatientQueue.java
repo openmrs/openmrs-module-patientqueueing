@@ -44,9 +44,12 @@ public class PatientQueue extends BaseOpenmrsData implements Serializable {
 	@ManyToOne
 	@JoinColumn(name = "encounter_id")
 	private Encounter encounter;
+
+    @Column(name = "queue_number", length = 255)
+    private String status;
 	
 	@Column(name = "status", length = 255)
-	private String status;
+	private String queueNumber;
 
 	@Column(name = "priority")
 	private Integer priority;
@@ -137,5 +140,11 @@ public class PatientQueue extends BaseOpenmrsData implements Serializable {
 		this.status = status;
 	}
 
+    public String getQueueNumber() {
+        return queueNumber;
+    }
 
+    public void setQueueNumber(String queueNumber) {
+        this.queueNumber = queueNumber;
+    }
 }

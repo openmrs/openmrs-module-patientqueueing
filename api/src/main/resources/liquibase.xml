@@ -15,6 +15,7 @@
             <column name="location_to" type="INT"/>
             <column name="encounter_id" type="INT"/>
             <column name="status" type="VARCHAR(255)"/>
+            <column name="queue_number" type="VARCHAR(255)"/>
             <column name="priority" type="INT"/>
             <column name="priority_comment" type="VARCHAR(255)"/>
             <column name="date_created" type="datetime"/>
