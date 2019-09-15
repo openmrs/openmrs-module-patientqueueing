@@ -11,19 +11,10 @@ package org.openmrs.module.patientqueueing.api.dao;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Restrictions;
-import org.openmrs.Location;
-import org.openmrs.Patient;
-import org.openmrs.Provider;
 import org.openmrs.api.db.hibernate.DbSession;
 import org.openmrs.api.db.hibernate.DbSessionFactory;
-import org.openmrs.module.patientqueueing.model.PatientQueue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-
-import java.util.Date;
-import java.util.List;
 
 @Repository("patientqueueing.PatientQueueingDao")
 public class PatientQueueingDao {
@@ -37,33 +28,4 @@ public class PatientQueueingDao {
 		return sessionFactory.getCurrentSession();
 	}
 	
-	public PatientQueue getPatientQueueById(String queueId) {
-		return (PatientQueue) getSession().createCriteria(PatientQueue.class)
-		        .add(Restrictions.eq("patient_queue_id", queueId)).uniqueResult();
-	}
-	
-	public List<PatientQueue> getPatientQueueByPatient(Patient patient) {
-		Criteria criteria = getSession().createCriteria(PatientQueue.class);
-		criteria.add(Restrictions.eq("patient", patient));
-		return criteria.list();
-	}
-	
-	public PatientQueue savePatientQueue(PatientQueue patientQueue) {
-		try {
-			sessionFactory.getCurrentSession().saveOrUpdate(patientQueue);
-			return patientQueue;
-		}
-		catch (Exception e) {
-			log.error(e);
-		}
-		return null;
-	}
-	
-	public List<PatientQueue> getPatientInQueue(Provider provider, Date fromDate, Date toDate, Location sessionLocation) {
-		Criteria criteria = getSession().createCriteria(PatientQueue.class);
-		criteria.add(Restrictions.between("dateCreated", fromDate, toDate));
-		criteria.add(Restrictions.eq("provider", provider));
-		criteria.add(Restrictions.eq("locationTo", sessionLocation));
-		return criteria.list();
-	}
 }

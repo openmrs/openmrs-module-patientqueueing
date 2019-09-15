@@ -9,17 +9,7 @@
  */
 package org.openmrs.module.patientqueueing.api;
 
-import org.openmrs.Location;
-import org.openmrs.Patient;
-import org.openmrs.Provider;
-import org.openmrs.annotation.Authorized;
-import org.openmrs.api.APIException;
 import org.openmrs.api.OpenmrsService;
-import org.openmrs.module.patientqueueing.model.PatientQueue;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Date;
-import java.util.List;
 
 /**
  * The main service of this module, which is exposed for other modules. See
@@ -27,23 +17,4 @@ import java.util.List;
  */
 public interface PatientQueueingService extends OpenmrsService {
 	
-	@Authorized
-	@Transactional(readOnly = true)
-	public abstract PatientQueue getPatientQueueById(String queueId) throws APIException;
-	
-	public List<PatientQueue> getPatientQueueByPatient(Patient patient) throws APIException;
-	
-	@Transactional
-	public abstract List<PatientQueue> getPatientInQueueList(Provider provider, Date fromDate, Date toDate,
-	        Location sessionLocation) throws APIException;
-	
-	@Transactional
-	public abstract List<PatientQueue> getPatientInQueueList(Date fromDate, Date toDate, Location sessionLocation)
-	        throws APIException;
-	
-	@Transactional
-	public abstract PatientQueue savePatientQue(PatientQueue patientQueue) throws APIException;
-	
-	@Transactional
-	public abstract PatientQueue completeQueue(PatientQueue patientQueue) throws APIException;
 }

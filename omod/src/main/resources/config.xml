@@ -58,19 +58,5 @@
 		<file>messages_es.properties</file>
 	</messages>
 	<!-- /Internationalization -->
-
-	<privilege>
-		<name>App: patientqueueing.accessClinicianDashboard</name>
-		<description>Allows access to Clinician Dashboard.</description>
-	</privilege>
-	<privilege>
-		<name>Task: patientqueueing.addPatientToQueue</name>
-		<description>Ability to Add aPatient to a Queue.</description>
-	</privilege>
-
-	<privilege>
-		<name>Task: patientqueueing.completePatientQueue</name>
-		<description>Ability to Complete a Patient Queue.</description>
-	</privilege>
 </module>
 

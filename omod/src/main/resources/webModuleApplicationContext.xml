@@ -19,41 +19,7 @@
   		    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
   		    http://www.springframework.org/schema/util
   		    http://www.springframework.org/schema/util/spring-util-3.0.xsd">
-
-	<context:component-scan base-package="org.openmrs.module.patientqueueing.web.controller" />
-
 	<bean class="org.openmrs.ui.framework.StandardModuleUiConfiguration">
 		<property name="moduleId" value="${project.parent.artifactId}"/>
-	</bean>
-
-	<bean class="org.openmrs.ui.framework.page.GlobalResourceIncluder">
-		<property name="resources">
-			<list>
-				<bean class="org.openmrs.ui.framework.resource.Resource">
-					<property name="category" value="css" />
-					<property name="providerName" value="patientqueueing" />
-					<property name="resourcePath" value="styles/hierarchy-select.min.css"/>
-					<property name="priority" value="-200" />
-				</bean>
-				<bean class="org.openmrs.ui.framework.resource.Resource">
-					<property name="category" value="css" />
-					<property name="providerName" value="patientqueueing" />
-					<property name="resourcePath" value="scripts/hierarchy-select.min.js"/>
-					<property name="priority" value="-200" />
-				</bean>
-				<bean class="org.openmrs.ui.framework.resource.Resource">
-					<property name="category" value="css" />
-					<property name="providerName" value="patientqueueing" />
-					<property name="resourcePath" value="scripts/patientqueue.js"/>
-					<property name="priority" value="-200" />
-				</bean>
-				<bean class="org.openmrs.ui.framework.resource.Resource">
-					<property name="category" value="css" />
-					<property name="providerName" value="patientqueueing" />
-					<property name="resourcePath" value="styles/queueing.css"/>
-					<property name="priority" value="-200" />
-				</bean>
-			</list>
-		</property>
 	</bean>
 </beans>
