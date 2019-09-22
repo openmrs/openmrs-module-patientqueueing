@@ -15,7 +15,7 @@
 	<name>Patient Queueing</name>
 	<description>This Module Provides functionality to Queue Patient In a Hospital with a health care provider Dashboard to allow them to see the people in queue, message other providers and receive messages from other providers regarding patient care</description>
 
-	<url>https://wiki.openmrs.org/x/FQ4z</url>
+	<url>https://wiki.openmrs.org/display/projects/Patient+Queueing+In+Reference+Application</url>
 
 	<scm>
 		<connection>scm:git:git@github.com:openmrs/openmrs-module-patientqueueing.git</connection>

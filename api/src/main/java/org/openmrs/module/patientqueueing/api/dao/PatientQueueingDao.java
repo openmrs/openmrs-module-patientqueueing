@@ -19,7 +19,7 @@ import org.springframework.stereotype.Repository;
 @Repository("patientqueueing.PatientQueueingDao")
 public class PatientQueueingDao {
 	
-	protected final Log log = LogFactory.getLog(getClass());
+	protected final Log log = LogFactory.getLog(PatientQueueingDao.class);
 	
 	@Autowired
 	DbSessionFactory sessionFactory;
