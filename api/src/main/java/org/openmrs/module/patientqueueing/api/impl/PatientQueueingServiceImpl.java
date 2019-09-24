@@ -9,20 +9,9 @@
  */
 package org.openmrs.module.patientqueueing.api.impl;
 
-import org.openmrs.Location;
-import org.openmrs.Patient;
-import org.openmrs.Provider;
-import org.openmrs.api.APIException;
-import org.openmrs.api.PatientService;
-import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.patientqueueing.api.PatientQueueingService;
 import org.openmrs.module.patientqueueing.api.dao.PatientQueueingDao;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
 
 public class PatientQueueingServiceImpl extends BaseOpenmrsService implements PatientQueueingService {
 	
