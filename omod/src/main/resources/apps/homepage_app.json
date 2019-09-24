@@ -1,0 +1,17 @@
+[{
+    "id": "patientqueueing.providerDashboard.homepageLink",
+    "description": "A Dashboard for Providers such as Triage, Clinicians, Lab, Radiology etc........",
+    "extensions": [
+      {
+        "extensionPointId": "org.openmrs.referenceapplication.homepageLink",
+        "id": "coreapps.systemadministration.homepageLink",
+        "type": "link",
+        "label": "patientqueueing.provider.dashboard.label",
+        "url": "patientqueueing/providerDashboard.page",
+        "icon": "icon-stethoscope",
+        "order": 1,
+        "requiredPrivilege": "App: patientqueueing.providerDashboard"
+      }
+    ]
+  }
+]
