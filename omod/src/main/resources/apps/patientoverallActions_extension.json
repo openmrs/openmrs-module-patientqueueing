@@ -1,0 +1,13 @@
+[
+  {
+    "id": "org.openmrs.patientqueueing.completePatientQueue",
+    "extensionPointId": "patientDashboard.overallActions",
+    "type": "script",
+    "label": "Complete Patient Session",
+    "script": "patientqueue.showCompletePatientQueueDialog({{patient.patientId}})",
+    "icon": "icon-check-in",
+    "order": -20,
+    "require": "!patient.person.dead",
+    "requiredPrivilege": "Task: patientqueueing.completePatientQueue"
+  }
+]

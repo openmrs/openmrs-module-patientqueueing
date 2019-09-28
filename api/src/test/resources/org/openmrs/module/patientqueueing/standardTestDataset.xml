@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+
+	<global_property  property="patientqueueing.defaultDateFormat"  property_value="dd/MM/yyyy"  description="The Date format for mysql database for OpenMRS"  uuid="d6e8499e-87eb-451d-a7ce-fa9013e48e74"/>
+	<global_property  property="patientqueueing.defaultFacilityVisitTypeUUID"  property_value="7b0f5697-27e3-40c4-8bae-f4049abfb4ed"  description="Facility Visit Type UUID"  uuid="6b20aa94-4b7b-498b-a500-e02f7c0490a3"/>
+	<global_property  property="patientqueueing.displayDateFormat"  property_value="dd/MM/yyyy HH:mm:ss"  description="Date format for patientQueueing display and date pickers"  uuid="ec45ad58-0cd0-4ab7-a7b4-a267236ac7b9"/>
+
+	<!-- Encounter Types -->
+	<encounter_type encounter_type_id="1" name="Sample Encounter" description="Sample Encounter" creator="1" date_created="2016-04-05 16:43:19.0" retired="false" uuid="6864c0ac-eb49-11e9-81b4-2a2ae2dbcce4"/>
+
+	<!-- Patient-->
+	<person person_id="10000" gender="F" birthdate="2014-01-01 00:00:00.0" birthdate_estimated="0" dead="false" creator="1" date_created="2014-01-01 00:00:00.0" voided="false" uuid="6864c408-eb49-11e9-81b4-2a2ae2dbcce4"/>
+	<person_name person_name_id="100010" preferred="true" person_id="10000" prefix="" given_name="Sara" middle_name="Nakamya" family_name="Mukasa" family_name_suffix="" creator="1" date_created="2014-01-01 00:00:00.0" voided="false" void_reason="" uuid="6864c57a-eb49-11e9-81b4-2a2ae2dbcce4"/>
+	<patient patient_id="10000" creator="1" date_created="2014-01-01 00:00:00.0" voided="false"/>
+
+	<!--Encounter-->
+	<encounter encounter_id="10000" encounter_type="1" patient_id="8" location_id="1" form_id="1" encounter_datetime="2009-08-01 00:00:00.0" creator="1" date_created="2008-08-18 14:09:05.0" voided="false" uuid="6864ca02-eb49-11e9-81b4-2a2ae2dbcce4"/>
+
+	<!--Patient Queue-->
+	<patient_queue  patient_queue_id="1"   patient_id="10000" location_from="1"  location_to="1"  encounter_id="10000"  status="PENDING"  queue_number="07/10/2019-LOC-001" date_created="2019-10-07 18:53:56"  changed_by="1"  date_changed="2019-10-07 19:05:56"  voided="0"  creator="1"  uuid="4102d6e2-9fb4-4084-b412-8e3838479170"/>
+	<patient_queue  patient_queue_id="2"   patient_id="10000" location_from="1"  location_to="1"  encounter_id="10000"  status="COMPLETED"  queue_number="08/10/2019-LOC-001" date_created="2019-10-07 19:05:56"  changed_by="1"  date_changed="2019-10-07 19:08:26"  voided="0" creator="1"  uuid="b32ef7ea-98a1-4fcd-936e-b244b943a499"/>
+</dataset>

@@ -68,12 +68,12 @@ public class ProviderDashboardPageController {
 		    (dashboard == "providerDashboard" ? "provider" : dashboard) + ".otherActions", contextModel);
 		Collections.sort(otherActions);
 		model.addAttribute("otherActions", otherActions);
-
-        // used for breadcrumbs to link back to the base dashboard in the case when this is used to render a context-specific dashboard
+		
+		// used for breadcrumbs to link back to the base dashboard in the case when this is used to render a context-specific dashboard
 		model.addAttribute("baseDashboardUrl", coreAppsProperties.getDashboardUrl());
-
+		
 		model.addAttribute("dashboard", dashboard);
-
+		
 		model.put("currentLocation", sessionContext.getSessionLocation());
 		return null;
 	}
