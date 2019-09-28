@@ -6,5 +6,12 @@
       "provider": "patientqueueing",
       "fragment": "completePatientQueue"
     }
+  }, {
+    "id": "${project.parent.groupId}.${project.parent.artifactId}.patientDashboard.includeSendPatientQueueFragment",
+    "extensionPointId": "patientDashboard.includeFragments",
+    "extensionParams": {
+      "provider": "patientqueueing",
+      "fragment": "sendPatientToQueue"
+    }
   }
 ]

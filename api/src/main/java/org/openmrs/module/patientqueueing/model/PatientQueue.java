@@ -50,8 +50,8 @@ public class PatientQueue extends BaseOpenmrsData implements Serializable {
 	@Enumerated(EnumType.STRING)
 	private PatientQueue.Status status;
 	
-	@Column(name = "queue_number", length = 255)
-	private String queueNumber;
+	@Column(name = "visit_number", length = 255)
+	private String visitNumber;
 	
 	@Column(name = "priority")
 	private Integer priority;
@@ -146,11 +146,11 @@ public class PatientQueue extends BaseOpenmrsData implements Serializable {
 		this.status = status;
 	}
 	
-	public String getQueueNumber() {
-		return queueNumber;
+	public String getVisitNumber() {
+		return visitNumber;
 	}
 	
-	public void setQueueNumber(String queueNumber) {
-		this.queueNumber = queueNumber;
+	public void setVisitNumber(String visitNumber) {
+		this.visitNumber = visitNumber;
 	}
 }

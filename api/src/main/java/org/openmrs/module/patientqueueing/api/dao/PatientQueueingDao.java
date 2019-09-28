@@ -87,7 +87,7 @@ public class PatientQueueingDao {
 	/**
 	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#savePatientQue(org.openmrs.module.patientqueueing.model.PatientQueue)
 	 */
-	public PatientQueue savePatientQueue(PatientQueue patientQueue) throws Exception {
+	public PatientQueue savePatientQueue(PatientQueue patientQueue) {
 		sessionFactory.getCurrentSession().saveOrUpdate(patientQueue);
 		return patientQueue;
 	}
@@ -108,6 +108,19 @@ public class PatientQueueingDao {
 		}
 		
 		criteria.add(Restrictions.not(Restrictions.in("status", new Enum[] { PatientQueue.Status.COMPLETED })));
+		
+		return (PatientQueue) criteria.uniqueResult();
+	}
+	
+	/**
+	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#getMostRecentQueue(org.openmrs.Patient)
+	 */
+	public PatientQueue getMostRecentQueue(Patient patient) {
+		Criteria criteria = getSession().createCriteria(PatientQueue.class);
+		
+		criteria.add(Restrictions.eq("patient", patient));
+		criteria.addOrder(Order.desc("dateCreated"));
+		criteria.setMaxResults(1);
 		
 		return (PatientQueue) criteria.uniqueResult();
 	}

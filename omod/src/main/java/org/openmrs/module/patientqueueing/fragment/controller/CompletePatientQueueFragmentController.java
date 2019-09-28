@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.text.ParseException;
 
-
 public class CompletePatientQueueFragmentController {
 	
 	public void controller(@RequestParam("patientId") Patient patient, FragmentModel model, UiSessionContext sessionContext)

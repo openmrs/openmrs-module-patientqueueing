@@ -9,5 +9,15 @@
     "order": -20,
     "require": "!patient.person.dead",
     "requiredPrivilege": "Task: patientqueueing.completePatientQueue"
-  }
+  },{
+  "id": "${project.parent.groupId}.${project.parent.artifactId}.queuePatient",
+  "extensionPointId": "patientDashboard.overallActions",
+  "type": "script",
+  "label": "patientqueueing.task.sendPatientToQueue.label",
+  "script": "patientqueue.showSendPatientQueueDialog({{patient.patientId}})",
+  "icon": "icon-stethoscope",
+  "order": -20,
+  "require": "!patient.person.dead",
+  "requiredPrivilege": "Task: patientqueueing.sendPatientToQueue"
+}
 ]
