@@ -32,6 +32,12 @@
 					<property name="resourcePath" value="scripts/patientqueue.js"/>
 					<property name="priority" value="-200" />
 				</bean>
+                <bean class="org.openmrs.ui.framework.resource.Resource">
+                    <property name="category" value="css" />
+                    <property name="providerName" value="patientqueueing" />
+                    <property name="resourcePath" value="styles/queue.css"/>
+                    <property name="priority" value="-200" />
+                </bean>
 			</list>
 		</property>
 	</bean>

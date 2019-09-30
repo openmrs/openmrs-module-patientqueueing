@@ -1,0 +1,11 @@
+[
+  {
+    "id": "patientqueueing.alterts.providerDashboardLeftColumn",
+    "extensionPointId": "providerDashboard.leftColumnFragments",
+    "order": 1,
+    "extensionParams": {
+      "provider": "patientqueueing",
+      "fragment": "alerts"
+    }
+  }
+]

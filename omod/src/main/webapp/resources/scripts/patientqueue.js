@@ -3,6 +3,10 @@ var patientqueue = patientqueue || {};
 patientqueue.completePatientQueueDialog = null;
 patientqueue.patientId = null;
 patientqueue.sendPatientQueueDialog = null;
+patientqueue.readMessageDialog = null;
+patientqueue.alert_message_id = null;
+patientqueue.message = null;
+patientqueue.createMessageDialog = null;
 
 
 patientqueue.showCompletePatientQueueDialog = function (patientId) {
@@ -60,4 +64,46 @@ patientqueue.createSendPatientQueueDialog = function () {
     });
 
     patientqueue.sendPatientQueueDialog.show();
+}
+
+patientqueue.showReadMessageDialog = function (message,alert_message_id) {
+    patientqueue.message = message;
+    patientqueue.alert_message_id=alert_message_id;
+    jq("#message").html("");
+    jq("#message").html(message);
+    if (patientqueue.readMessageDialog == null) {
+        patientqueue.createReadMessageDialog();
+    }
+    patientqueue.readMessageDialog.show();
+};
+
+patientqueue.closeReadMessageDialog = function () {
+    patientqueue.readMessageDialog.close();
+};
+
+
+patientqueue.buildAlertAttributeParams = function () {
+    var params = {};
+    params['alert_message_id'] = patientqueue.alert_message_id;
+    return params;
+};
+
+
+patientqueue.createReadMessageDialog = function () {
+    patientqueue.readMessageDialog = emr.setupConfirmationDialog({
+        selector: '#read_message',
+        actions: {
+            confirm: function () {
+                emr.getFragmentActionWithCallback('patientqueueing', 'alerts', 'markAlertAsRead', patientqueue.buildAlertAttributeParams(),
+                    function (v) {
+                        jq('#read_message' + ' .icon-spin').css('display', 'inline-block').parent().addClass('disabled');
+                        emr.navigateTo({ applicationUrl: emr.applyContextModel("patientqueueing/providerDashboard.page")});
+                    });
+            },
+            cancel: function () {
+                patientqueue.readMessageDialog.close();
+            }
+        }
+    });
+    patientqueue.readMessageDialog.close();
 }
