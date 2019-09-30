@@ -45,6 +45,12 @@
 	
 	<!-- Internationalization -->
 	<!-- All message codes should start with @MODULE_ID@.* -->
+
+	<privilege>
+		<name>App: patientqueueing.providerDashboard</name>
+		<description>Able to access Provider Dashboard</description>
+	</privilege>
+
 	<messages>
 		<lang>en</lang>
 		<file>messages.properties</file>
