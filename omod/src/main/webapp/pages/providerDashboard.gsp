@@ -4,7 +4,7 @@
 <script type="text/javascript">
     var breadcrumbs = [
         { icon: "icon-home", link: '/' + OPENMRS_CONTEXT_PATH + '/index.htm' },
-        { label: "Provider DashBoard" , link: '#'}
+        { label: "${currentLocation?.name}" , link: '#'}
     ];
 
     // add on breadcrumb if it has been defined in messages.properties
@@ -13,14 +13,13 @@
     <% } %>
 
     jq(function(){
-        // make sure we reload the page if the location is changes; this custom event is emitted by by the location selector in the header
+        // make sure we reload the page if the location is changes; this custom event is emitted by the location selector in the header
         jq(document).on('sessionLocationChanged', function() {
             window.location.reload();
         });
     });
 
     jq(document).ready(function () {
-
         jq("#okay").click(function () {
             patientqueue.createReadMessageDialog();
         });

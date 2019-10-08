@@ -1,6 +1,6 @@
 [{
     "id": "patientqueueing.providerDashboard.homepageLink",
-    "description": "A Dashboard for Providers such as Triage, Clinicians, Lab, Radiology etc........",
+    "description": "patientqueueing.provider.dashboard.description",
     "extensions": [
       {
         "extensionPointId": "org.openmrs.referenceapplication.homepageLink",
