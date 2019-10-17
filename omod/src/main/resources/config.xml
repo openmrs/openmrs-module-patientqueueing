@@ -51,6 +51,11 @@
 		<description>Able to access Provider Dashboard</description>
 	</privilege>
 
+	<privilege>
+		<name>Task: patientqueueing.completePatientQueue</name>
+		<description>Able to complete a patient queue</description>
+	</privilege>
+
 	<messages>
 		<lang>en</lang>
 		<file>messages.properties</file>
