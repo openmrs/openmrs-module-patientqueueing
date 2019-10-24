@@ -26,7 +26,6 @@
                     <p class="center" style="text-align: center;font-weight: bolder">
                         <input type="hidden" name="patientQueueId" id="patientQueueId" value="">
                         ${ui.message("patientqueueing.complete.dialogeMessage")}
-
                     </p>
                 </div>
 
