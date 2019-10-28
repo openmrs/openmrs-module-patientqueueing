@@ -20,4 +20,5 @@ public class PatientQueueingConfig {
 	public final static String MODULE_PRIVILEGE = "Patient Queueing Privilege";
 	
 	public static final String MODULE_ID = "patientqueueing";
+	
 }

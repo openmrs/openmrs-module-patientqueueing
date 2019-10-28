@@ -41,6 +41,18 @@
 	<aware_of_modules>
 		<aware_of_module>org.openmrs.module.legacyui</aware_of_module>
 	</aware_of_modules>
+
+	<globalProperty>
+		<property>patientqueueing.defaultDateFormat</property>
+		<defaultValue>dd/MM/yyyy</defaultValue>
+		<description>The date format without time</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>patientqueueing.displayDateTimeFormat</property>
+		<defaultValue>dd/MM/yyyy HH:mm:ss</defaultValue>
+		<description>Date format for patientqueueing display and date pickers</description>
+	</globalProperty>
 	
 	
 	<!-- Internationalization -->
@@ -49,6 +61,16 @@
 	<privilege>
 		<name>App: patientqueueing.providerDashboard</name>
 		<description>Able to access Provider Dashboard</description>
+	</privilege>
+
+	<privilege>
+		<name>Task: patientqueueing.completePatientQueue</name>
+		<description>Able to complete a patient queue</description>
+	</privilege>
+
+	<privilege>
+		<name>Task: patientqueueing.sendPatientToQueue</name>
+		<description>Ability to send Patient To Queue</description>
 	</privilege>
 
 	<messages>

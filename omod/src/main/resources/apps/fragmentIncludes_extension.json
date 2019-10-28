@@ -4,23 +4,14 @@
     "extensionPointId": "patientDashboard.includeFragments",
     "extensionParams": {
       "provider": "patientqueueing",
-      "fragment": "completeQueue"
+      "fragment": "completePatientQueue"
     }
-  },
-  {
-    "id": "${project.parent.groupId}.${project.parent.artifactId}.patientDashboard.includeAddPatientQueueFragment",
+  }, {
+    "id": "${project.parent.groupId}.${project.parent.artifactId}.patientDashboard.includeSendPatientQueueFragment",
     "extensionPointId": "patientDashboard.includeFragments",
     "extensionParams": {
       "provider": "patientqueueing",
-      "fragment": "addPatientToQueue"
-    }
-  },
-  {
-    "id": "${project.parent.groupId}.${project.parent.artifactId}.clinicianDashboard.includeAddPatientQueueFragment",
-    "extensionPointId": "clinicianDashboard.includeFragments",
-    "extensionParams": {
-      "provider": "patientqueueing",
-      "fragment": "addPatientToQueue"
+      "fragment": "sendPatientToQueue"
     }
   }
 ]
