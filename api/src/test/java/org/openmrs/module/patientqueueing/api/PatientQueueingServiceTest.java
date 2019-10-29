@@ -22,6 +22,7 @@ import org.openmrs.module.patientqueueing.api.dao.PatientQueueingDao;
 import org.openmrs.module.patientqueueing.api.impl.PatientQueueingServiceImpl;
 import org.openmrs.module.patientqueueing.model.PatientQueue;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
+import org.openmrs.util.OpenmrsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -194,9 +195,9 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 		Patient patient = Context.getPatientService().getPatient(10000);
 		
 		Location location = Context.getLocationService().getLocation(1);
-
+		
 		String visitNumber = patientQueueingService.generateVisitNumber(location, patient);
-
+		
 		PatientQueue patientQueue = new PatientQueue();
 		patientQueue.setPatient(patient);
 		patientQueue.setStatus(PatientQueue.Status.PENDING);
@@ -207,7 +208,7 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 		patientQueue.setPriorityComment("Emergency");
 		patientQueueingService.assignVisitNumberForToday(patientQueue);
 		patientQueueingService.savePatientQue(patientQueue);
-
+		
 		Assert.assertEquals(visitNumber, patientQueue.getVisitNumber());
 	}
 	
@@ -310,4 +311,40 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 
 		patientQueueingService.generateVisitNumber(location, patient);
 	}
+
+    @Test
+    public void getPatientQueueListBySearchParams_shouldReturnPatientQueuesThatMatchesParameters() throws Exception {
+
+        PatientQueueingService patientQueueingService = Context.getService(PatientQueueingService.class);
+
+		Date dateCreated = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2019-10-07 19:08:26");
+
+        Patient patient = Context.getPatientService().getPatient(10000);
+
+
+		List<PatientQueue> patientQueueList = patientQueueingService.getPatientQueueListBySearchParams("Mukasa", OpenmrsUtil.firstSecondOfDay(dateCreated), OpenmrsUtil.getLastMomentOfDay(dateCreated), null, null, PatientQueue.Status.PENDING);
+
+        Assert.assertEquals(1, patientQueueList.size());
+
+        Assert.assertEquals(patient, patientQueueList.get(0).getPatient());
+
+        Assert.assertEquals("Mukasa", patientQueueList.get(0).getPatient().getFamilyName());
+    }
+
+    @Test
+    public void getPatientQueueListBySearchParams_shouldReturnNotReturnPatientQueuesThatDontMatchParameters() throws Exception {
+
+        PatientQueueingService patientQueueingService = Context.getService(PatientQueueingService.class);
+
+        Patient patient = Context.getPatientService().getPatient(8);
+
+        Location location = Context.getLocationService().getLocation(1);
+
+        Assert.assertEquals("Anet", patient.getGivenName());
+
+        List<PatientQueue> patientQueueList = patientQueueingService.getPatientQueueListBySearchParams("Anet", null, null, null, location, null);
+
+        Assert.assertEquals(0, patientQueueList.size());
+
+    }
 }

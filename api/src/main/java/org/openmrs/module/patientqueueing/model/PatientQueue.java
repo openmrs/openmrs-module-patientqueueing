@@ -59,6 +59,9 @@ public class PatientQueue extends BaseOpenmrsData implements Serializable {
 	@Column(name = "priority_comment", length = 255)
 	private String priorityComment;
 	
+	@Column(name = "comment", length = 255)
+	private String comment;
+	
 	public PatientQueue() {
 	}
 	
@@ -152,5 +155,13 @@ public class PatientQueue extends BaseOpenmrsData implements Serializable {
 	
 	public void setVisitNumber(String visitNumber) {
 		this.visitNumber = visitNumber;
+	}
+	
+	public String getComment() {
+		return comment;
+	}
+	
+	public void setComment(String comment) {
+		this.comment = comment;
 	}
 }

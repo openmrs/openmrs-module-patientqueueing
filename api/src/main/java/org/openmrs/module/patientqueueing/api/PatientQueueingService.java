@@ -116,4 +116,18 @@ public interface PatientQueueingService extends OpenmrsService {
 	 */
 	@Transactional(readOnly = true)
 	public PatientQueue assignVisitNumberForToday(PatientQueue patientQueue);
+
+
+	/**
+	 * Get Patient Queue List By search Params
+	 * @param searchString search string eg first name, last name, middle name.
+	 * @param fromDate lowest date a query will be built upon. It can be null
+	 * @param toDate highest date a query will be built upon. It Can be null
+	 * @param locationTo Location Where patient was sent to
+	 * @param locationFrom Location Where patient was sent from
+	 * @param status Status such as COMPLETED,PENDING
+	 * @return  List<PatientQueue> A list of patientQueue that meet the parameters
+	 */
+	@Transactional(readOnly = true)
+	public List<PatientQueue> getPatientQueueListBySearchParams(String searchString, Date fromDate, Date toDate, Location locationTo, Location locationFrom, PatientQueue.Status status);
 }

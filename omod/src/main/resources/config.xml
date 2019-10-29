@@ -53,6 +53,13 @@
 		<defaultValue>dd/MM/yyyy HH:mm:ss</defaultValue>
 		<description>Date format for patientqueueing display and date pickers</description>
 	</globalProperty>
+
+
+	<globalProperty>
+		<property>patientqueueing.clinicianLocationUUIDS</property>
+		<defaultValue>b1a8b05e-3542-4037-bbd3-998ee9c40574,2131aff8-2e2a-480a-b7ab-4ac53250262b,58c57d25-8d39-41ab-8422-108a0c277d98</defaultValue>
+		<description>A comma separated list of location uuids for locations that clinicians operate from</description>
+	</globalProperty>
 	
 	
 	<!-- Internationalization -->
