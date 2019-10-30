@@ -40,8 +40,8 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 
 	private static Logger logger = LoggerFactory.getLogger(PatientQueueingServiceTest.class);
 
-    private static final Integer QUEUE_PRIORITY_ZERO=0;
-    private static final Integer QUEUE_PRIORITY_ONE=1;
+    private static final Integer QUEUE_PRIORITY_ZERO = 0;
+    private static final Integer QUEUE_PRIORITY_ONE = 1;
 
 	@Before
 	public void initialize() throws Exception {
