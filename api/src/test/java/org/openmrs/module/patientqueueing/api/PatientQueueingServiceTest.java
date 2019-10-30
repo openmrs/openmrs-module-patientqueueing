@@ -37,9 +37,12 @@ import java.util.List;
 public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String QUEUE_STANDARD_DATASET_XML = "org/openmrs/module/patientqueueing/standardTestDataset.xml";
-	
+
 	private static Logger logger = LoggerFactory.getLogger(PatientQueueingServiceTest.class);
-	
+
+    private static final Integer QUEUE_PRIORITY_ZERO = 0;
+    private static final Integer QUEUE_PRIORITY_ONE = 1;
+
 	@Before
 	public void initialize() throws Exception {
 		executeDataSet(QUEUE_STANDARD_DATASET_XML);
@@ -252,4 +255,36 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 		Assert.assertEquals(patientQueue, patientQueueingService.getMostRecentQueue(patient));
 		
 	}
+
+    @Test
+    public void savePatientQueue_shouldNotCompletePatientQueueOnEdit() throws Exception {
+
+        PatientQueueingService patientQueueingService = Context.getService(PatientQueueingService.class);
+
+        Patient patient = Context.getPatientService().getPatient(10000);
+
+        Location location = Context.getLocationService().getLocation(1);
+
+        PatientQueue patientQueue = new PatientQueue();
+        patientQueue.setPatient(patient);
+        patientQueue.setStatus(PatientQueue.Status.PENDING);
+        patientQueue.setEncounter(Context.getEncounterService().getEncounter(10000));
+        patientQueue.setLocationFrom(location);
+        patientQueue.setLocationTo(location);
+        patientQueue.setPriority(QUEUE_PRIORITY_ZERO);
+        patientQueue.setPriorityComment("Emergency");
+        patientQueueingService.assignVisitNumberForToday(patientQueue);
+        patientQueueingService.savePatientQue(patientQueue);
+
+        PatientQueue patientQueueToEdit = patientQueueingService.getPatientQueueById(patientQueue.getPatientQueueId());
+
+        patientQueueToEdit.setPriority(QUEUE_PRIORITY_ONE);
+        patientQueueToEdit.setPriorityComment("Non-Emergency");
+
+        PatientQueue editedPatientQueue = patientQueueingService.savePatientQue(patientQueueToEdit);
+
+        Assert.assertEquals(QUEUE_PRIORITY_ONE, editedPatientQueue.getPriority());
+        Assert.assertEquals("Non-Emergency", editedPatientQueue.getPriorityComment());
+        Assert.assertEquals(PatientQueue.Status.PENDING, editedPatientQueue.getStatus());
+    }
 }

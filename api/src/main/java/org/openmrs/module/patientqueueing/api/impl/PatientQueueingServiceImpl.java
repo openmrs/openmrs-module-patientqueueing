@@ -36,7 +36,7 @@ public class PatientQueueingServiceImpl extends BaseOpenmrsService implements Pa
     public PatientQueue savePatientQue(PatientQueue patientQueue) {
         PatientQueue currentQueue = dao.getIncompletePatientQueue(patientQueue.getPatient(), patientQueue.getLocationTo());
 
-        if (currentQueue != null) {
+        if (currentQueue != null && !patientQueue.equals(currentQueue)) {
             completePatientQueue(currentQueue);
         }
 
