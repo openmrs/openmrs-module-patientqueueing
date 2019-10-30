@@ -40,8 +40,8 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 
 	private static Logger logger = LoggerFactory.getLogger(PatientQueueingServiceTest.class);
 
-    private static final int QUEUE_PRIORITY_ZERO=0;
-    private static final int QUEUE_PRIORITY_ONE=1;
+    private static final Integer QUEUE_PRIORITY_ZERO=0;
+    private static final Integer QUEUE_PRIORITY_ONE=1;
 
 	@Before
 	public void initialize() throws Exception {
@@ -283,7 +283,7 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 
         PatientQueue editedPatientQueue = patientQueueingService.savePatientQue(patientQueueToEdit);
 
-        Assert.assertEquals(QUEUE_PRIORITY_ONE, editedPatientQueue.getPriority().intValue());
+        Assert.assertEquals(QUEUE_PRIORITY_ONE, editedPatientQueue.getPriority());
         Assert.assertEquals("Non-Emergency", editedPatientQueue.getPriorityComment());
         Assert.assertEquals(PatientQueue.Status.PENDING, editedPatientQueue.getStatus());
     }
