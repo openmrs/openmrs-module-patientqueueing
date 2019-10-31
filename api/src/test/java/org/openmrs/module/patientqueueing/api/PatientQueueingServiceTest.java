@@ -306,10 +306,8 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 		patientQueue.setVisitNumber("20/10/2019-002");
 		patientQueueingService.savePatientQue(patientQueue);
 
-		String visitNumber = patientQueueingService.generateVisitNumber(location, patient);
-
 		Assert.assertNotEquals(STANDARD_VISIT_NUMBER_LENGTH, patientQueue.getVisitNumber());
 
-		Assert.assertEquals(STANDARD_VISIT_NUMBER_LENGTH, visitNumber.length());
+		patientQueueingService.generateVisitNumber(location, patient);
 	}
 }
