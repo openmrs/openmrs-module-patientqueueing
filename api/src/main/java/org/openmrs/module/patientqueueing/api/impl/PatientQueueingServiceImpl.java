@@ -12,6 +12,7 @@ package org.openmrs.module.patientqueueing.api.impl;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
+import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.patientqueueing.api.PatientQueueingService;
 import org.openmrs.module.patientqueueing.api.dao.PatientQueueingDao;
@@ -25,6 +26,9 @@ import java.util.List;
 public class PatientQueueingServiceImpl extends BaseOpenmrsService implements PatientQueueingService {
 
     PatientQueueingDao dao;
+
+    private static final int VISIT_NUMBER_INTEGER_START_POSITION = 15;
+    private static final int INTEGER_IN_VISIT_NUMBER_LENGTH = 3;
 
     public void setDao(PatientQueueingDao dao) {
         this.dao = dao;
@@ -115,8 +119,14 @@ public class PatientQueueingServiceImpl extends BaseOpenmrsService implements Pa
 
         int nextNumberInQueue = 1;
         if (!patientQueues.isEmpty()) {
-            String currentVisitNumber = patientQueues.get(0).getVisitNumber();
-            nextNumberInQueue = Integer.parseInt(String.valueOf(currentVisitNumber.subSequence(currentVisitNumber.length(), -3)));
+
+            int visitNumberLength = patientQueues.get(0).getVisitNumber().length();
+
+            if (visitNumberLength == VISIT_NUMBER_INTEGER_START_POSITION + INTEGER_IN_VISIT_NUMBER_LENGTH) {
+                nextNumberInQueue = Integer.parseInt(patientQueues.get(0).getVisitNumber()
+                        .subSequence(VISIT_NUMBER_INTEGER_START_POSITION, visitNumberLength).toString());
+                nextNumberInQueue += 1;
+            }
         }
 
         String dateString = formatterExt.format(today);

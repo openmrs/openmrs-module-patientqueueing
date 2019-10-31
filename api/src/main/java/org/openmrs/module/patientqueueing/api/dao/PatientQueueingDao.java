@@ -107,7 +107,7 @@ public class PatientQueueingDao {
 			criteria.add(Restrictions.eq("patient", patient));
 		}
 		
-		criteria.add(Restrictions.not(Restrictions.in("status", new Enum[] { PatientQueue.Status.COMPLETED })));
+		criteria.add(Restrictions.ne("status",PatientQueue.Status.COMPLETED));
 		
 		return (PatientQueue) criteria.uniqueResult();
 	}
