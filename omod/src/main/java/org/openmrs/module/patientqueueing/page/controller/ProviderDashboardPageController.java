@@ -14,6 +14,7 @@
 package org.openmrs.module.patientqueueing.page.controller;
 
 import org.apache.commons.lang3.StringUtils;
+import org.openmrs.Location;
 import org.openmrs.module.appframework.context.AppContextModel;
 import org.openmrs.module.appframework.domain.AppDescriptor;
 import org.openmrs.module.appframework.domain.Extension;
@@ -35,16 +36,17 @@ public class ProviderDashboardPageController {
 	
 	public Object controller(PageModel model, @RequestParam(required = false, value = "apps") AppDescriptor app,
 	        @RequestParam(required = false, value = "dashboard") String dashboard,
+	        @RequestParam(required = false, value = "locationId") Location location,
 	        @SpringBean("adtService") AdtService adtService,
 	        @SpringBean("appFrameworkService") AppFrameworkService appFrameworkService,
 	        @SpringBean("applicationEventService") ApplicationEventService applicationEventService,
-	        @SpringBean("coreAppsProperties") CoreAppsProperties coreAppsProperties, UiSessionContext sessionContext) {
+	        @SpringBean("coreAppsProperties") CoreAppsProperties coreAppsProperties, UiSessionContext sessionContext,
+	        UiUtils ui) {
 		
 		if (StringUtils.isEmpty(dashboard)) {
 			dashboard = "providerDashboard";
 		}
 		model.addAttribute("apps", app);
-		UiUtils uiUtils = new BasicUiUtils();
 		
 		AppContextModel contextModel = sessionContext.generateAppContextModel();
 		model.addAttribute("appContextModel", contextModel);
@@ -75,6 +77,11 @@ public class ProviderDashboardPageController {
 		model.addAttribute("dashboard", dashboard);
 		
 		model.put("currentLocation", sessionContext.getSessionLocation());
+		
+		if (location != null && sessionContext.getSessionLocation() != location) {
+			sessionContext.setSessionLocation(location);
+			return "redirect:" + ui.pageLink("patientqueueing", "providerDashboard");
+		}
 		return null;
 	}
 }

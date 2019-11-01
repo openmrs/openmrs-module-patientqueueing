@@ -13,6 +13,7 @@ import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.api.context.Context;
+import org.openmrs.api.PatientService;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.patientqueueing.api.PatientQueueingService;
 import org.openmrs.module.patientqueueing.api.dao.PatientQueueingDao;
@@ -20,6 +21,8 @@ import org.openmrs.module.patientqueueing.model.PatientQueue;
 import org.openmrs.util.OpenmrsUtil;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -147,4 +150,23 @@ public class PatientQueueingServiceImpl extends BaseOpenmrsService implements Pa
         return dateString + "-" + locationName + "-" + zeroesToAppend + nextNumberInQueue;
     }
 
+    /**
+     * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#getPatientQueueListBySearchParams(java.lang.String, java.util.Date, java.util.Date, org.openmrs.Location, org.openmrs.Location, org.openmrs.module.patientqueueing.model.PatientQueue.Status)
+     */
+    @Override
+    public List<PatientQueue> getPatientQueueListBySearchParams(String searchString, Date fromDate, Date toDate, Location locationTo, Location locationFrom, PatientQueue.Status status) {
+
+        List<Patient> patientList = new ArrayList<Patient>();
+
+		if (searchString != null && !searchString.equals("")) {
+            PatientService patientService = Context.getPatientService();
+            List list = Arrays.asList(searchString.split(","));
+            for (Object o : list) {
+                List<Patient> patients = patientService.getPatients(o.toString());
+                patientList.addAll(patients);
+            }
+        }
+
+        return dao.getPatientQueueList(patientList, fromDate, toDate, locationTo, locationFrom, status);
+    }
 }
