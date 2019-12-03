@@ -19,14 +19,22 @@
 }
 
 #patient-search {
-    min-width: 55%;
+    min-width: 96%;
     color: #363463;
     display: block;
     padding: 5px 10px;
-    margin: 0;
-    margin-top: 5px;
+    height: 45px;
+    margin-top: 27px;
     background-color: #FFF;
     border: 1px solid #dddddd;
+}
+
+.vertical {
+    border-left: 1px solid #c7c5c5;
+    height: 79px;
+    position: absolute;
+    left: 99%;
+    top: 11%;
 }
 
 .section{

@@ -57,7 +57,8 @@
 
     function displayData(response) {
         var content = "";
-        content = "<table><thead><tr><th>Queue ID</th><th>Names</th><th>Age (Years)</th><th>PREVIOUS LOCATION</th><th>PREVIOUS PROVIDER</th><th>WAITING TIME</th><th>ACTION</th></tr></thead><tbody>";
+        var stillInQueue = 0;
+        content = "<table><thead><tr><th>NO. IN QUEUE</th><th>Names</th><th>Age (Years)</th><th>PREVIOUS LOCATION</th><th>ASSIGNED PROVIDER</th><th>WAITING TIME</th><th>ACTION</th></tr></thead><tbody>";
         for (i = 0; i < response.patientQueueList.length; i++) {
             var patientQueueListElement = response.patientQueueList[i];
             var urlToPatientDashBoard = '${ui.pageLink("coreapps","clinicianfacing/patient",[patientId: "patientIdElement"])}'.replace("patientIdElement", patientQueueListElement.patientId);
@@ -73,35 +74,63 @@
             content += "<td>" + waitingTime + "</td>";
             content += "<td>";
             content += "<i class=\"icon-dashboard view-action\" title=\"Goto Patient's Dashboard\" onclick=\"location.href = 'urlToPatientDashboard'\"></i>".replace("urlToPatientDashboard", urlToPatientDashBoard);
-            content += "<i class=\"icon-exchange edit-action\" title=\"Transfer To Another Provider\" onclick='urlTransferPatientToAnotherQueue'></i>".replace("urlTransferPatientToAnotherQueue", urlTransferPatientToAnotherQueue);
-            content += "<i class=\"icon-exchange edit-action\" data-toggle=\"modal\" data-target=\"#add_patient_to_queue_dialog\" data-id=\"\" data-whatever=\"@mdo\" data-order_id=\"%s\"></i>".replace("%s", patientQueueListElement.patientId);
-            content += "<i class=\"icon-envelope view-action\" title=\"Transfer To Another Provider\" onclick='urlAlert'><span style=\"color: red\">1</span></i>".replace("urlAlert", urlAlert);
             content += "</td>";
             content += "</tr>";
+            stillInQueue+=1;
         }
         content += "</tbody></table>";
-
+        jq("#clinician-pending-number").html("");
+        jq("#clinician-pending-number").append("   " + stillInQueue);
         jq("#clinician-queue-list-table").append(content);
+
     }
 </script>
 
-<div class="info-section" id="clinician-list">
-    <div class="info-header">
-        <i class="icon-diagnosis"></i>
+<div class="card">
+    <div class="card-header">
+        <div class="">
+            <div class="row">
+                <div class="col-3">
+                    <div>
+                        <h3 style="color: maroon">${currentLocation.name}</i></h3>
+                    </div>
 
-        <h3 style="width: 50%">${ui.message("patientqueueing.patientinqueue.title.label")}</h3> <span
-            style="right:auto;width: 40%;font-weight: bold"></span>
+                    <div style="text-align: center">
+                        <h4>${currentProvider?.personName?.fullName}</h4>
+                    </div>
+                    <div class="vertical"></div>
+                </div>
+
+                <div class="col-8">
+                    <form method="get" id="patient-search-form" onsubmit="return false">
+                        <input type="text" id="patient-search"
+                               placeholder="${ui.message("coreapps.findPatient.search.placeholder")}"
+                               autocomplete="off"/><i
+                            id="patient-search-clear-button" class="small icon-remove-sign"></i>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-    <span>
-        <form method="get" id="patient-search-form" onsubmit="return false">
-            <input type="text" id="patient-search"
-                   placeholder="${ui.message("coreapps.findPatient.search.placeholder")}" autocomplete="off"/><i
-                id="patient-search-clear-button" class="small icon-remove-sign"></i>
-        </form>
-    </span>
 
-    <div class="info-body">
-        <div id="clinician-queue-list-table">
+    <div class="card-body">
+        <ul class="nav nav-tabs nav-fill" id="myTab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-item nav-link active" id="home-tab" data-toggle="tab" href="#clinician-pending" role="tab"
+                   aria-controls="clinician-pending-tab" aria-selected="true">${ui.message("patientqueueing.clinicianQueueList.numberInQueue")} <span style="color:red"
+                                                                                                 id="clinician-pending-number">0</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="clinician-pending" role="tabpanel"
+                 aria-labelledby="clinician-pending-tab">
+                <div class="info-body">
+                    <div id="clinician-queue-list-table">
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
