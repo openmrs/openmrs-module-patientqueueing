@@ -40,6 +40,7 @@ public class ClinicianQueueListFragmentController {
         List clinicianLocationUUIDList = Arrays.asList(locationUUIDS.split(","));
 
         pageModel.put("clinicianLocationUUIDList", clinicianLocationUUIDList);
+        pageModel.put("currentProvider", Context.getAuthenticatedUser());
     }
 
     public SimpleObject getPatientQueueList(@RequestParam(value = "searchfilter", required = false) String searchfilter, UiSessionContext uiSessionContext) throws IOException {
