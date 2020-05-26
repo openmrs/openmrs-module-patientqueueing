@@ -22,7 +22,7 @@ import java.io.Serializable;
 public class PatientQueue extends BaseOpenmrsData implements Serializable {
 	
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "patient_queue_id")
 	private Integer patientQueueId;
 	
