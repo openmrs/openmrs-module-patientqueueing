@@ -47,7 +47,7 @@
             searchfilter: jq("#patient-search").val().trim().toLowerCase()
         }, function (response) {
             if (response) {
-                var responseData = JSON.parse(response.replace("patientQueueList=", "\"patientQueueList\":").trim());
+                var responseData = JSON.parse(JSON.stringify(response).replace("patientQueueList=", "\"patientQueueList\":").trim());
                 displayData(responseData);
             } else if (!response) {
                 jq("#clinician-queue-list-table").append(${ ui.message("coreapps.none ") });
