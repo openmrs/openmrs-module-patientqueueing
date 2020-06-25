@@ -35,6 +35,10 @@ public class PatientQueueMapper implements Serializable {
 	private String status;
 	
 	private String dateCreated;
+
+	private String dateChanged;
+
+	private String changedBy;
 	
 	private String creatorId;
 	
@@ -130,7 +134,23 @@ public class PatientQueueMapper implements Serializable {
 	public void setDateCreated(String dateCreated) {
 		this.dateCreated = dateCreated;
 	}
-	
+
+	public String getDateChanged() {
+		return dateChanged;
+	}
+
+	public void setDateChanged(String dateChanged) {
+		this.dateChanged = dateChanged;
+	}
+
+	public String getChangedBy() {
+		return changedBy;
+	}
+
+	public void setChangedBy(String changedBy) {
+		this.changedBy = changedBy;
+	}
+
 	public String getCreatorId() {
 		return creatorId;
 	}
