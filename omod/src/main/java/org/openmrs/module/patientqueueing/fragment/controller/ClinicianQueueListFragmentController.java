@@ -52,7 +52,7 @@ public class ClinicianQueueListFragmentController {
 
 		patientQueueList = patientQueueingService.getPatientQueueListBySearchParams(searchfilter,
 				OpenmrsUtil.firstSecondOfDay(new Date()), OpenmrsUtil.getLastMomentOfDay(new Date()),
-				uiSessionContext.getSessionLocation(), null, null);
+				uiSessionContext.getSessionLocation(), null, PatientQueue.Status.PENDING);
 
         List<PatientQueueMapper> patientQueueMappers = mapPatientQueueToMapper(patientQueueList);
         simpleObject.put("patientQueueList", objectMapper.writeValueAsString(patientQueueMappers));
