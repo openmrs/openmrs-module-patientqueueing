@@ -9,7 +9,7 @@
 
 	<groupId>org.openmrs.module</groupId>
 	<artifactId>patientqueueing</artifactId>
-	<version>1.1.0-SNAPSHOT</version>
+	<version>1.1.0</version>
 	<packaging>pom</packaging>
 	<name>Patient Queueing</name>
 	<description>This Module Provides functionality to Queue Patient In a Hospital with a health care provider Dashboard to allow them to see the people in queue, message other providers and receive messages from other providers regarding patient care</description>
@@ -20,7 +20,7 @@
 		<connection>scm:git:git@github.com:openmrs/openmrs-module-patientqueueing.git</connection>
 		<developerConnection>scm:git:git@github.com:openmrs/openmrs-module-patientqueueing.git</developerConnection>
 		<url>https://github.com/openmrs/openmrs-module-patientqueueing/</url>
-	  <tag>HEAD</tag>
+	  <tag>1.1.0</tag>
   </scm>
 
 	<modules>
