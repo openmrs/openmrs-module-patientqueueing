@@ -17,7 +17,9 @@ import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.api.db.hibernate.DbSession;
 import org.openmrs.api.db.hibernate.DbSessionFactory;
+import org.openmrs.module.patientqueueing.api.PatientQueueingService;
 import org.openmrs.module.patientqueueing.model.PatientQueue;
+import org.openmrs.module.patientqueueing.model.QueueRoom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +54,7 @@ public class PatientQueueingDao {
 	 *      org.openmrs.Patient, org.openmrs.module.patientqueueing.model.PatientQueue.Status)
 	 */
 	public List<PatientQueue> getPatientQueueList(Provider provider, Date fromDate, Date toDate, Location locationTo,
-	        Location locationFrom, Patient patient, PatientQueue.Status status) {
+	        Location locationFrom, Patient patient, PatientQueue.Status status, QueueRoom queueRoom) {
 		Criteria criteria = getSession().createCriteria(PatientQueue.class);
 		
 		if (fromDate != null && toDate != null) {
@@ -79,6 +81,10 @@ public class PatientQueueingDao {
 			criteria.add(Restrictions.eq("status", status));
 		}
 		
+		if (queueRoom != null) {
+			criteria.add(Restrictions.eq("queueRoom", queueRoom));
+		}
+		
 		criteria.addOrder(Order.desc("dateCreated"));
 		
 		return criteria.list();
@@ -96,7 +102,7 @@ public class PatientQueueingDao {
 	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#getIncompletePatientQueue(org.openmrs.Patient,
 	 *      org.openmrs.Location)
 	 */
-	public PatientQueue getIncompletePatientQueue(Patient patient, Location locationTo) {
+	public PatientQueue getIncompletePatientQueue(Patient patient, Location locationTo, QueueRoom queueRoom) {
 		Criteria criteria = getSession().createCriteria(PatientQueue.class);
 		
 		if (locationTo != null) {
@@ -107,7 +113,11 @@ public class PatientQueueingDao {
 			criteria.add(Restrictions.eq("patient", patient));
 		}
 		
-		criteria.add(Restrictions.ne("status",PatientQueue.Status.COMPLETED));
+		if (queueRoom != null) {
+			criteria.add(Restrictions.eq("queueRoom", queueRoom));
+		}
+		
+		criteria.add(Restrictions.ne("status", PatientQueue.Status.COMPLETED));
 		
 		return (PatientQueue) criteria.uniqueResult();
 	}
@@ -124,11 +134,14 @@ public class PatientQueueingDao {
 		
 		return (PatientQueue) criteria.uniqueResult();
 	}
-
+	
 	/**
-	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#getPatientQueueListBySearchParams(java.lang.String, java.util.Date, java.util.Date, org.openmrs.Location, org.openmrs.Location, org.openmrs.module.patientqueueing.model.PatientQueue.Status)
+	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#getPatientQueueListBySearchParams(java.lang.String,
+	 *      java.util.Date, java.util.Date, org.openmrs.Location, org.openmrs.Location,
+	 *      org.openmrs.module.patientqueueing.model.PatientQueue.Status)
 	 */
-	public List<PatientQueue> getPatientQueueList(List<Patient> patientList, Date fromDate, Date toDate, Location locationTo, Location locationFrom, PatientQueue.Status status) {
+	public List<PatientQueue> getPatientQueueList(List<Patient> patientList, Date fromDate, Date toDate,
+	        Location locationTo, Location locationFrom, PatientQueue.Status status, QueueRoom queueRoom) {
 		Criteria criteria = getSession().createCriteria(PatientQueue.class);
 		
 		if (!patientList.isEmpty()) {
@@ -138,7 +151,7 @@ public class PatientQueueingDao {
 		if (fromDate != null && toDate != null) {
 			criteria.add(Restrictions.between("dateCreated", fromDate, toDate));
 		}
-
+		
 		if (locationTo != null) {
 			criteria.add(Restrictions.eq("locationTo", locationTo));
 		}
@@ -151,9 +164,44 @@ public class PatientQueueingDao {
 			criteria.add(Restrictions.eq("status", status));
 		}
 		
+		if (queueRoom != null) {
+			criteria.add(Restrictions.eq("queueRoom", queueRoom));
+		}
+		
 		criteria.addOrder(Order.desc("dateCreated"));
 		
 		return criteria.list();
+	}
+	
+	/**
+	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#saveQueueRoom(org.openmrs.module.patientqueueing.model.QueueRoom)
+	 */
+	public QueueRoom saveQueueRoom(QueueRoom queueRoom) {
+		sessionFactory.getCurrentSession().save(queueRoom);
+		return queueRoom;
+	}
+	
+	/**
+	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#getPatientQueueById(java.lang.Integer)
+	 */
+	public QueueRoom getQueueRoomById(Integer queueRoomId) {
+		return (QueueRoom) getSession().createCriteria(QueueRoom.class).add(Restrictions.eq("queueRoomId", queueRoomId))
+		        .uniqueResult();
+	}
+	
+	/**
+	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#getQueueRoomByUUID(java.lang.String)
+	 */
+	public QueueRoom getQueueRoomByUUID(String queueRoomUUID) {
+		return (QueueRoom) getSession().createCriteria(QueueRoom.class).add(Restrictions.eq("uuid", queueRoomUUID))
+		        .uniqueResult();
+	}
+	
+	/**
+	 * @see PatientQueueingService#getAllQueueRoom() (java.lang.String)
+	 */
+	public List<QueueRoom> getAllQueueRoom() {
+		return (List<QueueRoom>) getSession().createCriteria(QueueRoom.class).list();
 	}
 	
 }

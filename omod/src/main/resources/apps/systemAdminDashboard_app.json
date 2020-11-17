@@ -1,0 +1,17 @@
+[{
+    "id": "patientqueueing.systemAdministration.homepageLink",
+    "description": "patientqueueing.provider.dashboard.description",
+    "extensions": [
+      {
+        "extensionPointId": "systemAdministration.apps",
+        "id": "coreapps.systemadministration.homepageLink",
+        "type": "link",
+        "label": "patientqueueing.room.label",
+        "url": "patientqueueing/queueRoom.page",
+        "icon": "icon-cog",
+        "order": 5,
+        "requiredPrivilege": "App: coreapps.systemAdministration"
+      }
+    ]
+  }
+]

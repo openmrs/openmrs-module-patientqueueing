@@ -94,4 +94,87 @@
     <changeSet author="slubwama" id="patientqueue_1566208965241-17">
         <addForeignKeyConstraint baseColumnNames="creator" baseTableName="patient_queue" constraintName="patient_queue_users_user_id_fk" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="user_id" referencedTableName="users"/>
     </changeSet>
+
+    <changeSet author="slubwama" id="patientqueue_1603897715186-1">
+        <createTable tableName="queue_room">
+            <column autoIncrement="true" name="queue_room_id" type="INT">
+                <constraints primaryKey="true" unique="true"/>
+            </column>
+            <column name="location" type="INT"/>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="date_created" type="datetime"/>
+            <column name="creator" type="INT"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="changed_by" type="INT"/>
+            <column name="voided" type="TINYINT(3)"/>
+            <column name="date_voided" type="datetime"/>
+            <column name="voided_by" type="INT"/>
+            <column name="void_reason" type="VARCHAR(255)"/>
+            <column name="uuid" type="VARCHAR(38)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="slubwama" id="patientqueue_1603897715186-2">
+        <addUniqueConstraint columnNames="queue_room_id" constraintName="queue_room_queue_room_id_uindex" tableName="queue_room"/>
+    </changeSet>
+    <changeSet author="slubwama" id="patientqueue_1603897715186-3">
+        <createIndex indexName="queue_room_location_location_id_fk" tableName="queue_room">
+            <column name="location"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="slubwama" id="patientqueue_1603897715186-4">
+        <createIndex indexName="queue_room_users_user_id_fk" tableName="queue_room">
+            <column name="creator"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="slubwama" id="patientqueue_1603897715186-5">
+        <createIndex indexName="queue_room_users_user_id_fk_2" tableName="queue_room">
+            <column name="changed_by"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="slubwama" id="patientqueue_1603897715186-6">
+        <createIndex indexName="queue_room_users_user_id_fk_3" tableName="queue_room">
+            <column name="voided_by"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="slubwama" id="patientqueue_1603897715186-7">
+        <addForeignKeyConstraint baseColumnNames="location" baseTableName="queue_room" constraintName="queue_room_location_location_id_fk" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="location_id" referencedTableName="location"/>
+    </changeSet>
+    <changeSet author="slubwama" id="patientqueue_1603897715186-8">
+        <addForeignKeyConstraint baseColumnNames="creator" baseTableName="queue_room" constraintName="queue_room_users_user_id_fk" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="user_id" referencedTableName="users"/>
+    </changeSet>
+    <changeSet author="slubwama" id="patientqueue_1603897715186-9">
+        <addForeignKeyConstraint baseColumnNames="changed_by" baseTableName="queue_room" constraintName="queue_room_users_user_id_fk_2" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="user_id" referencedTableName="users"/>
+    </changeSet>
+    <changeSet author="slubwama" id="patientqueue_1603897715186-10">
+        <addForeignKeyConstraint baseColumnNames="voided_by" baseTableName="queue_room" constraintName="queue_room_users_user_id_fk_3" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="user_id" referencedTableName="users"/>
+    </changeSet>
+
+    
+    <changeSet  author="slubwama" id="patientqueue_1603897715186-11">
+        <preConditions onFail="CONTINUE">
+            <tableExists tableName="patient_queue"/>
+            <not><columnExists tableName="patient_queue" columnName="queue_room"/></not>
+        </preConditions>
+        <comment>
+            Add Column queue_room to patient_queue table
+        </comment>
+        <addColumn tableName="patient_queue">
+            <column name="queue_room" type="INT" />
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="slubwama" id="patientqueue_1603897715186-12">
+        <preConditions onFail="CONTINUE">
+            <columnExists tableName="patient_queue" columnName="queue_room"/>
+            <columnExists tableName="queue_room" columnName="queue_room_id"/>
+        </preConditions>
+        <createIndex indexName="patient_queue_queue_room_queue_room_id_fk" tableName="patient_queue">
+            <column name="queue_room"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="slubwama" id="patientqueue_1603897715186-13">
+        <addForeignKeyConstraint baseColumnNames="queue_room" baseTableName="patient_queue" constraintName="patient_queue_queue_room_queue_room_id_fk" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="queue_room_id" referencedTableName="queue_room"/>
+    </changeSet>
 </databaseChangeLog>

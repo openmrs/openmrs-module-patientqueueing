@@ -1,0 +1,37 @@
+/**
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+ * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ * <p>
+ * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+ * graphic logo is a trademark of OpenMRS Inc.
+ */
+package org.openmrs.module.patientqueueing.fragment.controller;
+
+import org.codehaus.jackson.map.ObjectMapper;
+import org.openmrs.api.context.Context;
+import org.openmrs.module.patientqueueing.api.PatientQueueingService;
+import org.openmrs.module.patientqueueing.model.QueueRoom;
+import org.openmrs.ui.framework.SimpleObject;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.io.IOException;
+
+/**
+ *  * Controller for a fragment that shows all users  
+ */
+public class QueueRoomFragmentController {
+	
+	public SimpleObject getQueueRoom(@RequestParam("queueRoomId") String queueRoomId) throws IOException {
+		QueueRoom queueRoom = Context.getService(PatientQueueingService.class).getQueueRoomByUUID(queueRoomId);
+		
+		SimpleObject simpleObject = new SimpleObject();
+		
+		ObjectMapper objectMapper = new ObjectMapper();
+		SimpleObject queueRoomMapper = SimpleObject.create("queueRoomId", queueRoom.getId(), "name", queueRoom.getName(),
+		    "location", queueRoom.getLocation(), "description", queueRoom.getDescription());
+		simpleObject.put("queueRoom", objectMapper.writeValueAsString(queueRoomMapper));
+		return simpleObject;
+	}
+}
