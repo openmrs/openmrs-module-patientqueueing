@@ -63,6 +63,10 @@ public class PatientQueue extends BaseOpenmrsData implements Serializable {
 	@Column(name = "comment", length = 255)
 	private String comment;
 	
+	@ManyToOne
+	@JoinColumn(name = "queue_room")
+	private Location queueRoom;
+	
 	public PatientQueue() {
 	}
 	
@@ -164,5 +168,13 @@ public class PatientQueue extends BaseOpenmrsData implements Serializable {
 	
 	public void setComment(String comment) {
 		this.comment = comment;
+	}
+	
+	public Location getQueueRoom() {
+		return queueRoom;
+	}
+	
+	public void setQueueRoom(Location queueRoom) {
+		this.queueRoom = queueRoom;
 	}
 }

@@ -94,4 +94,47 @@
     <changeSet author="slubwama" id="patientqueue_1566208965241-17">
         <addForeignKeyConstraint baseColumnNames="creator" baseTableName="patient_queue" constraintName="patient_queue_users_user_id_fk" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="user_id" referencedTableName="users"/>
     </changeSet>
+
+    <changeSet  author="slubwama" id="patientqueue_1566208965241-18">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="patient_queue"/>
+            <not><columnExists tableName="patient_queue" columnName="queue_room"/></not>
+        </preConditions>
+        <comment>
+            Add Column queue_room to patient_queue table
+        </comment>
+        <addColumn tableName="patient_queue">
+            <column name="queue_room" type="INT" />
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="slubwama" id="patientqueue_1566208965241-19">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="patient_queue" columnName="queue_room"/>
+        </preConditions>
+        <createIndex indexName="patient_queue_location_queue_room_id_fk" tableName="patient_queue">
+            <column name="queue_room"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="slubwama" id="patientqueue_1566208965241-20">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="patient_queue" columnName="queue_room"/>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="queue_room" baseTableName="patient_queue" constraintName="patient_queue_location_queue_room_id_fk" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="location_id" referencedTableName="location"/>
+    </changeSet>
+
+    <changeSet author="slubwama" id="patientqueue_1566208965241-21">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM location_tag WHERE uuid ='c0e1d1d8-c97d-4869-ba16-68d351d3d5f5';
+            </sqlCheck>
+        </preConditions>
+        <comment>
+            Add Queue Room Location Tag
+        </comment>
+        <sql>
+            INSERT INTO location_tag (name, description, creator, date_created, retired, uuid) VALUES ('Queue Room', 'A tag to indicate a queue room used by the queuing module', 1, '2020-11-26 19:32:49', 0, 'c0e1d1d8-c97d-4869-ba16-68d351d3d5f5');
+        </sql>
+    </changeSet>
 </databaseChangeLog>

@@ -4,12 +4,50 @@
 
 <script>
     if (jQuery) {
+
+        function addQueueRoomOption(queueRooms, currentLocationUUID) {
+            var queueRoomOptions = [];
+            var sel = document.getElementById('queue_room_location');
+            for (var i = 0 in queueRooms) {
+                if (queueRooms[i].parentLocation.uuid === currentLocationUUID) {
+                    var opt = document.createElement('option');
+                    opt.appendChild( document.createTextNode(queueRooms[i].name) );
+                    opt.value = queueRooms[i].uuid;
+                    sel.appendChild(opt);
+                    queueRoomOptions.push(queueRooms[i].uuid)
+                }
+            }
+
+            if(queueRoomOptions.length>0){
+                document.getElementById('patient_queue_room').style.display="block";
+            }else {
+                document.getElementById('patient_queue_room').style.display="none";
+            }
+        }
+
         jq(document).ready(function () {
+
+            document.getElementById('patient_queue_room').style.display="none";
+
+            jq("#location_id").change(function () {
+                jq.ajax({
+                    type: "GET",
+                    url: '/' + OPENMRS_CONTEXT_PATH + "/ws/rest/v1/location?v=full&tag=c0e1d1d8-c97d-4869-ba16-68d351d3d5f5",
+                    dataType: "json",
+                    async: false,
+                    success: function (data) {
+                        serverResponse = data.results;
+                        addQueueRoomOption(serverResponse,  document.getElementById('location_id').options[document.getElementById('location_id').selectedIndex].value);
+                    }
+                });
+            });
+
             jq("#create").click(function () {
                 jq.post('${ ui.actionLink("create") }', {
                     patientId: jq("#patient_id").val().trim(),
                     providerId: jq("#provider_id").val().trim(),
-                    locationId: jq("#location_id").val().trim()
+                    locationId: jq("#location_id").val().trim(),
+                    queueRoom: jq("#queue_room_location").val().trim()
                 }, function (response) {
                     var jsonToastMessage = JSON.parse(JSON.stringify(response).replace("toastMessage=", "\"toastMessage\":").trim());
 
@@ -55,6 +93,13 @@
             <% if (locationList == null) { %>
             <div><${ui.message("patientqueueing.select.error")}</div>
             <% } %>
+        </div>
+
+        <div class="form-group" id="patient_queue_room">
+            <label for="queue_room_location">${ui.message("patientqueueing.room.name")}</label>
+            <select class="form-control" id="queue_room_location">
+                <option value="">${ui.message("patientqueueing.room.select.name")}</option>
+            </select>
         </div>
 
         <div class="form-group">
