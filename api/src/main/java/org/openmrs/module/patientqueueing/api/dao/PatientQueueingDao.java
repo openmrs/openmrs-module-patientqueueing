@@ -176,7 +176,7 @@ public class PatientQueueingDao {
 	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#saveQueueRoom(org.openmrs.module.patientqueueing.model.QueueRoom)
 	 */
 	public QueueRoom saveQueueRoom(QueueRoom queueRoom) {
-		sessionFactory.getCurrentSession().save(queueRoom);
+		sessionFactory.getCurrentSession().saveOrUpdate(queueRoom);
 		return queueRoom;
 	}
 	

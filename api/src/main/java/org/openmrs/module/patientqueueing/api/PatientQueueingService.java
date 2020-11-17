@@ -174,6 +174,7 @@ public interface PatientQueueingService extends OpenmrsService {
 	 * @param queueRoom The room where the patient has been sent to
 	 * @return List<PatientQueue> A list of patientQueue that meet the parameters
 	 */
+	
 	@Transactional(readOnly = true)
 	public List<PatientQueue> getPatientQueueListBySearchParams(String searchString, Date fromDate, Date toDate,
 	        Location locationTo, Location locationFrom, PatientQueue.Status status, QueueRoom queueRoom);
@@ -185,6 +186,7 @@ public interface PatientQueueingService extends OpenmrsService {
 	 * @return QueueRoom that has been saved
 	 * @throws APIException
 	 */
+	@Transactional
 	public QueueRoom saveQueueRoom(QueueRoom queueRoom);
 	
 	/**
@@ -193,6 +195,7 @@ public interface PatientQueueingService extends OpenmrsService {
 	 * @param queueRoomUUID the uuid of the patient queue room to be searched
 	 * @return QueueRoom. a unique patient queue room that matches the queueRoomUUID
 	 */
+	@Transactional(readOnly = true)
 	public QueueRoom getQueueRoomByUUID(String queueRoomUUID);
 	
 	/**
@@ -201,7 +204,14 @@ public interface PatientQueueingService extends OpenmrsService {
 	 * @param queueRoomId the uuid of the patient queue room to be searched
 	 * @return QueueRoom. a unique patient queue room that matches the queueRoomId
 	 */
+	@Transactional(readOnly = true)
 	public QueueRoom getQueueRoomById(Integer queueRoomId);
 	
+	/**
+	 * Get All Queue Room
+	 * 
+	 * @return List<QueueRoom>. A list of queue rooms
+	 */
+	@Transactional(readOnly = true)
 	public List<QueueRoom> getAllQueueRoom();
 }
