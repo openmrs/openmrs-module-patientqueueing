@@ -12,8 +12,7 @@ package org.openmrs.module.patientqueueing.mapper;
 import java.io.Serializable;
 
 /**
- * This class is used to map patient queue attributes to either string or integers into an object i
- * object that can be converted to a simple object.
+ * This class is used to map  patient queue attributes to either string or integers into an object i object that can be converted to a simple object.
  */
 public class PatientQueueMapper implements Serializable {
 	
@@ -36,9 +35,9 @@ public class PatientQueueMapper implements Serializable {
 	private String status;
 	
 	private String dateCreated;
-	
+
 	private String dateChanged;
-	
+
 	private String changedBy;
 	
 	private String creatorId;

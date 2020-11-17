@@ -6,7 +6,7 @@
         "extensionPointId": "org.openmrs.referenceapplication.homepageLink",
         "id": "coreapps.systemadministration.homepageLink",
         "type": "link",
-        "label": "patientqueueing.room.label",
+        "label": "patientqueueing.provider.dashboard.label",
         "url": "patientqueueing/providerDashboard.page",
         "icon": "icon-stethoscope",
         "order": 1,

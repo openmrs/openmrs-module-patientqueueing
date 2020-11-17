@@ -131,7 +131,7 @@
                 <tr>
                     <th>ID</th>
                     <th>NAME</th>
-                    <th>DATE</th>
+                    <th>LOCATION</th>
                     <th>UUID</th>
                     <th>ACTION</th>
                 </tr>
@@ -142,7 +142,7 @@
                 <tr>
                     <td>${it.queueRoomId}</td>
                     <td>${it.name}</td>
-                    <td>${it.dateCreated}</td>
+                    <td>${it.location.name}</td>
                     <td>${it.uuid}</td>
                     <td>
                         <i style="font-size: 25px" data-toggle="modal" data-target="#addEditQueueRoomModel"
