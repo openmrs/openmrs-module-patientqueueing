@@ -17,7 +17,6 @@ import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.api.db.hibernate.DbSession;
 import org.openmrs.api.db.hibernate.DbSessionFactory;
-import org.openmrs.module.patientqueueing.api.PatientQueueingService;
 import org.openmrs.module.patientqueueing.model.PatientQueue;
 import org.openmrs.module.patientqueueing.model.QueueRoom;
 import org.slf4j.Logger;
@@ -198,7 +197,7 @@ public class PatientQueueingDao {
 	}
 	
 	/**
-	 * @see PatientQueueingService#getAllQueueRoom() (java.lang.String)
+	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#getAllQueueRoom()
 	 */
 	public List<QueueRoom> getAllQueueRoom() {
 		return (List<QueueRoom>) getSession().createCriteria(QueueRoom.class).list();

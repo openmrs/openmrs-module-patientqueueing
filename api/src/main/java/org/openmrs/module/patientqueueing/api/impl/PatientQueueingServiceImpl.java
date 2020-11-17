@@ -71,17 +71,6 @@ public class PatientQueueingServiceImpl extends BaseOpenmrsService implements Pa
 	}
 	
 	/**
-	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#getPatientQueueList(org.openmrs.Provider,
-	 *      java.util.Date, java.util.Date, org.openmrs.Location, org.openmrs.Location,
-	 *      org.openmrs.Patient,
-	 *      org.openmrs.module.patientqueueing.model.PatientQueue.Status,org.openmrs.module.patientqueueing.model.QueueRoom)
-	 */
-	public List<PatientQueue> getPatientQueueList(Provider provider, Date fromDate, Date toDate, Location locationTo,
-	        Location locationFrom, Patient patient, PatientQueue.Status status, QueueRoom queueRoom) {
-		return dao.getPatientQueueList(provider, fromDate, toDate, locationTo, locationFrom, patient, status, queueRoom);
-	}
-	
-	/**
 	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#completePatientQueue(org.openmrs.module.patientqueueing.model.PatientQueue)
 	 */
 	@Override
@@ -97,15 +86,6 @@ public class PatientQueueingServiceImpl extends BaseOpenmrsService implements Pa
 	public PatientQueue getIncompletePatientQueue(Patient patient, Location locationTo) {
 		
 		return dao.getIncompletePatientQueue(patient, locationTo, null);
-	}
-	
-	/**
-	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#getIncompletePatientQueue(org.openmrs.Patient,
-	 *      org.openmrs.Location,org.openmrs.module.patientqueueing.model.QueueRoom )
-	 */
-	public PatientQueue getIncompletePatientQueue(Patient patient, Location locationTo, QueueRoom queueRoom) {
-		
-		return dao.getIncompletePatientQueue(patient, locationTo, queueRoom);
 	}
 	
 	/**
@@ -200,29 +180,6 @@ public class PatientQueueingServiceImpl extends BaseOpenmrsService implements Pa
 	}
 	
 	/**
-	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#getPatientQueueListBySearchParams(java.lang.String,
-	 *      java.util.Date, java.util.Date, org.openmrs.Location, org.openmrs.Location,
-	 *      org.openmrs.module.patientqueueing.model.PatientQueue.Status,org.openmrs.module.patientqueueing.model.QueueRoom)
-	 */
-	@Override
-	public List<PatientQueue> getPatientQueueListBySearchParams(String searchString, Date fromDate, Date toDate,
-	        Location locationTo, Location locationFrom, PatientQueue.Status status, QueueRoom queueRoom) {
-		
-		List<Patient> patientList = new ArrayList<Patient>();
-		
-		if (searchString != null && !searchString.equals("")) {
-			PatientService patientService = Context.getPatientService();
-			List list = Arrays.asList(searchString.split(","));
-			for (Object o : list) {
-				List<Patient> patients = patientService.getPatients(o.toString());
-				patientList.addAll(patients);
-			}
-		}
-		
-		return dao.getPatientQueueList(patientList, fromDate, toDate, locationTo, locationFrom, status, queueRoom);
-	}
-	
-	/**
 	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#saveQueueRoom(org.openmrs.module.patientqueueing.model.QueueRoom)
 	 */
 	@Override
@@ -252,5 +209,49 @@ public class PatientQueueingServiceImpl extends BaseOpenmrsService implements Pa
 	@Override
 	public List<QueueRoom> getAllQueueRoom() {
 		return dao.getAllQueueRoom();
+	}
+
+
+	/**
+	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#getPatientQueueList(org.openmrs.Provider,
+	 *      java.util.Date, java.util.Date, org.openmrs.Location, org.openmrs.Location,
+	 *      org.openmrs.Patient,
+	 *      org.openmrs.module.patientqueueing.model.PatientQueue.Status,org.openmrs.module.patientqueueing.model.QueueRoom)
+	 */
+	public List<PatientQueue> getPatientQueueList(Provider provider, Date fromDate, Date toDate, Location locationTo,
+												  Location locationFrom, Patient patient, PatientQueue.Status status, QueueRoom queueRoom) {
+		return dao.getPatientQueueList(provider, fromDate, toDate, locationTo, locationFrom, patient, status, queueRoom);
+	}
+
+	/**
+	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#getIncompletePatientQueue(org.openmrs.Patient,
+	 *      org.openmrs.Location,org.openmrs.module.patientqueueing.model.QueueRoom )
+	 */
+	public PatientQueue getIncompletePatientQueue(Patient patient, Location locationTo, QueueRoom queueRoom) {
+
+		return dao.getIncompletePatientQueue(patient, locationTo, queueRoom);
+	}
+
+	/**
+	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#getPatientQueueListBySearchParams(java.lang.String,
+	 *      java.util.Date, java.util.Date, org.openmrs.Location, org.openmrs.Location,
+	 *      org.openmrs.module.patientqueueing.model.PatientQueue.Status,org.openmrs.module.patientqueueing.model.QueueRoom)
+	 */
+	@Override
+	public List<PatientQueue> getPatientQueueListBySearchParams(String searchString, Date fromDate, Date toDate,
+																Location locationTo, Location locationFrom, PatientQueue.Status status, QueueRoom queueRoom) {
+
+		List<Patient> patientList = new ArrayList<Patient>();
+
+		if (searchString != null && !searchString.equals("")) {
+			PatientService patientService = Context.getPatientService();
+			List list = Arrays.asList(searchString.split(","));
+			for (Object o : list) {
+				List<Patient> patients = patientService.getPatients(o.toString());
+				patientList.addAll(patients);
+			}
+		}
+
+		return dao.getPatientQueueList(patientList, fromDate, toDate, locationTo, locationFrom, status, queueRoom);
 	}
 }
