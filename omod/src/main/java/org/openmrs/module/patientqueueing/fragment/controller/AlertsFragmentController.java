@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AlertsFragmentController {
-	
+
 	private final Logger log = LoggerFactory.getLogger(AlertsFragmentController.class);
 	
 	public AlertsFragmentController() {

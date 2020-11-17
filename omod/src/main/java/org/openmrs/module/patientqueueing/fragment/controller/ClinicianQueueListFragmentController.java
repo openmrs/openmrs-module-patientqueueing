@@ -30,63 +30,59 @@ import java.util.Date;
 import java.util.List;
 
 public class ClinicianQueueListFragmentController {
-	
-	private static final Logger log = LoggerFactory.getLogger(ClinicianQueueListFragmentController.class);
-	
-	public void controller(@SpringBean FragmentModel pageModel) {
-		
-		String locationUUIDS = Context.getAdministrationService()
-		        .getGlobalProperty("patientqueueing.clinicianLocationUUIDS");
-		
-		List clinicianLocationUUIDList = Arrays.asList(locationUUIDS.split(","));
-		
-		pageModel.put("clinicianLocationUUIDList", clinicianLocationUUIDList);
-		pageModel.put("currentProvider", Context.getAuthenticatedUser());
-	}
-	
-	public SimpleObject getPatientQueueList(@RequestParam(value = "searchfilter", required = false) String searchfilter,
-	        UiSessionContext uiSessionContext) throws IOException {
-		
-		PatientQueueingService patientQueueingService = Context.getService(PatientQueueingService.class);
-		ObjectMapper objectMapper = new ObjectMapper();
-		SimpleObject simpleObject = new SimpleObject();
-		List<PatientQueue> patientQueueList = new ArrayList();
-		
+
+    private static final Logger log = LoggerFactory.getLogger(ClinicianQueueListFragmentController.class);
+
+    public void controller(@SpringBean FragmentModel pageModel) {
+
+        String locationUUIDS = Context.getAdministrationService().getGlobalProperty("patientqueueing.clinicianLocationUUIDS");
+
+        List clinicianLocationUUIDList = Arrays.asList(locationUUIDS.split(","));
+
+        pageModel.put("clinicianLocationUUIDList", clinicianLocationUUIDList);
+        pageModel.put("currentProvider", Context.getAuthenticatedUser());
+    }
+
+    public SimpleObject getPatientQueueList(@RequestParam(value = "searchfilter", required = false) String searchfilter, UiSessionContext uiSessionContext) throws IOException {
+
+        PatientQueueingService patientQueueingService = Context.getService(PatientQueueingService.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+        SimpleObject simpleObject = new SimpleObject();
+        List<PatientQueue> patientQueueList = new ArrayList();
+
 		patientQueueList = patientQueueingService.getPatientQueueListBySearchParams(searchfilter,
-		    OpenmrsUtil.firstSecondOfDay(new Date()), OpenmrsUtil.getLastMomentOfDay(new Date()),
-		    uiSessionContext.getSessionLocation(), null, PatientQueue.Status.PENDING);
-		
-		List<PatientQueueMapper> patientQueueMappers = mapPatientQueueToMapper(patientQueueList);
-		simpleObject.put("patientQueueList", objectMapper.writeValueAsString(patientQueueMappers));
-		
-		return simpleObject;
-	}
-	
-	/**
-	 * Convert PatientQueue List to PatientQueueMapper
-	 * 
-	 * @param patientQueueList The list of patient queues to be converted into a map
-	 * @return List<PatientQueueMapper> a list of patient queue with parameters mapped to strings of
-	 *         integers only
-	 */
-	private List<PatientQueueMapper> mapPatientQueueToMapper(List<PatientQueue> patientQueueList) {
-		List<PatientQueueMapper> patientQueueMappers = new ArrayList<PatientQueueMapper>();
-		
-		for (PatientQueue patientQueue : patientQueueList) {
-			String names = patientQueue.getPatient().getFamilyName() + " " + patientQueue.getPatient().getGivenName() + " "
-			        + patientQueue.getPatient().getMiddleName();
-			PatientQueueMapper patientQueueMapper = new PatientQueueMapper();
-			patientQueueMapper.setId(patientQueue.getId());
-			patientQueueMapper.setPatientNames(names.replace("null", ""));
-			patientQueueMapper.setPatientId(patientQueue.getPatient().getPatientId());
-			patientQueueMapper.setLocationFrom(patientQueue.getLocationFrom().getName());
-			patientQueueMapper.setLocationTo(patientQueue.getLocationTo().getName());
-			patientQueueMapper.setProviderNames(patientQueue.getProvider().getName());
-			patientQueueMapper.setStatus(patientQueue.getStatus().name());
-			patientQueueMapper.setAge(patientQueue.getPatient().getAge().toString());
-			patientQueueMapper.setDateCreated(patientQueue.getDateCreated().toString());
-			patientQueueMappers.add(patientQueueMapper);
-		}
-		return patientQueueMappers;
-	}
+				OpenmrsUtil.firstSecondOfDay(new Date()), OpenmrsUtil.getLastMomentOfDay(new Date()),
+				uiSessionContext.getSessionLocation(), null, PatientQueue.Status.PENDING);
+
+        List<PatientQueueMapper> patientQueueMappers = mapPatientQueueToMapper(patientQueueList);
+        simpleObject.put("patientQueueList", objectMapper.writeValueAsString(patientQueueMappers));
+
+        return simpleObject;
+    }
+
+    /**
+     * Convert PatientQueue List to PatientQueueMapper
+     *
+     * @param patientQueueList The list of patient queues to be converted into a map
+     * @return List<PatientQueueMapper> a list of patient queue with parameters mapped to strings of integers only
+     */
+    private List<PatientQueueMapper> mapPatientQueueToMapper(List<PatientQueue> patientQueueList) {
+        List<PatientQueueMapper> patientQueueMappers = new ArrayList<PatientQueueMapper>();
+
+        for (PatientQueue patientQueue : patientQueueList) {
+            String names = patientQueue.getPatient().getFamilyName() + " " + patientQueue.getPatient().getGivenName() + " " + patientQueue.getPatient().getMiddleName();
+            PatientQueueMapper patientQueueMapper = new PatientQueueMapper();
+            patientQueueMapper.setId(patientQueue.getId());
+            patientQueueMapper.setPatientNames(names.replace("null", ""));
+            patientQueueMapper.setPatientId(patientQueue.getPatient().getPatientId());
+            patientQueueMapper.setLocationFrom(patientQueue.getLocationFrom().getName());
+            patientQueueMapper.setLocationTo(patientQueue.getLocationTo().getName());
+            patientQueueMapper.setProviderNames(patientQueue.getProvider().getName());
+            patientQueueMapper.setStatus(patientQueue.getStatus().name());
+            patientQueueMapper.setAge(patientQueue.getPatient().getAge().toString());
+            patientQueueMapper.setDateCreated(patientQueue.getDateCreated().toString());
+            patientQueueMappers.add(patientQueueMapper);
+        }
+        return patientQueueMappers;
+    }
 }
