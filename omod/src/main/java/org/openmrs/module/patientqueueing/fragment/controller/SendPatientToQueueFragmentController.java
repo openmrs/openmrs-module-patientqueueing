@@ -45,7 +45,9 @@ public class SendPatientToQueueFragmentController {
 	
 	public SimpleObject create(@RequestParam(value = "patientId") Patient patient,
 	        @RequestParam(value = "providerId", required = false) Provider provider, UiUtils ui,
-	        @RequestParam("locationId") Location location, UiSessionContext uiSessionContext) throws IOException {
+	        @RequestParam("locationId") Location location,
+	        @RequestParam(value = "queueRoom", required = false) Location queueRoom, UiSessionContext uiSessionContext)
+	        throws IOException {
 		PatientQueue patientQueue = new PatientQueue();
 		
 		PatientQueueingService patientQueueingService = Context.getService(PatientQueueingService.class);
@@ -57,6 +59,9 @@ public class SendPatientToQueueFragmentController {
 		patientQueue.setCreator(uiSessionContext.getCurrentUser());
 		patientQueue.setDateCreated(new Date());
 		patientQueueingService.assignVisitNumberForToday(patientQueue);
+		if (queueRoom != null) {
+			patientQueue.setQueueRoom(queueRoom);
+		}
 		patientQueueingService.savePatientQue(patientQueue);
 		
 		SimpleObject simpleObject = new SimpleObject();

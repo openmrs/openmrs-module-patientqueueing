@@ -5,10 +5,42 @@
 <script>
 
     if (jQuery) {
+
+        function addQueueRoomsToSelect(queueRooms, currentLocationUUID) {
+            var queueRoomOptions = "";
+            var sel = document.getElementById('queue-room-location');
+            for (var i = 0 in queueRooms) {
+                if (queueRooms[i].parentLocation.uuid === currentLocationUUID) {
+                    var opt = document.createElement('option');
+                    opt.appendChild( document.createTextNode(queueRooms[i].name) );
+                    opt.value = queueRooms[i].uuid;
+                    sel.appendChild(opt);
+                }
+            }
+        }
+
         jq(document).ready(function () {
+            jq.ajax({
+                type: "GET",
+                url: '/' + OPENMRS_CONTEXT_PATH + "/ws/rest/v1/location?v=full&tag=c0e1d1d8-c97d-4869-ba16-68d351d3d5f5",
+                dataType: "json",
+                async: false,
+                success: function (data) {
+                    serverResponse = data.results;
+                    addQueueRoomsToSelect(serverResponse, "${currentLocation.uuid}");
+                }
+            });
+
+
             getPatientQueue();
             jq("#patient-search").change(function () {
                 if (jq("#patient-search").val().length >= 3) {
+                    getPatientQueue();
+                }
+            });
+
+            jq("#queue-room-location").change(function () {
+                if (jq("#queue-room-location").val().length >= 3) {
                     getPatientQueue();
                 }
             });
@@ -44,7 +76,8 @@
     function getPatientQueue() {
         jq("#clinician-queue-list-table").html("");
         jq.get('${ ui.actionLink("getPatientQueueList") }', {
-            searchfilter: jq("#patient-search").val().trim().toLowerCase()
+            searchfilter: jq("#patient-search").val().trim().toLowerCase(),
+            queueRoom: document.getElementById("queue-room-location").options[document.getElementById("queue-room-location").selectedIndex].value
         }, function (response) {
             if (response) {
                 var responseData = JSON.parse(String(response).replace("patientQueueList=", "\"patientQueueList\":").trim());
@@ -76,7 +109,7 @@
             content += "<i class=\"icon-dashboard view-action\" title=\"Goto Patient's Dashboard\" onclick=\"location.href = 'urlToPatientDashboard'\"></i>".replace("urlToPatientDashboard", urlToPatientDashBoard);
             content += "</td>";
             content += "</tr>";
-            stillInQueue+=1;
+            stillInQueue += 1;
         }
         content += "</tbody></table>";
         jq("#clinician-pending-number").html("");
@@ -98,17 +131,24 @@
                     <div style="text-align: center">
                         <h4>${currentProvider?.personName?.fullName}</h4>
                     </div>
+
                     <div class="vertical"></div>
                 </div>
 
-                <div class="col-8">
+
                     <form method="get" id="patient-search-form" onsubmit="return false">
+                        <div class="col-4">
                         <input type="text" id="patient-search"
                                placeholder="${ui.message("coreapps.findPatient.search.placeholder")}"
                                autocomplete="off"/><i
                             id="patient-search-clear-button" class="small icon-remove-sign"></i>
+                        </div>
+                        <div class="col-2">
+                            <select name="queueRoom" id="queue-room-location">
+                                <option id="">Select Queue Room</option>
+                        </select>
+                        </div>
                     </form>
-                </div>
             </div>
         </div>
     </div>
@@ -117,7 +157,8 @@
         <ul class="nav nav-tabs nav-fill" id="myTab" role="tablist">
             <li class="nav-item">
                 <a class="nav-item nav-link active" id="home-tab" data-toggle="tab" href="#clinician-pending" role="tab"
-                   aria-controls="clinician-pending-tab" aria-selected="true">${ui.message("patientqueueing.clinicianQueueList.numberInQueue")} <span style="color:red"
+                   aria-controls="clinician-pending-tab" aria-selected="true">${
+                        ui.message ( "patientqueueing.clinicianQueueList.numberInQueue" )} <span style="color:red"
                                                                                                  id="clinician-pending-number">0</span>
                 </a>
             </li>

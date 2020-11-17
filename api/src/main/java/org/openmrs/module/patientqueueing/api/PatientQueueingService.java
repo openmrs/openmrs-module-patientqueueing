@@ -80,6 +80,24 @@ public interface PatientQueueingService extends OpenmrsService {
 	        Location locationFrom, Patient patient, PatientQueue.Status status);
 	
 	/**
+	 * Gets a list of patient queues basing on given parameters.
+	 *
+	 * @param provider The provider where the patient was being sent. It Can be null
+	 * @param fromDate lowest date a query will be built upon. It can be null
+	 * @param toDate highest date a query will be built upon. It Can be null
+	 * @param locationTo Location Where patient was sent to
+	 * @param locationFrom Location Where patient was sent from
+	 * @param patient The patient who is in the queue
+	 * @param status Status such as COMPLETED,PENDING
+	 * @param queueRoom The room where a patient is queued to
+	 * @return List<PatientQueue> A list of patientQueue that meet the parameters
+	 * @throws APIException
+	 */
+	@Transactional(readOnly = true)
+	public List<PatientQueue> getPatientQueueList(Provider provider, Date fromDate, Date toDate, Location locationTo,
+	        Location locationFrom, Patient patient, PatientQueue.Status status, QueueRoom queueRoom);
+
+	/**
 	 * Mark passed patientQueue completed.
 	 * 
 	 * @param patientQueue The PatientQueue to be completed
@@ -100,6 +118,17 @@ public interface PatientQueueingService extends OpenmrsService {
 	public PatientQueue getIncompletePatientQueue(Patient patient, Location locationTo);
 	
 	/**
+	 * Gets the patientQueue for a patient at a given location which is not complete.
+	 *
+	 * @param locationTo The Location where the patient was is queued to
+	 * @param patient The patient who is in the queue
+	 * @param queueRoom The room where patient has been sent
+	 * @return a patient queue that meets the criteria of parameters
+	 */
+	@Transactional(readOnly = true)
+	public PatientQueue getIncompletePatientQueue(Patient patient, Location locationTo, QueueRoom queueRoom);
+
+	/**
 	 * Gets the most recent patientQueue of a patient
 	 * 
 	 * @param patient the patient whose most recent queue will be returned
@@ -117,17 +146,79 @@ public interface PatientQueueingService extends OpenmrsService {
 	@Transactional(readOnly = true)
 	public PatientQueue assignVisitNumberForToday(PatientQueue patientQueue);
 
-
 	/**
 	 * Get Patient Queue List By search Params
+	 *
 	 * @param searchString search string eg first name, last name, middle name.
 	 * @param fromDate lowest date a query will be built upon. It can be null
 	 * @param toDate highest date a query will be built upon. It Can be null
 	 * @param locationTo Location Where patient was sent to
 	 * @param locationFrom Location Where patient was sent from
 	 * @param status Status such as COMPLETED,PENDING
-	 * @return  List<PatientQueue> A list of patientQueue that meet the parameters
+	 * @return List<PatientQueue> A list of patientQueue that meet the parameters
 	 */
 	@Transactional(readOnly = true)
 	public List<PatientQueue> getPatientQueueListBySearchParams(String searchString, Date fromDate, Date toDate, Location locationTo, Location locationFrom, PatientQueue.Status status);
+
+	/**
+	 * Get Patient Queue List By search Params
+	 *
+	 * @param searchString search string eg first name, last name, middle name.
+	 * @param fromDate lowest date a query will be built upon. It can be null
+	 * @param toDate highest date a query will be built upon. It Can be null
+	 * @param locationTo Location Where patient was sent to
+	 * @param locationFrom Location Where patient was sent from
+	 * @param status Status such as COMPLETED,PENDING
+	 * @param queueRoom The room where the patient has been sent to
+	 * @return List<PatientQueue> A list of patientQueue that meet the parameters
+	 */
+
+	@Transactional(readOnly = true)
+	public List<PatientQueue> getPatientQueueListBySearchParams(String searchString, Date fromDate, Date toDate,
+																Location locationTo, Location locationFrom, PatientQueue.Status status, QueueRoom queueRoom);
+
+	/**
+	 * Update or Save pa. Requires a patientQueue
+	 *
+	 * @param queueRoom The QueueRoom to be saved
+	 * @return QueueRoom that has been saved
+	 * @throws APIException
+	 */
+	@Transactional
+	public QueueRoom saveQueueRoom(QueueRoom queueRoom);
+
+	/**
+	 * Get Queue Room by UUID
+	 *
+	 * @param queueRoomUUID the uuid of the patient queue room to be searched
+	 * @return QueueRoom. a unique patient queue room that matches the queueRoomUUID
+	 */
+	@Transactional(readOnly = true)
+	public QueueRoom getQueueRoomByUUID(String queueRoomUUID);
+
+	/**
+	 * Get Queue Room by Id
+	 *
+	 * @param queueRoomId the uuid of the patient queue room to be searched
+	 * @return QueueRoom. a unique patient queue room that matches the queueRoomId
+	 */
+	@Transactional(readOnly = true)
+	public QueueRoom getQueueRoomById(Integer queueRoomId);
+
+	/**
+	 * Get Queue Room by Location
+	 *
+	 * @param location the location of the patient queue room to be searched
+	 * @return QueueRoom. a unique patient queue room that matches the location
+	 */
+	@Transactional(readOnly = true)
+	public List<QueueRoom> getQueueRoomByLocation(Location location);
+
+	/**
+	 * Get All Queue Room
+	 *
+	 * @return List<QueueRoom>. A list of queue rooms
+	 */
+	@Transactional(readOnly = true)
+	public List<QueueRoom> getAllQueueRoom();
 }
