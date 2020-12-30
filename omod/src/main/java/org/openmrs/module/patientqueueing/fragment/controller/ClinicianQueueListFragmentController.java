@@ -10,6 +10,7 @@
 package org.openmrs.module.patientqueueing.fragment.controller;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.openmrs.Location;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appui.UiSessionContext;
 import org.openmrs.module.patientqueueing.api.PatientQueueingService;
@@ -43,7 +44,7 @@ public class ClinicianQueueListFragmentController {
         pageModel.put("currentProvider", Context.getAuthenticatedUser());
     }
 
-    public SimpleObject getPatientQueueList(@RequestParam(value = "searchfilter", required = false) String searchfilter, UiSessionContext uiSessionContext) throws IOException {
+    public SimpleObject getPatientQueueList(@RequestParam(value = "searchfilter", required = false) String searchfilter,   @RequestParam(value = "queueRoom", required = false) Location queueRoom, UiSessionContext uiSessionContext) throws IOException {
 
         PatientQueueingService patientQueueingService = Context.getService(PatientQueueingService.class);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -52,7 +53,7 @@ public class ClinicianQueueListFragmentController {
 
 		patientQueueList = patientQueueingService.getPatientQueueListBySearchParams(searchfilter,
 				OpenmrsUtil.firstSecondOfDay(new Date()), OpenmrsUtil.getLastMomentOfDay(new Date()),
-				uiSessionContext.getSessionLocation(), null, PatientQueue.Status.PENDING);
+				uiSessionContext.getSessionLocation(), null, PatientQueue.Status.PENDING,queueRoom);
 
         List<PatientQueueMapper> patientQueueMappers = mapPatientQueueToMapper(patientQueueList);
         simpleObject.put("patientQueueList", objectMapper.writeValueAsString(patientQueueMappers));
@@ -77,7 +78,10 @@ public class ClinicianQueueListFragmentController {
             patientQueueMapper.setPatientId(patientQueue.getPatient().getPatientId());
             patientQueueMapper.setLocationFrom(patientQueue.getLocationFrom().getName());
             patientQueueMapper.setLocationTo(patientQueue.getLocationTo().getName());
-            patientQueueMapper.setProviderNames(patientQueue.getProvider().getName());
+
+			if (patientQueue.getProvider() != null) {
+				patientQueueMapper.setProviderNames(patientQueue.getProvider().getName());
+			}
             patientQueueMapper.setStatus(patientQueue.getStatus().name());
             patientQueueMapper.setAge(patientQueue.getPatient().getAge().toString());
             patientQueueMapper.setDateCreated(patientQueue.getDateCreated().toString());
