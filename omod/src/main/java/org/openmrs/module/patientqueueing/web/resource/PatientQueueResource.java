@@ -23,36 +23,36 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-@Resource(name = RestConstants.VERSION_1 + "/PatientQueue", supportedClass = PatientQueue.class, supportedOpenmrsVersions = {
-        "1.9.*", "1.10.*", "1.11.*", "1.12.*", "2.0.*", "2.1.*", "2.2.*", "2.3.*", "2.4.*" })
+@Resource(name = RestConstants.VERSION_1 + "/patientqueue", supportedClass = PatientQueue.class, supportedOpenmrsVersions = {
+        "1.9.*", "1.10.*", "1.11.*", "1.12.*", "2.0.*", "2.1.*", "2.2.*", "2.3.*", "2.4.*", "2.5.*" })
 public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
-
+	
 	@Override
 	public PatientQueue newDelegate() {
 		return new PatientQueue();
 	}
-
+	
 	@Override
 	public PatientQueue save(PatientQueue PatientQueue) {
 		return Context.getService(PatientQueueingService.class).savePatientQue(PatientQueue);
 	}
-
+	
 	@Override
 	public PatientQueue getByUniqueId(String uniqueId) {
 		return Context.getService(PatientQueueingService.class).getPatientQueueById(Integer.parseInt(uniqueId));
 	}
-
+	
 	@Override
 	public NeedsPaging<PatientQueue> doGetAll(RequestContext context) throws ResponseException {
 		return new NeedsPaging<PatientQueue>(new ArrayList<PatientQueue>(Context.getService(PatientQueueingService.class)
 		        .getPatientQueueList(null, null, null, null, null, null, null)), context);
 	}
-
+	
 	@Override
 	public List<Representation> getAvailableRepresentations() {
 		return Arrays.asList(Representation.DEFAULT, Representation.FULL);
 	}
-
+	
 	@Override
 	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
 		if (rep instanceof DefaultRepresentation) {
@@ -62,7 +62,7 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 			description.addProperty("date");
 			description.addProperty("visit_number");
 			description.addSelfLink();
-
+			
 			return description;
 		} else if (rep instanceof FullRepresentation) {
 			DelegatingResourceDescription description = new DelegatingResourceDescription();
@@ -97,43 +97,43 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 		}
 		return null;
 	}
-
+	
 	@Override
 	protected void delete(PatientQueue patientQueue, String s, RequestContext requestContext) throws ResponseException {
-
+		
 	}
-
+	
 	@Override
 	public void purge(PatientQueue patientQueue, RequestContext requestContext) throws ResponseException {
-
+		
 	}
-
+	
 	@Override
 	public DelegatingResourceDescription getCreatableProperties() throws ResourceDoesNotSupportOperationException {
 		DelegatingResourceDescription description = new DelegatingResourceDescription();
 		description.addProperty("location");
 		description.addProperty("status");
 		description.addProperty("room");
-
+		
 		return description;
 	}
-
+	
 	@Override
 	protected PageableResult doSearch(RequestContext context) {
 		PatientQueueingService patientQueueingService = Context.getService(PatientQueueingService.class);
-
+		
 		String locationQuery = context.getParameter("location");
 		String status = context.getParameter("status");
 		String queueRoomQuery = context.getParameter("room");
 		PatientQueue.Status queueStatus = null;
-
+		
 		Location location = null;
 		Location room = null;
-
+		
 		if (locationQuery != null && !locationQuery.equals("")) {
 			location = Context.getLocationService().getLocationByUuid(locationQuery);
 		}
-
+		
 		if (status != null && status.equals("pending")) {
 			queueStatus = PatientQueue.Status.PENDING;
 		} else if (status != null && status.equals("completed")) {
@@ -141,17 +141,17 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 		} else if (status != null && status.equals("picked")) {
 			queueStatus = PatientQueue.Status.PICKED;
 		}
-
+		
 		if (queueRoomQuery != null) {
 			room = Context.getLocationService().getLocationByUuid(queueRoomQuery);
 		}
-
+		
 		List<PatientQueue> PatientQueuesByQuery = null;
-
+		
 		PatientQueuesByQuery = patientQueueingService.getPatientQueueListBySearchParams(
 		    context.getParameter("searchString"), OpenmrsUtil.firstSecondOfDay(new Date()),
 		    OpenmrsUtil.getLastMomentOfDay(new Date()), location, null, queueStatus, room);
-
+		
 		return new NeedsPaging<PatientQueue>(PatientQueuesByQuery, context);
 	}
 }
