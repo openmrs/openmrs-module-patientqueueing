@@ -47,6 +47,14 @@ public class PatientQueueingDao {
 	}
 	
 	/**
+	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#getPatientQueueByUuid(java.lang.String)
+	 */
+	public PatientQueue getPatientQueueByUUID(String uuid) {
+		return (PatientQueue) getSession().createCriteria(PatientQueue.class).add(Restrictions.eq("uuid", uuid))
+		        .uniqueResult();
+	}
+	
+	/**
 	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#getPatientQueueList(org.openmrs.Provider,
 	 *      java.util.Date, java.util.Date, org.openmrs.Location, org.openmrs.Location,
 	 *      org.openmrs.Patient, org.openmrs.module.patientqueueing.model.PatientQueue.Status)

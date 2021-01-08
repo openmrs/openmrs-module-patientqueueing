@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping("/rest/" + RestConstants.VERSION_1 + "/patientqueueing")
 public class PatientQueueingResourceController extends MainResourceController {
-
+	
 	/**
 	 * @see org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController#getNamespace()
 	 */
@@ -16,5 +16,5 @@ public class PatientQueueingResourceController extends MainResourceController {
 	public String getNamespace() {
 		return RestConstants.VERSION_1 + "/patientqueueing";
 	}
-
+	
 }

@@ -59,8 +59,8 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 			DelegatingResourceDescription description = new DelegatingResourceDescription();
 			description.addProperty("uuid");
 			description.addProperty("status");
-			description.addProperty("date");
-			description.addProperty("visit_number");
+			description.addProperty("dateCreated");
+			description.addProperty("visitNumber");
 			description.addSelfLink();
 			
 			return description;

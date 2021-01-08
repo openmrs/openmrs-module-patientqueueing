@@ -176,4 +176,11 @@ public interface PatientQueueingService extends OpenmrsService {
 	@Transactional(readOnly = true)
 	public List<PatientQueue> getPatientQueueListBySearchParams(String searchString, Date fromDate, Date toDate,
 																Location locationTo, Location locationFrom, PatientQueue.Status status, Location queueRoom);
+	/**
+	 * Get a single patient queue record by queueId. The uuid can not be null
+	 * @param uuid Id of the patient queue to be retrieved
+	 * @return The patient queue that matches the uuid
+	 */
+	@Transactional(readOnly = true)
+	PatientQueue getPatientQueueByUuid(String uuid);
 }

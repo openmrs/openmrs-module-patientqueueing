@@ -70,6 +70,18 @@
 				<version>${emrapiVersion}</version>
 				<scope>provided</scope>
 			</dependency>
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>emrapi-api-1.12</artifactId>
+				<version>${emrapiVersion}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>emrapi-api-pre2.2</artifactId>
+				<version>${emrapiVersion}</version>
+				<scope>test</scope>
+			</dependency>
 			<!-- Importing versions from refapp distro -->
             <dependency>
                 <groupId>org.openmrs.distro</groupId>
@@ -78,6 +90,47 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>webservices.rest-omod</artifactId>
+				<version>${webservices.restModuleVersion}</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>webservices.rest-omod-common</artifactId>
+				<version>${webservices.restModuleVersion}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>webservices.rest-omod-common</artifactId>
+				<version>${webservices.restModuleVersion}</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>webservices.rest-omod-1.10</artifactId>
+				<version>${webservices.restModuleVersion}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>webservices.rest-omod-2.0</artifactId>
+				<version>${webservices.restModuleVersion}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>webservices.rest-omod-2.1</artifactId>
+				<version>${webservices.restModuleVersion}</version>
+				<scope>test</scope>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<build>
@@ -140,7 +193,8 @@
 		<appframeworkVersion>2.11.0</appframeworkVersion>
 		<appuiVersion>1.9.0</appuiVersion>
 		<coreappsVersion>1.20.0</coreappsVersion>
-		<emrapiVersion>1.26.0</emrapiVersion>
+		<emrapiVersion>1.29.0</emrapiVersion>
 		<uiframeworkVersion>3.13.0</uiframeworkVersion>
+		<webservices.restModuleVersion>2.28.0</webservices.restModuleVersion>
 	</properties>
 </project>
