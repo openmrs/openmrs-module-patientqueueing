@@ -6,7 +6,8 @@
  *
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
- */
+ *//*
+
 package org.openmrs.module.patientqueueing.web.recource;
 
 import org.openmrs.module.patientqueueing.api.PatientQueueingService;
@@ -15,22 +16,28 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.patientqueueing.web.resource.PatientQueueResource;
 import org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest;
 
+*/
 /**
  * Contains tests for the {@link PatientQueueResource}
- */
+ *//*
+
 public class PatientQueueTest extends BaseDelegatingResourceTest<PatientQueueResource, PatientQueue> {
 	
-	/**
+	*/
+/**
 	 * @see org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest#newObject()
-	 */
+	 *//*
+
 	@Override
 	public PatientQueue newObject() {
 		return Context.getService(PatientQueueingService.class).getPatientQueueById(Integer.parseInt(getUuidProperty()));
 	}
 	
-	/**
+	*/
+/**
 	 * @see org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest#validateDefaultRepresentation()
-	 */
+	 *//*
+
 	@Override
 	public void validateDefaultRepresentation() throws Exception {
 		super.validateDefaultRepresentation();
@@ -41,9 +48,11 @@ public class PatientQueueTest extends BaseDelegatingResourceTest<PatientQueueRes
 		assertPropPresent("visitNumber");
 	}
 	
-	/**
+	*/
+/**
 	 * @see org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest#validateFullRepresentation()
-	 */
+	 *//*
+
 	@Override
 	public void validateFullRepresentation() throws Exception {
 		super.validateFullRepresentation();
@@ -68,19 +77,24 @@ public class PatientQueueTest extends BaseDelegatingResourceTest<PatientQueueRes
 		assertPropEquals("voided", getObject().isVoided());
 	}
 	
-	/**
+	*/
+/**
 	 * @see org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest#getDisplayProperty()
-	 */
+	 *//*
+
 	@Override
 	public String getDisplayProperty() {
 		return "Initial HIV Clinic PatientQueue @ Unknown Location - 01/01/2005 00:00";
 	}
 	
-	/**
+	*/
+/**
 	 * @see org.openmrs.module.webservices.rest.web.resource.impl.BaseDelegatingResourceTest#getUuidProperty()
-	 */
+	 *//*
+
 	@Override
 	public String getUuidProperty() {
 		return "2";
 	}
 }
+*/

@@ -6,7 +6,8 @@
  * <p>
  * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
  * graphic logo is a trademark of OpenMRS Inc.
- */
+ *//*
+
 package org.openmrs.module.patientqueueing.web.controller;
 
 import org.apache.commons.beanutils.PropertyUtils;
@@ -17,7 +18,6 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.patientqueueing.api.PatientQueueingService;
 import org.openmrs.module.patientqueueing.model.PatientQueue;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.MainResourceControllerTest;
-import org.openmrs.module.webservices.rest.web.v1_0.resource.openmrs2_1.PersonNameResource2_1;
 
 public class PatientQueueControllerTest extends MainResourceControllerTest {
 	
@@ -28,25 +28,31 @@ public class PatientQueueControllerTest extends MainResourceControllerTest {
 		this.service = Context.getService(PatientQueueingService.class);
 	}
 	
-	/**
+	*/
+/**
 	 * @see org.openmrs.module.webservices.rest.web.v1_0.controller.MainResourceControllerTest#getURI()
-	 */
+	 *//*
+
 	@Override
 	public String getURI() {
 		return "patientqueue";
 	}
 	
-	/**
+	*/
+/**
 	 * @see org.openmrs.module.webservices.rest.web.v1_0.controller.MainResourceControllerTest#getUuid()
-	 */
+	 *//*
+
 	@Override
 	public String getUuid() {
 		return "4102d6e2-9fb4-4084-b412-8e3838479170";
 	}
 	
-	/**
+	*/
+/**
 	 * @see org.openmrs.module.webservices.rest.web.v1_0.controller.MainResourceControllerTest#getAllCount()
-	 */
+	 *//*
+
 	@Override
 	public long getAllCount() {
 		return service.getPatientQueueList(null, null, null, null, null, null, null).size();
@@ -96,3 +102,4 @@ public class PatientQueueControllerTest extends MainResourceControllerTest {
 	}
 	
 }
+*/
