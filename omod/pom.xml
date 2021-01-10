@@ -89,7 +89,7 @@
 
 		<dependency>
 			<groupId>org.openmrs.module</groupId>
-			<artifactId>webservices.rest-omod-2.0</artifactId>
+			<artifactId>webservices.rest-omod-2.3</artifactId>
 		</dependency>
 	</dependencies>
 

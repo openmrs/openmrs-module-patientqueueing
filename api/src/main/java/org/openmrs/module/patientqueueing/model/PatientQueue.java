@@ -67,10 +67,10 @@ public class PatientQueue extends BaseOpenmrsData implements Serializable {
 	@ManyToOne
 	@JoinColumn(name = "queue_room")
 	private Location queueRoom;
-
+	
 	@Column(name = "date_picked")
 	private Date datePicked;
-
+	
 	@Column(name = "date_completed")
 	private Date dateCompleted;
 	
@@ -184,19 +184,19 @@ public class PatientQueue extends BaseOpenmrsData implements Serializable {
 	public void setQueueRoom(Location queueRoom) {
 		this.queueRoom = queueRoom;
 	}
-
+	
 	public Date getDatePicked() {
 		return datePicked;
 	}
-
+	
 	public void setDatePicked(Date datePicked) {
 		this.datePicked = datePicked;
 	}
-
+	
 	public Date getDateCompleted() {
 		return dateCompleted;
 	}
-
+	
 	public void setDateCompleted(Date dateCompleted) {
 		this.dateCompleted = dateCompleted;
 	}

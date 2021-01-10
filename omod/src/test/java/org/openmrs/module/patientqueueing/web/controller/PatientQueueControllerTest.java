@@ -8,6 +8,7 @@
  * graphic logo is a trademark of OpenMRS Inc.
  *//*
 
+
 package org.openmrs.module.patientqueueing.web.controller;
 
 import org.apache.commons.beanutils.PropertyUtils;
@@ -33,6 +34,7 @@ public class PatientQueueControllerTest extends MainResourceControllerTest {
 	 * @see org.openmrs.module.webservices.rest.web.v1_0.controller.MainResourceControllerTest#getURI()
 	 *//*
 
+	
 	@Override
 	public String getURI() {
 		return "patientqueue";
@@ -43,6 +45,7 @@ public class PatientQueueControllerTest extends MainResourceControllerTest {
 	 * @see org.openmrs.module.webservices.rest.web.v1_0.controller.MainResourceControllerTest#getUuid()
 	 *//*
 
+	
 	@Override
 	public String getUuid() {
 		return "4102d6e2-9fb4-4084-b412-8e3838479170";
@@ -53,6 +56,7 @@ public class PatientQueueControllerTest extends MainResourceControllerTest {
 	 * @see org.openmrs.module.webservices.rest.web.v1_0.controller.MainResourceControllerTest#getAllCount()
 	 *//*
 
+	
 	@Override
 	public long getAllCount() {
 		return service.getPatientQueueList(null, null, null, null, null, null, null).size();
@@ -95,7 +99,7 @@ public class PatientQueueControllerTest extends MainResourceControllerTest {
 		Assert.assertFalse(patientQueue.isVoided());
 		
 		handle(newDeleteRequest(getURI() + "/" + getUuid(), new Parameter("reason", "test reason")));
-		
+
 		patientQueue = service.getPatientQueueByUuid(getUuid());
 		Assert.assertTrue(patientQueue.isVoided());
 		Assert.assertEquals("test reason", patientQueue.getVoidReason());

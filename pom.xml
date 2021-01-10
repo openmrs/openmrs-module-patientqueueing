@@ -120,14 +120,7 @@
 
 			<dependency>
 				<groupId>org.openmrs.module</groupId>
-				<artifactId>webservices.rest-omod-2.0</artifactId>
-				<version>${webservices.restModuleVersion}</version>
-				<scope>test</scope>
-			</dependency>
-
-			<dependency>
-				<groupId>org.openmrs.module</groupId>
-				<artifactId>webservices.rest-omod-2.1</artifactId>
+				<artifactId>webservices.rest-omod-2.3</artifactId>
 				<version>${webservices.restModuleVersion}</version>
 				<scope>test</scope>
 			</dependency>
