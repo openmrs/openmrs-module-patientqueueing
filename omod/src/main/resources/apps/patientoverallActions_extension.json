@@ -19,5 +19,15 @@
   "order": -20,
   "require": "!patient.person.dead",
   "requiredPrivilege": "Task: patientqueueing.sendPatientToQueue"
+},{
+  "id": "${project.parent.groupId}.${project.parent.artifactId}.pickQueuePatient",
+  "extensionPointId": "patientDashboard.overallActions",
+  "type": "script",
+  "label": "patientqueueing.task.pickPatientToQueue.label",
+  "script": "patientqueue.showPickPatientQueueDialog({{patient.patientId}})",
+  "icon": "icon-stethoscope",
+  "order": -20,
+  "require": "!patient.person.dead",
+  "requiredPrivilege": "Task: patientqueueing.pickPatientToQueue"
 }
 ]

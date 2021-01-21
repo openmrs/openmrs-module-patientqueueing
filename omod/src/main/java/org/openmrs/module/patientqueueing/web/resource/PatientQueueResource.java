@@ -21,6 +21,7 @@ import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.openmrs.util.OpenmrsUtil;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -42,7 +43,22 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 	
 	@Override
 	public PatientQueue getByUniqueId(String uniqueId) {
-		return Context.getService(PatientQueueingService.class).getPatientQueueByUuid(uniqueId);
+		PatientQueue patientQueue = null;
+		Integer id = null;
+		
+		patientQueue = Context.getService(PatientQueueingService.class).getPatientQueueByUuid(uniqueId);
+		if (patientQueue == null && uniqueId != null) {
+			try {
+				id = Integer.parseInt(uniqueId);
+			}
+			catch (Exception e) {}
+			
+			if (id != null) {
+				patientQueue = Context.getService(PatientQueueingService.class).getPatientQueueById(id);
+			}
+		}
+		
+		return patientQueue;
 	}
 	
 	@Override
@@ -129,7 +145,7 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 		DelegatingResourceDescription description = new DelegatingResourceDescription();
 		description.addProperty("location");
 		description.addProperty("status");
-		description.addProperty("room");
+		description.addProperty("queueRoom");
 		description.addProperty("provider");
 		description.addProperty("datePicked");
 		description.addProperty("dateCompleted");
@@ -167,9 +183,9 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 		
 		List<PatientQueue> PatientQueuesByQuery = null;
 		
-		PatientQueuesByQuery = patientQueueingService.getPatientQueueListBySearchParams(
-		    context.getParameter("searchString"), OpenmrsUtil.firstSecondOfDay(new Date()),
-		    OpenmrsUtil.getLastMomentOfDay(new Date()), location, null, queueStatus, room);
+		PatientQueuesByQuery = patientQueueingService.getPatientQueueListBySearchParams(context.getParameter("q"),
+		    OpenmrsUtil.firstSecondOfDay(new Date()), OpenmrsUtil.getLastMomentOfDay(new Date()), location, null,
+		    queueStatus, room);
 		
 		return new NeedsPaging<PatientQueue>(PatientQueuesByQuery, context);
 	}
