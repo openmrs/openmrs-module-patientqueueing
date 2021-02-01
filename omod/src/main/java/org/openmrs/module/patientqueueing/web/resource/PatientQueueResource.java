@@ -124,6 +124,15 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 			DelegatingResourceDescription description = new DelegatingResourceDescription();
 			description.addProperty("uuid");
 			description.addProperty("visitNumber");
+			description.addProperty("dateCreated");
+			description.addProperty("dateChanged");
+			description.addProperty("locationFrom");
+			description.addProperty("locationTo");
+			description.addProperty("status");
+			description.addProperty("queueRoom");
+			description.addProperty("datePicked");
+			description.addProperty("dateCompleted");
+			description.addProperty("provider");
 			description.addSelfLink();
 			return description;
 		}
