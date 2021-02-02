@@ -347,4 +347,54 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
         Assert.assertEquals(0, patientQueueList.size());
 
     }
+
+	@Test
+	public void pickPatientQueue_shouldSetAndReturnPatientQueueWithPickedStatus() throws Exception {
+
+		PatientQueueingService patientQueueingService = Context.getService(PatientQueueingService.class);
+
+		Patient patient = Context.getPatientService().getPatient(10000);
+		Location location = Context.getLocationService().getLocation(1);
+
+		List<PatientQueue> patientQueueList = Context.getService(PatientQueueingService.class).getPatientQueueList(null,
+				null, null, location, null, patient, PatientQueue.Status.PENDING);
+
+		PatientQueue patientQueue = patientQueueList.get(0);
+
+		Assert.assertEquals(PatientQueue.Status.PENDING, patientQueue.getStatus());
+
+		patientQueueingService.pickPatientQueue(patientQueue, null, null);
+
+		PatientQueue pickedPatientQueue = patientQueueingService.getPatientQueueById(patientQueue.getPatientQueueId());
+
+		Assert.assertNotNull(pickedPatientQueue);
+
+		Assert.assertEquals(PatientQueue.Status.PICKED, pickedPatientQueue.getStatus());
+		Assert.assertNotNull(pickedPatientQueue.getDatePicked());
+	}
+
+	@Test
+	public void completePatientQueue_shouldSetAndReturnPatientQueueWithDateCompleted() throws Exception {
+
+		PatientQueueingService patientQueueingService = Context.getService(PatientQueueingService.class);
+
+		Patient patient = Context.getPatientService().getPatient(10000);
+		Location location = Context.getLocationService().getLocation(1);
+
+		List<PatientQueue> patientQueueList = Context.getService(PatientQueueingService.class).getPatientQueueList(null,
+				null, null, location, null, patient, PatientQueue.Status.PENDING);
+
+		PatientQueue patientQueue = patientQueueList.get(0);
+
+		Assert.assertEquals(PatientQueue.Status.PENDING, patientQueue.getStatus());
+
+		patientQueueingService.completePatientQueue(patientQueue);
+
+		PatientQueue completedPatientQueue = patientQueueingService.getPatientQueueById(patientQueue.getPatientQueueId());
+
+		Assert.assertNotNull(completedPatientQueue);
+
+		Assert.assertEquals(PatientQueue.Status.COMPLETED, completedPatientQueue.getStatus());
+		Assert.assertNotNull(completedPatientQueue.getDateCompleted());
+	}
 }
