@@ -212,4 +212,12 @@ public class PatientQueueingServiceImpl extends BaseOpenmrsService implements Pa
 
 		return dao.getPatientQueueList(patientList, fromDate, toDate, locationTo, locationFrom, status, queueRoom);
 	}
+	
+	/**
+	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#getPatientQueueByUuid(java.lang.String)
+	 */
+	@Override
+	public PatientQueue getPatientQueueByUuid(String uuid) {
+		return dao.getPatientQueueByUUID(uuid);
+	}
 }
