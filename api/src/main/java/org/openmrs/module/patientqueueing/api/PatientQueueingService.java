@@ -177,13 +177,21 @@ public interface PatientQueueingService extends OpenmrsService {
 	public List<PatientQueue> getPatientQueueListBySearchParams(String searchString, Date fromDate, Date toDate,
 																Location locationTo, Location locationFrom, PatientQueue.Status status, Location queueRoom);
 	/**
-	 * Change status of a patient queue from pending to picked
-	 *
-	 * @param patientQueue the queue which will be picked
-	 * @param provider the health worker who is picking the patient
-	 * @param queueRoom the specific room where the provider is at the time of picking the patient
-	 * @return the queue which has been picked
+	 * Get a single patient queue record by queueId. The uuid can not be null
+	 * @param uuid Id of the patient queue to be retrieved
+	 * @return The patient queue that matches the uuid
 	 */
 	@Transactional(readOnly = true)
-	PatientQueue pickPatientQueue(PatientQueue patientQueue, Provider provider, Location queueRoom);
+	PatientQueue getPatientQueueByUuid(String uuid);
+
+    /**
+     * Change status of a patient queue from pending to picked
+     *
+     * @param patientQueue the queue which will be picked
+     * @param provider the health worker who is picking the patient
+     * @param queueRoom the specific room where the provider is at the time of picking the patient
+     * @return the queue which has been picked
+     */
+    @Transactional(readOnly = true)
+    PatientQueue pickPatientQueue(PatientQueue patientQueue, Provider provider, Location queueRoom);
 }
