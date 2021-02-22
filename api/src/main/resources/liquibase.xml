@@ -137,4 +137,30 @@
             INSERT INTO location_tag (name, description, creator, date_created, retired, uuid) VALUES ('Queue Room', 'A tag to indicate a queue room used by the queuing module', 1, '2020-11-26 19:32:49', 0, 'c0e1d1d8-c97d-4869-ba16-68d351d3d5f5');
         </sql>
     </changeSet>
+
+    <changeSet  author="slubwama" id="patientqueue_1566208965241-22">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="patient_queue"/>
+            <not><columnExists tableName="patient_queue" columnName="date_picked"/></not>
+        </preConditions>
+        <comment>
+            Add Column date_picked to patient_queue table
+        </comment>
+        <addColumn tableName="patient_queue">
+            <column name="date_picked" type="datetime" />
+        </addColumn>
+    </changeSet>
+
+    <changeSet  author="slubwama" id="patientqueue_1566208965241-23">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="patient_queue"/>
+            <not><columnExists tableName="patient_queue" columnName="date_completed"/></not>
+        </preConditions>
+        <comment>
+            Add Column date_completed to patient_queue table
+        </comment>
+        <addColumn tableName="patient_queue">
+            <column name="date_completed" type="datetime" />
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

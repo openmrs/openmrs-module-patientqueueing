@@ -17,6 +17,7 @@ import javax.persistence.Column;
 import javax.persistence.ManyToOne;
 import javax.persistence.JoinColumn;
 import java.io.Serializable;
+import java.util.Date;
 
 @Entity(name = "patientqueueing.PatientQueue")
 @Table(name = "patient_queue")
@@ -66,6 +67,18 @@ public class PatientQueue extends BaseOpenmrsData implements Serializable {
 	@ManyToOne
 	@JoinColumn(name = "queue_room")
 	private Location queueRoom;
+
+    /**
+     * Date when a provider selects a picks or selects from the queue
+     */
+	@Column(name = "date_picked")
+	private Date datePicked;
+
+    /**
+     * Date when the patient queue is completed
+     */
+	@Column(name = "date_completed")
+	private Date dateCompleted;
 	
 	public PatientQueue() {
 	}
@@ -176,5 +189,21 @@ public class PatientQueue extends BaseOpenmrsData implements Serializable {
 	
 	public void setQueueRoom(Location queueRoom) {
 		this.queueRoom = queueRoom;
+	}
+	
+	public Date getDatePicked() {
+		return datePicked;
+	}
+	
+	public void setDatePicked(Date datePicked) {
+		this.datePicked = datePicked;
+	}
+	
+	public Date getDateCompleted() {
+		return dateCompleted;
+	}
+	
+	public void setDateCompleted(Date dateCompleted) {
+		this.dateCompleted = dateCompleted;
 	}
 }

@@ -72,6 +72,7 @@ public class PatientQueueingServiceImpl extends BaseOpenmrsService implements Pa
     @Override
     public PatientQueue completePatientQueue(PatientQueue patientQueue) {
         patientQueue.setStatus(PatientQueue.Status.COMPLETED);
+        patientQueue.setDateCompleted(new Date());
         return dao.savePatientQueue(patientQueue);
     }
 
@@ -212,7 +213,7 @@ public class PatientQueueingServiceImpl extends BaseOpenmrsService implements Pa
 
 		return dao.getPatientQueueList(patientList, fromDate, toDate, locationTo, locationFrom, status, queueRoom);
 	}
-	
+
 	/**
 	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#getPatientQueueByUuid(java.lang.String)
 	 */
@@ -220,4 +221,16 @@ public class PatientQueueingServiceImpl extends BaseOpenmrsService implements Pa
 	public PatientQueue getPatientQueueByUuid(String uuid) {
 		return dao.getPatientQueueByUUID(uuid);
 	}
+
+    /**
+     * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#pickPatientQueue(org.openmrs.module.patientqueueing.model.PatientQueue,org.openmrs.Provider,org.openmrs.Location)
+     */
+    @Override
+    public PatientQueue pickPatientQueue(PatientQueue patientQueue, Provider provider, Location queueRoom) {
+        patientQueue.setStatus(PatientQueue.Status.PICKED);
+        patientQueue.setDatePicked(new Date());
+        patientQueue.setProvider(provider);
+        patientQueue.setQueueRoom(queueRoom);
+        return dao.savePatientQueue(patientQueue);
+    }
 }
