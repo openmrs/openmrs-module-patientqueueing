@@ -1,5 +1,12 @@
 package org.openmrs.module.patientqueueing.web.resource;
 
+import io.swagger.models.Model;
+import io.swagger.models.ModelImpl;
+import io.swagger.models.properties.StringProperty;
+import io.swagger.models.properties.BooleanProperty;
+import io.swagger.models.properties.DateProperty;
+import io.swagger.models.properties.RefProperty;
+import io.swagger.models.properties.IntegerProperty;
 import org.openmrs.Location;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.patientqueueing.api.PatientQueueingService;
@@ -39,7 +46,22 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 	
 	@Override
 	public PatientQueue getByUniqueId(String uniqueId) {
-		return Context.getService(PatientQueueingService.class).getPatientQueueById(Integer.parseInt(uniqueId));
+		PatientQueue patientQueue = null;
+		Integer id = null;
+		
+		patientQueue = Context.getService(PatientQueueingService.class).getPatientQueueByUuid(uniqueId);
+		if (patientQueue == null && uniqueId != null) {
+			try {
+				id = Integer.parseInt(uniqueId);
+			}
+			catch (Exception e) {}
+			
+			if (id != null) {
+				patientQueue = Context.getService(PatientQueueingService.class).getPatientQueueById(id);
+			}
+		}
+		
+		return patientQueue;
 	}
 	
 	@Override
@@ -58,9 +80,20 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 		if (rep instanceof DefaultRepresentation) {
 			DelegatingResourceDescription description = new DelegatingResourceDescription();
 			description.addProperty("uuid");
+			description.addProperty("patient", Representation.REF);
+			description.addProperty("datePicked");
+			description.addProperty("dateCompleted");
+			description.addProperty("locationFrom", Representation.REF);
+			description.addProperty("locationTo", Representation.REF);
+			description.addProperty("provider", Representation.REF);
+			description.addProperty("encounter", Representation.REF);
 			description.addProperty("status");
-			description.addProperty("dateCreated");
+			description.addProperty("priority");
+			description.addProperty("priorityComment");
 			description.addProperty("visitNumber");
+			description.addProperty("comment");
+			description.addProperty("queueRoom", Representation.REF);
+			
 			description.addSelfLink();
 			
 			return description;
@@ -85,6 +118,8 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 			description.addProperty("visitNumber");
 			description.addProperty("comment");
 			description.addProperty("queueRoom");
+			description.addProperty("datePicked");
+			description.addProperty("dateCompleted");
 			description.addSelfLink();
 			description.addLink("full", ".?v=" + RestConstants.REPRESENTATION_FULL);
 			return description;
@@ -92,6 +127,15 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 			DelegatingResourceDescription description = new DelegatingResourceDescription();
 			description.addProperty("uuid");
 			description.addProperty("visitNumber");
+			description.addProperty("dateCreated");
+			description.addProperty("dateChanged");
+			description.addProperty("locationFrom");
+			description.addProperty("locationTo");
+			description.addProperty("status");
+			description.addProperty("queueRoom");
+			description.addProperty("datePicked");
+			description.addProperty("dateCompleted");
+			description.addProperty("provider");
 			description.addSelfLink();
 			return description;
 		}
@@ -113,7 +157,10 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 		DelegatingResourceDescription description = new DelegatingResourceDescription();
 		description.addProperty("location");
 		description.addProperty("status");
-		description.addProperty("room");
+		description.addProperty("queueRoom");
+		description.addProperty("provider");
+		description.addProperty("datePicked");
+		description.addProperty("dateCompleted");
 		
 		return description;
 	}
@@ -153,5 +200,81 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 		    OpenmrsUtil.getLastMomentOfDay(new Date()), location, null, queueStatus, room);
 		
 		return new NeedsPaging<PatientQueue>(PatientQueuesByQuery, context);
+	}
+	
+	@Override
+	public Model getGETModel(Representation rep) {
+		ModelImpl model = (ModelImpl) super.getGETModel(rep);
+		if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
+			model.property("uuid", new StringProperty()).property("dateCreated", new DateProperty())
+			        .property("voided", new BooleanProperty()).property("priority", new IntegerProperty())
+			        .property("priorityComment", new StringProperty()).property("visitNumber", new StringProperty())
+			        .property("comment", new StringProperty()).property("status", new StringProperty())
+			        .property("datePicked", new DateProperty()).property("dateCompleted", new DateProperty());
+		}
+		if (rep instanceof DefaultRepresentation) {
+			model.property("patient", new RefProperty("#/definitions/PatientGetRef"))
+			        .property("creator", new RefProperty("#/definitions/UserGetRef"))
+			        .property("changedBy", new RefProperty("#/definitions/UserGetRef"))
+			        .property("voidedBy", new RefProperty("#/definitions/UserGetRef"))
+			        .property("provider", new RefProperty("#/definitions/ProviderGetRef"))
+			        .property("locationFrom", new RefProperty("#/definitions/LocationGetRef"))
+			        .property("locationTo", new RefProperty("#/definitions/LocationGetRef"))
+			        .property("encounter", new RefProperty("#/definitions/EncounterGetRef"));
+			
+		} else if (rep instanceof FullRepresentation) {
+			model.property("patient", new RefProperty("#/definitions/PatientGetRef"))
+			        .property("creator", new RefProperty("#/definitions/UserGetRef"))
+			        .property("changedBy", new RefProperty("#/definitions/UserGetRef"))
+			        .property("voidedBy", new RefProperty("#/definitions/UserGetRef"))
+			        .property("provider", new RefProperty("#/definitions/ProviderGetRef"))
+			        .property("locationFrom", new RefProperty("#/definitions/LocationGetRef"))
+			        .property("locationTo", new RefProperty("#/definitions/LocationGetRef"))
+			        .property("encounter", new RefProperty("#/definitions/EncounterGetRef"));
+		}
+		return model;
+	}
+	
+	@Override
+	public Model getCREATEModel(Representation rep) {
+		ModelImpl model = (ModelImpl) super.getGETModel(rep);
+		if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
+			model.property("uuid", new StringProperty()).property("dateCreated", new DateProperty())
+			        .property("voided", new BooleanProperty()).property("status", new StringProperty())
+			        .property("priority", new IntegerProperty()).property("priorityComment", new StringProperty())
+			        .property("visitNumber", new StringProperty()).property("comment", new StringProperty())
+			        .property("status", new StringProperty()).property("datePicked", new DateProperty())
+			        .property("dateCompleted", new DateProperty());
+		}
+		if (rep instanceof DefaultRepresentation) {
+			model.property("patient", new RefProperty("#/definitions/PatientCreate"))
+			        .property("creator", new RefProperty("#/definitions/UserCreate"))
+			        .property("changedBy", new RefProperty("#/definitions/UserCreate"))
+			        .property("voidedBy", new RefProperty("#/definitions/UserCreate"))
+			        .property("provider", new RefProperty("#/definitions/ProviderCreate"))
+			        .property("locationFrom", new RefProperty("#/definitions/LocationCreate"))
+			        .property("locationTo", new RefProperty("#/definitions/LocationCreate"))
+			        .property("encounter", new RefProperty("#/definitions/EncounterCreate"));
+			
+		} else if (rep instanceof FullRepresentation) {
+			model.property("patient", new RefProperty("#/definitions/PatientCreate"))
+			        .property("creator", new RefProperty("#/definitions/UserCreate"))
+			        .property("changedBy", new RefProperty("#/definitions/UserCreate"))
+			        .property("voidedBy", new RefProperty("#/definitions/UserCreate"))
+			        .property("provider", new RefProperty("#/definitions/ProviderCreate"))
+			        .property("locationFrom", new RefProperty("#/definitions/LocationCreate"))
+			        .property("locationTo", new RefProperty("#/definitions/LocationCreate"))
+			        .property("encounter", new RefProperty("#/definitions/EncounterCreate"));
+		}
+		return model;
+	}
+	
+	@Override
+	public Model getUPDATEModel(Representation rep) {
+		return new ModelImpl().property("status", new StringProperty()).property("priority", new IntegerProperty())
+		        .property("priorityComment", new StringProperty()).property("comment", new StringProperty())
+		        .property("status", new StringProperty()).property("datePicked", new DateProperty())
+		        .property("dateCompleted", new DateProperty())
+		        .property("provider", new RefProperty("#/definitions/ProviderCreate"));
 	}
 }
