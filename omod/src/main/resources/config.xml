@@ -36,7 +36,7 @@
 			org.openmrs.module.coreapps
 		</require_module>
 		<require_module version="${webservices.restModuleVersion}">
-			org.openmrs.module.webservices
+			org.openmrs.module.webservices.rest
 		</require_module>
 	</require_modules>
 	<!-- Extensions -->
