@@ -155,12 +155,20 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 	@Override
 	public DelegatingResourceDescription getCreatableProperties() throws ResourceDoesNotSupportOperationException {
 		DelegatingResourceDescription description = new DelegatingResourceDescription();
-		description.addProperty("location");
+		description.addProperty("patient");
+		description.addProperty("provider");
+		description.addProperty("locationTo");
+		description.addProperty("locationFrom");
 		description.addProperty("status");
+		description.addProperty("encounter");
+		description.addProperty("visitNumber");
+		description.addProperty("priority");
 		description.addProperty("queueRoom");
 		description.addProperty("provider");
 		description.addProperty("datePicked");
 		description.addProperty("dateCompleted");
+		description.addProperty("priorityComment");
+		description.addProperty("comment");
 		
 		return description;
 	}
