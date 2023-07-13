@@ -40,8 +40,10 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 	}
 	
 	@Override
-	public PatientQueue save(PatientQueue PatientQueue) {
-		return Context.getService(PatientQueueingService.class).savePatientQue(PatientQueue);
+	public PatientQueue save(PatientQueue patientQueue) {
+		PatientQueueingService patientQueueingService=Context.getService(PatientQueueingService.class);
+		patientQueue = patientQueueingService.assignVisitNumberForToday(patientQueue);
+		return Context.getService(PatientQueueingService.class).savePatientQue(patientQueue);
 	}
 	
 	@Override
