@@ -194,4 +194,16 @@ public interface PatientQueueingService extends OpenmrsService {
      */
     @Transactional(readOnly = true)
     PatientQueue pickPatientQueue(PatientQueue patientQueue, Provider provider, Location queueRoom);
+
+	/**
+	 * Get Patient Queues of parent location queue rooms
+	 * @param parentLocation the parent location of patient queue rooms to search patients from
+	 * @param status Status such as COMPLETED,PENDING,PICKED
+	 * @param fromDate lowest date a query will be built upon. It can be null
+	 * @param toDate highest date a query will be built upon. It Can be null
+	 * @param onlyInQueueRooms when set to true only includes patients in child locations with tag queue room
+	 */
+	@Transactional(readOnly = true)
+	public List<PatientQueue> getPatientQueueByParentLocation(Location parentLocation, PatientQueue.Status status,
+															  Date fromDate, Date toDate,boolean onlyInQueueRooms);
 }

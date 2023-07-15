@@ -21,4 +21,5 @@ public class PatientQueueingConfig {
 	
 	public static final String MODULE_ID = "patientqueueing";
 	
+	public static final String ROOM_TAG_UUID = "c0e1d1d8-c97d-4869-ba16-68d351d3d5f5";
 }

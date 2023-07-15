@@ -10,6 +10,7 @@
 package org.openmrs.module.patientqueueing.api.impl;
 
 import org.openmrs.Location;
+import org.openmrs.LocationTag;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.api.context.Context;
@@ -25,6 +26,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
+
+import static org.openmrs.module.patientqueueing.PatientQueueingConfig.ROOM_TAG_UUID;
 
 public class PatientQueueingServiceImpl extends BaseOpenmrsService implements PatientQueueingService {
 
@@ -232,5 +237,30 @@ public class PatientQueueingServiceImpl extends BaseOpenmrsService implements Pa
         patientQueue.setProvider(provider);
         patientQueue.setQueueRoom(queueRoom);
         return dao.savePatientQueue(patientQueue);
+    }
+
+    /**
+     * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#
+     * getPatientQueueByParentLocation(org.openmrs.Location,
+     * org.openmrs.module.patientqueueing.model.PatientQueue.Status, java.util.Date dateFrom,
+     * java.util.Date)
+     */
+    @Override
+    public List<PatientQueue> getPatientQueueByParentLocation(Location parentLocation, PatientQueue.Status status, Date fromDate, Date toDate, boolean onlyInQueueRooms) {
+        LocationTag queueRomTag = Context.getLocationService().getLocationTagByUuid(ROOM_TAG_UUID);
+        Set<Location> childLocations = new HashSet<>();
+        if (onlyInQueueRooms) {
+            for (Location location : parentLocation.getChildLocations()) {
+                if (location.getTags().contains(queueRomTag)) {
+                    childLocations.add(location);
+                }
+            }
+        } else {
+            childLocations = parentLocation.getChildLocations();
+        }
+        if (childLocations.isEmpty()) {
+            return null;
+        }
+        return dao.getPatientsInQueueRoom(childLocations, status, fromDate, toDate);
     }
 }

@@ -25,6 +25,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Repository("patientqueueing.PatientQueueingDao")
 public class PatientQueueingDao {
@@ -180,4 +181,28 @@ public class PatientQueueingDao {
 		return criteria.list();
 	}
 	
+	/**
+	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#
+	 *      getPatientQueueByParentLocation(org.openmrs.Location,
+	 *      org.openmrs.module.patientqueueing.model.PatientQueue.Status,java.util.Date dateFrom,
+	 *      java.util.Date)
+	 */
+	public List<PatientQueue> getPatientsInQueueRoom(Set<Location> queueRooms, PatientQueue.Status status, Date fromDate, Date toDate) {
+		Criteria criteria = getSession().createCriteria(PatientQueue.class);
+		
+		if (fromDate != null && toDate != null) {
+			criteria.add(Restrictions.between("dateCreated", fromDate, toDate));
+		}
+		
+		if (status != null) {
+			criteria.add(Restrictions.eq("status", status));
+		}
+		
+		if (queueRooms != null) {
+			criteria.add(Restrictions.in("queueRoom", queueRooms));
+		}
+		
+		criteria.addOrder(Order.desc("dateCreated"));
+		return criteria.list();
+	}
 }

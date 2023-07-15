@@ -33,12 +33,12 @@ import java.util.List;
 @Resource(name = RestConstants.VERSION_1 + "/patientqueue", supportedClass = PatientQueue.class, supportedOpenmrsVersions = {
         "1.9.*", "1.10.*", "1.11.*", "1.12.*", "2.0.*", "2.1.*", "2.2.*", "2.3.*", "2.4.*", "2.5.*" })
 public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
-	
+
 	@Override
 	public PatientQueue newDelegate() {
 		return new PatientQueue();
 	}
-	
+
 	@Override
 	public PatientQueue save(PatientQueue patientQueue) {
 		PatientQueueingService patientQueueingService=Context.getService(PatientQueueingService.class);
@@ -171,7 +171,7 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 		description.addProperty("dateCompleted");
 		description.addProperty("priorityComment");
 		description.addProperty("comment");
-		
+
 		return description;
 	}
 	
@@ -180,6 +180,8 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 		PatientQueueingService patientQueueingService = Context.getService(PatientQueueingService.class);
 		
 		String locationQuery = context.getParameter("location");
+		String parentLocationQuery = context.getParameter("parentLocation");
+		boolean onlyInQueueRooms = Boolean.parseBoolean(context.getParameter("onlyInQueueRooms"));
 		String status = context.getParameter("status");
 		String queueRoomQuery = context.getParameter("room");
 		PatientQueue.Status queueStatus = null;
@@ -204,11 +206,17 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 		}
 		
 		List<PatientQueue> PatientQueuesByQuery = null;
-		
-		PatientQueuesByQuery = patientQueueingService.getPatientQueueListBySearchParams(
-		    context.getParameter("searchString"), OpenmrsUtil.firstSecondOfDay(new Date()),
-		    OpenmrsUtil.getLastMomentOfDay(new Date()), location, null, queueStatus, room);
-		
+
+		if (parentLocationQuery != null && !parentLocationQuery.equals("")) {
+			PatientQueuesByQuery = patientQueueingService.getPatientQueueByParentLocation(Context.getLocationService()
+			        .getLocationByUuid(parentLocationQuery), queueStatus, OpenmrsUtil.firstSecondOfDay(new Date()),
+			    OpenmrsUtil.getLastMomentOfDay(new Date()),onlyInQueueRooms);
+		} else {
+			PatientQueuesByQuery = patientQueueingService.getPatientQueueListBySearchParams(
+			    context.getParameter("searchString"), OpenmrsUtil.firstSecondOfDay(new Date()),
+			    OpenmrsUtil.getLastMomentOfDay(new Date()), location, null, queueStatus, room);
+		}
+
 		return new NeedsPaging<PatientQueue>(PatientQueuesByQuery, context);
 	}
 	

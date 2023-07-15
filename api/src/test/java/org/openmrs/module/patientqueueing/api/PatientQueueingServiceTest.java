@@ -397,4 +397,15 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 		Assert.assertEquals(PatientQueue.Status.COMPLETED, completedPatientQueue.getStatus());
 		Assert.assertNotNull(completedPatientQueue.getDateCompleted());
 	}
+
+	@Test
+	public void getPatientsInQueueRoom_ShouldReturnPatientsInQueueRoomsOfParentLocations() throws ParseException {
+		Location parentLocation = Context.getLocationService().getLocation(1);
+		Date dateCreated = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2023-07-07 19:08:26");
+		List<PatientQueue> patientQueueList=Context.getService(PatientQueueingService.class).getPatientQueueByParentLocation(parentLocation,PatientQueue.Status.PENDING,OpenmrsUtil.firstSecondOfDay(dateCreated),
+				OpenmrsUtil.getLastMomentOfDay(dateCreated),true);
+		Assert.assertFalse( patientQueueList.size()>1);
+		Assert.assertEquals( patientQueueList.get(0).getQueueRoom().getParentLocation(),parentLocation);
+		Assert.assertEquals( patientQueueList.get(0).getQueueRoom().getName(),"Room 1");
+	}
 }
