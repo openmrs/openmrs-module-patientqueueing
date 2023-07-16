@@ -249,14 +249,14 @@ public class PatientQueueingServiceImpl extends BaseOpenmrsService implements Pa
     public List<PatientQueue> getPatientQueueByParentLocation(Location parentLocation, PatientQueue.Status status, Date fromDate, Date toDate, boolean onlyInQueueRooms) {
         LocationTag queueRomTag = Context.getLocationService().getLocationTagByUuid(ROOM_TAG_UUID);
         Set<Location> childLocations = new HashSet<>();
-        if (onlyInQueueRooms && parentLocation.getChildLocations() != null) {
-            for (Location location : parentLocation.getChildLocations()) {
+        if (onlyInQueueRooms && parentLocation.getChildLocations(false) != null) {
+            for (Location location : parentLocation.getChildLocations(false)) {
                 if (location.getTags().contains(queueRomTag)) {
                     childLocations.add(location);
                 }
             }
-        } else if (parentLocation.getChildLocations() != null) {
-            childLocations = parentLocation.getChildLocations();
+        } else if (parentLocation.getChildLocations(false) != null) {
+            childLocations = parentLocation.getChildLocations(false);
         }
 
         if (childLocations.isEmpty()) {
