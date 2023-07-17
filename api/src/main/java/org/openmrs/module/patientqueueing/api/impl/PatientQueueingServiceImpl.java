@@ -248,20 +248,33 @@ public class PatientQueueingServiceImpl extends BaseOpenmrsService implements Pa
     @Override
     public List<PatientQueue> getPatientQueueByParentLocation(Location parentLocation, PatientQueue.Status status, Date fromDate, Date toDate, boolean onlyInQueueRooms) {
         LocationTag queueRomTag = Context.getLocationService().getLocationTagByUuid(ROOM_TAG_UUID);
-        Set<Location> childLocations = new HashSet<>();
-        if (onlyInQueueRooms) {
-            for (Location location : parentLocation.getChildLocations(false)) {
-                if (location.getTags().contains(queueRomTag)) {
-                    childLocations.add(location);
-                }
-            }
-        } else{
-            childLocations = parentLocation.getChildLocations(false);
-        }
+        List<Location> childLocations = new ArrayList<>();
+        flattenLocationHierarchy(parentLocation, childLocations, queueRomTag, onlyInQueueRooms);
 
         if (childLocations.isEmpty()) {
             return null;
         }
         return dao.getPatientsInQueueRoom(childLocations, status, fromDate, toDate);
+    }
+
+    /**
+     * Supportive class that helps to loop through locations recursively to ensure that all child locations are collected
+     * @param parentLocation the parent location to check for children
+     * @param childLocations the chilLocation List to be updated
+     * @param locationTag the tag to check if location has it
+     * @param onlyInQueueRooms condition to determine if to only include locations with locationTag
+     */
+    private void flattenLocationHierarchy(Location parentLocation, List<Location> childLocations, LocationTag locationTag, boolean onlyInQueueRooms) {
+        if (onlyInQueueRooms) {
+            if (parentLocation.getTags().contains(locationTag)) {
+                childLocations.add(parentLocation);
+            }
+        } else {
+            childLocations.add(parentLocation);
+        }
+
+        for (Location childLocation : parentLocation.getChildLocations(false)) {
+            flattenLocationHierarchy(childLocation, childLocations, locationTag, onlyInQueueRooms);
+        }
     }
 }
