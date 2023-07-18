@@ -410,7 +410,7 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 	}
 
 	@Test
-	public void getPatientsInQueueRoom_ShouldReturnPatientsInQueueChildLocationsOfParentLocation() throws ParseException {
+	public void getPatientsInQueue_ShouldReturnPatientsInQueueChildLocationsOfParentLocation() throws ParseException {
 		Location parentLocation = Context.getLocationService().getLocation(1);
 		Date dateCreated = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2023-07-07 19:08:26");
 		List<PatientQueue> patientQueueList=Context.getService(PatientQueueingService.class).getPatientQueueByParentLocation(parentLocation,PatientQueue.Status.PENDING,OpenmrsUtil.firstSecondOfDay(dateCreated),

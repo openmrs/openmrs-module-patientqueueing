@@ -260,7 +260,7 @@ public class PatientQueueingServiceImpl extends BaseOpenmrsService implements Pa
     /**
      * Supportive class that helps to loop through locations recursively to ensure that all child locations are collected
      * @param parentLocation the parent location to check for children
-     * @param childLocations the chilLocation List to be updated
+     * @param childLocations the childLocation List to be updated
      * @param locationTag the tag to check if location has it
      * @param onlyInQueueRooms condition to determine if to only include locations with locationTag
      */
