@@ -10,6 +10,7 @@
 package org.openmrs.module.patientqueueing.api.impl;
 
 import org.openmrs.Location;
+import org.openmrs.LocationTag;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.api.context.Context;
@@ -25,6 +26,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
+
+import static org.openmrs.module.patientqueueing.PatientQueueingConfig.ROOM_TAG_UUID;
 
 public class PatientQueueingServiceImpl extends BaseOpenmrsService implements PatientQueueingService {
 
@@ -232,5 +237,44 @@ public class PatientQueueingServiceImpl extends BaseOpenmrsService implements Pa
         patientQueue.setProvider(provider);
         patientQueue.setQueueRoom(queueRoom);
         return dao.savePatientQueue(patientQueue);
+    }
+
+    /**
+     * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#
+     * getPatientQueueByParentLocation(org.openmrs.Location,
+     * org.openmrs.module.patientqueueing.model.PatientQueue.Status, java.util.Date dateFrom,
+     * java.util.Date)
+     */
+    @Override
+    public List<PatientQueue> getPatientQueueByParentLocation(Location parentLocation, PatientQueue.Status status, Date fromDate, Date toDate, boolean onlyInQueueRooms) {
+        LocationTag queueRomTag = Context.getLocationService().getLocationTagByUuid(ROOM_TAG_UUID);
+        List<Location> childLocations = new ArrayList<>();
+        flattenLocationHierarchy(parentLocation, childLocations, queueRomTag, onlyInQueueRooms);
+
+        if (childLocations.isEmpty()) {
+            return null;
+        }
+        return dao.getPatientsInQueueRoom(childLocations, status, fromDate, toDate);
+    }
+
+    /**
+     * Supportive class that helps to loop through locations recursively to ensure that all child locations are collected
+     * @param parentLocation the parent location to check for children
+     * @param childLocations the childLocation List to be updated
+     * @param locationTag the tag to check if location has it
+     * @param onlyInQueueRooms condition to determine if to only include locations with locationTag
+     */
+    private void flattenLocationHierarchy(Location parentLocation, List<Location> childLocations, LocationTag locationTag, boolean onlyInQueueRooms) {
+        if (onlyInQueueRooms) {
+            if (parentLocation.getTags().contains(locationTag)) {
+                childLocations.add(parentLocation);
+            }
+        } else {
+            childLocations.add(parentLocation);
+        }
+
+        for (Location childLocation : parentLocation.getChildLocations(false)) {
+            flattenLocationHierarchy(childLocation, childLocations, locationTag, onlyInQueueRooms);
+        }
     }
 }
