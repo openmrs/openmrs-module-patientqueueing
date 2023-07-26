@@ -81,14 +81,15 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 		ValidateUtil.validate(patientQueue);
 		patientQueue.setDateChanged(new Date());
 
-		if (propertiesToUpdate.get("status") != null && propertiesToUpdate.get("status") == "picked") {
-			patientQueue.setDatePicked(new Date());
-		} else if (propertiesToUpdate.get("status") != null && propertiesToUpdate.get("status") == "completed") {
-			patientQueue.setDateCompleted(new Date());
-		} else {
-			patientQueue.setDateCompleted(null);
-			patientQueue.setDatePicked(null);
-		}
+        if (propertiesToUpdate.get("status") != null && propertiesToUpdate.get("status") == "picked") {
+            patientQueue.setDatePicked(new Date());
+        } else if (propertiesToUpdate.get("status") != null && propertiesToUpdate.get("status") == "completed") {
+            patientQueue.setDateCompleted(new Date());
+        } else if (propertiesToUpdate.get("status") != null && propertiesToUpdate.get("status") == "pending" && patientQueue.getDateCompleted() != null) {
+            patientQueue.setDateCompleted(null);
+        } else if (propertiesToUpdate.get("status") != null && propertiesToUpdate.get("status") == "pending" && patientQueue.getDatePicked() != null) {
+            patientQueue.setDatePicked(null);
+        }
 
 		patientQueue = save(patientQueue);
 		return ConversionUtil.convertToRepresentation(patientQueue, Representation.DEFAULT);
