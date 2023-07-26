@@ -81,9 +81,9 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 		ValidateUtil.validate(patientQueue);
 		patientQueue.setDateChanged(new Date());
 
-		if (propertiesToUpdate.get("status") != null && propertiesToUpdate.get("status") != "picked") {
+		if (propertiesToUpdate.get("status") != null && propertiesToUpdate.get("status") == "picked") {
 			patientQueue.setDatePicked(new Date());
-		} else if (propertiesToUpdate.get("status") != null && propertiesToUpdate.get("status") != "completed") {
+		} else if (propertiesToUpdate.get("status") != null && propertiesToUpdate.get("status") == "completed") {
 			patientQueue.setDateCompleted(new Date());
 		} else {
 			patientQueue.setDateCompleted(null);
@@ -256,7 +256,7 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 
 		return new NeedsPaging<PatientQueue>(PatientQueuesByQuery, context);
 	}
-	
+
 	public DelegatingResourceDescription getUpdatableProperties() throws ResourceDoesNotSupportOperationException {
 		DelegatingResourceDescription description = new DelegatingResourceDescription();
 		description.addProperty("provider");
