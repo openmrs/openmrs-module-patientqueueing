@@ -11,9 +11,12 @@ import org.openmrs.Location;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.patientqueueing.api.PatientQueueingService;
 import org.openmrs.module.patientqueueing.model.PatientQueue;
+import org.openmrs.module.webservices.rest.SimpleObject;
+import org.openmrs.module.webservices.rest.web.ConversionUtil;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
+import org.openmrs.module.webservices.rest.web.api.RestService;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
@@ -24,11 +27,14 @@ import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceD
 import org.openmrs.module.webservices.rest.web.resource.impl.NeedsPaging;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
+import org.openmrs.module.webservices.validation.ValidateUtil;
 import org.openmrs.util.OpenmrsUtil;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Resource(name = RestConstants.VERSION_1 + "/patientqueue", supportedClass = PatientQueue.class, supportedOpenmrsVersions = {
         "1.9.*", "1.10.*", "1.11.*", "1.12.*", "2.0.*", "2.1.*", "2.2.*", "2.3.*", "2.4.*", "2.5.*" })
@@ -66,6 +72,37 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 		return patientQueue;
 	}
 	
+	@Override
+	public Object update(String uuid, SimpleObject propertiesToUpdate, RequestContext context) throws ResponseException {
+		if (propertiesToUpdate.get("status") == null) {
+			return super.update(uuid, propertiesToUpdate, context);
+		}
+		PatientQueue patientQueue = getPatientQueueForUpdate(uuid, propertiesToUpdate);
+		ValidateUtil.validate(patientQueue);
+		patientQueue.setDateChanged(new Date());
+
+		if (propertiesToUpdate.get("status") != null && propertiesToUpdate.get("status") != "picked") {
+			patientQueue.setDatePicked(new Date());
+		} else if (propertiesToUpdate.get("status") != null && propertiesToUpdate.get("status") != "completed") {
+			patientQueue.setDateCompleted(new Date());
+		} else {
+			patientQueue.setDateCompleted(null);
+			patientQueue.setDatePicked(null);
+		}
+
+		patientQueue = save(patientQueue);
+		return ConversionUtil.convertToRepresentation(patientQueue, Representation.DEFAULT);
+	}
+
+	public PatientQueue getPatientQueueForUpdate(String uuid, Map<String, Object> propertiesToUpdate) {
+		PatientQueue patientQueue = getByUniqueId(uuid);
+		PatientQueueResource patientQueueResource = (PatientQueueResource) Context.getService(RestService.class)
+		        .getResourceBySupportedClass(PatientQueue.class);
+		patientQueueResource.setConvertedProperties(patientQueue, propertiesToUpdate,
+		    patientQueueResource.getUpdatableProperties(), false);
+		return patientQueue;
+	}
+
 	@Override
 	public NeedsPaging<PatientQueue> doGetAll(RequestContext context) throws ResponseException {
 		return new NeedsPaging<PatientQueue>(new ArrayList<PatientQueue>(Context.getService(PatientQueueingService.class)
@@ -220,6 +257,21 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 		return new NeedsPaging<PatientQueue>(PatientQueuesByQuery, context);
 	}
 	
+	public DelegatingResourceDescription getUpdatableProperties() throws ResourceDoesNotSupportOperationException {
+		DelegatingResourceDescription description = new DelegatingResourceDescription();
+		description.addProperty("provider");
+		description.addProperty("status");
+		description.addProperty("encounter");
+		description.addProperty("queueRoom");
+		description.addProperty("datePicked");
+		description.addProperty("dateCompleted");
+		description.addProperty("dateChanged");
+		description.addProperty("comment");
+		description.addProperty("priorityComment");
+		description.addProperty("priority");
+		return description;
+	}
+
 	@Override
 	public Model getGETModel(Representation rep) {
 		ModelImpl model = (ModelImpl) super.getGETModel(rep);
@@ -289,10 +341,17 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 	
 	@Override
 	public Model getUPDATEModel(Representation rep) {
-		return new ModelImpl().property("status", new StringProperty()).property("priority", new IntegerProperty())
-		        .property("priorityComment", new StringProperty()).property("comment", new StringProperty())
-		        .property("status", new StringProperty()).property("datePicked", new DateProperty())
+		return new ModelImpl()
+				.property("status", new StringProperty())
+				.property("priority", new IntegerProperty())
+		        .property("priorityComment", new StringProperty())
+				.property("comment", new StringProperty())
+				.property("encounter", new StringProperty())
+		        .property("status", new StringProperty())
+				.property("datePicked", new DateProperty())
 		        .property("dateCompleted", new DateProperty())
-		        .property("provider", new RefProperty("#/definitions/ProviderCreate"));
+		        .property("provider", new RefProperty("#/definitions/ProviderCreate"))
+				.property("voided", new BooleanProperty())
+				.property("queueRoom", new BooleanProperty());
 	}
 }
