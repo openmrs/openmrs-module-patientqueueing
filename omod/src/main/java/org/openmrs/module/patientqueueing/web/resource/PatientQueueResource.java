@@ -75,13 +75,20 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 	@Override
 	public Object update(String uuid, SimpleObject propertiesToUpdate, RequestContext context) throws ResponseException {
 		String status=propertiesToUpdate.get("status");
+		String datePicked=propertiesToUpdate.get("datePicked");
+		String dateCompleted=propertiesToUpdate.get("dateCompleted");
+
+		if (status == null) {
+			return super.update(uuid, propertiesToUpdate, context);
+		}
+
 		PatientQueue patientQueue = getPatientQueueForUpdate(uuid, propertiesToUpdate);
 		ValidateUtil.validate(patientQueue);
 		patientQueue.setDateChanged(new Date());
 
-        if (status.equals("picked")) {
+        if (status.equals("picked") && datePicked==null) {
             patientQueue.setDatePicked(new Date());
-        } else if (status.equals("completed")) {
+        } else if (status.equals("completed") && dateCompleted==null) {
             patientQueue.setDateCompleted(new Date());
         } else if (status.equals("pending") && patientQueue.getDateCompleted() != null) {
             patientQueue.setDateCompleted(null);
