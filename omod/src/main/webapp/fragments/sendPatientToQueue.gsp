@@ -49,7 +49,7 @@
                     locationId: jq("#location_id").val().trim(),
                     queueRoom: jq("#queue_room_location").val().trim()
                 }, function (response) {
-                    var jsonToastMessage = JSON.parse(JSON.stringify(response).replace("toastMessage=", "\"toastMessage\":").trim());
+                    var jsonToastMessage = JSON.parse(response.replace("toastMessage=", "\"toastMessage\":").trim());
 
                     jq().toastmessage('showSuccessToast', jsonToastMessage.toastMessage.message);
                     window.location.reload();
