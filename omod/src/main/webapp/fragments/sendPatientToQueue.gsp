@@ -11,23 +11,23 @@
             for (var i = 0 in queueRooms) {
                 if (queueRooms[i].parentLocation.uuid === currentLocationUUID) {
                     var opt = document.createElement('option');
-                    opt.appendChild(document.createTextNode(queueRooms[i].name));
+                    opt.appendChild( document.createTextNode(queueRooms[i].name) );
                     opt.value = queueRooms[i].uuid;
                     sel.appendChild(opt);
                     queueRoomOptions.push(queueRooms[i].uuid)
                 }
             }
 
-            if (queueRoomOptions.length > 0) {
-                document.getElementById('patient_queue_room').style.display = "block";
-            } else {
-                document.getElementById('patient_queue_room').style.display = "none";
+            if(queueRoomOptions.length>0){
+                document.getElementById('patient_queue_room').style.display="block";
+            }else {
+                document.getElementById('patient_queue_room').style.display="none";
             }
         }
 
         jq(document).ready(function () {
 
-            document.getElementById('patient_queue_room').style.display = "none";
+            document.getElementById('patient_queue_room').style.display="none";
 
             jq("#location_id").change(function () {
                 jq.ajax({
@@ -37,7 +37,7 @@
                     async: false,
                     success: function (data) {
                         serverResponse = data.results;
-                        addQueueRoomOption(serverResponse, document.getElementById('location_id').options[document.getElementById('location_id').selectedIndex].value);
+                        addQueueRoomOption(serverResponse,  document.getElementById('location_id').options[document.getElementById('location_id').selectedIndex].value);
                     }
                 });
             });
