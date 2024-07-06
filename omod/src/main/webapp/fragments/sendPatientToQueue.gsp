@@ -49,9 +49,7 @@
                     locationId: jq("#location_id").val().trim(),
                     queueRoom: jq("#queue_room_location").val().trim()
                 }, function (response) {
-                    var jsonToastMessage = JSON.parse(response.replace("toastMessage=", "\"toastMessage\":").trim());
-
-                    jq().toastmessage('showSuccessToast', jsonToastMessage.toastMessage.message);
+                    jq().toastmessage('showSuccessToast', response.toastMessage);
                     window.location.reload();
                 });
             });
