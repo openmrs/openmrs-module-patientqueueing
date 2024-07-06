@@ -16,8 +16,6 @@ import org.openmrs.notification.Alert;
 import org.openmrs.ui.framework.SimpleObject;
 import org.openmrs.ui.framework.UiUtils;
 import org.openmrs.ui.framework.fragment.FragmentModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.IOException;
@@ -25,8 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AlertsFragmentController {
-
-	private final Logger log = LoggerFactory.getLogger(AlertsFragmentController.class);
 	
 	public AlertsFragmentController() {
 	}
