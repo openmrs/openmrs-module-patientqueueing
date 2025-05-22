@@ -187,7 +187,8 @@ public class PatientQueueingDao {
 	 *      org.openmrs.module.patientqueueing.model.PatientQueue.Status,java.util.Date dateFrom,
 	 *      java.util.Date)
 	 */
-	public List<PatientQueue> getPatientsInQueueRoom(List<Location> queueRooms, PatientQueue.Status status, Date fromDate, Date toDate) {
+	public List<PatientQueue> getPatientsInQueueRoom(List<Location> queueRooms, PatientQueue.Status status, Date fromDate,
+	        Date toDate) {
 		Criteria criteria = getSession().createCriteria(PatientQueue.class);
 		
 		if (fromDate != null && toDate != null) {

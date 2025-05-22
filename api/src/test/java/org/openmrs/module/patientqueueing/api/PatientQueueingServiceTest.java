@@ -9,9 +9,9 @@
  */
 package org.openmrs.module.patientqueueing.api;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -21,7 +21,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.patientqueueing.api.dao.PatientQueueingDao;
 import org.openmrs.module.patientqueueing.api.impl.PatientQueueingServiceImpl;
 import org.openmrs.module.patientqueueing.model.PatientQueue;
-import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
+import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.openmrs.util.OpenmrsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +47,7 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 	
 	private static final int STANDARD_VISIT_NUMBER_LENGTH = 18;
 	
-	@BeforeEach
+	@Before
 	public void initialize() throws Exception {
 		executeDataSet(QUEUE_STANDARD_DATASET_XML);
 	}
@@ -58,7 +58,7 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 	@Mock
 	PatientQueueingDao dao;
 	
-	@BeforeEach
+	@Before
 	public void setupMocks() {
 		MockitoAnnotations.initMocks(this);
 	}
@@ -74,8 +74,9 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 		
 		PatientQueue patientQueue = patientQueueingService.getIncompletePatientQueue(patient, location);
 		
-		Assertions.assertNotNull(patientQueue);
-		Assertions.assertEquals(PatientQueue.Status.PENDING, patientQueue.getStatus());
+		Assert.assertNotNull(patientQueue);
+		
+		Assert.assertEquals(PatientQueue.Status.PENDING, patientQueue.getStatus());
 	}
 	
 	@Test
@@ -91,16 +92,15 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 		
 		PatientQueue patientQueue = patientQueueList.get(0);
 		
-		Assertions.assertNotNull(patientQueue);
-		Assertions.assertEquals(PatientQueue.Status.PENDING, patientQueue.getStatus());
+		Assert.assertEquals(PatientQueue.Status.PENDING, patientQueue.getStatus());
 		
 		patientQueueingService.completePatientQueue(patientQueue);
 		
 		PatientQueue completedPatientQueue = patientQueueingService.getPatientQueueById(patientQueue.getPatientQueueId());
 		
-		Assertions.assertNotNull(completedPatientQueue);
+		Assert.assertNotNull(completedPatientQueue);
 		
-		Assertions.assertEquals(PatientQueue.Status.COMPLETED, completedPatientQueue.getStatus());
+		Assert.assertEquals(PatientQueue.Status.COMPLETED, completedPatientQueue.getStatus());
 	}
 	
 	@Test
@@ -129,9 +129,9 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 		List<PatientQueue> newPatientQueueList = patientQueueingService.getPatientQueueList(null, null, null, null, null,
 		    null, null);
 		
-		Assertions.assertEquals(originalPatientQueueList.size() + 1, newPatientQueueList.size());
+		Assert.assertEquals(originalPatientQueueList.size() + 1, newPatientQueueList.size());
 		
-		Assertions.assertEquals("20/10/2019-Unk-001", newPatientQueueList.get(0).getVisitNumber());
+		Assert.assertEquals("20/10/2019-Unk-001", newPatientQueueList.get(0).getVisitNumber());
 		
 	}
 	
@@ -169,7 +169,7 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 		patientQueue2.setPriorityComment("Emergency");
 		patientQueueingService.savePatientQue(patientQueue2);
 		
-		Assertions.assertEquals(PatientQueue.Status.COMPLETED, patientQueue1.getStatus());
+		Assert.assertEquals(PatientQueue.Status.COMPLETED, patientQueue1.getStatus());
 		
 	}
 	
@@ -186,7 +186,7 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 		SimpleDateFormat formatter = new SimpleDateFormat(Context.getAdministrationService().getGlobalProperty(
 		    "patientqueueing.defaultDateFormat"));
 		
-		Assertions.assertEquals(formatter.format(new Date()) + "-Unk" + "-001", visitNumber);
+		Assert.assertEquals(formatter.format(new Date()) + "-Unk" + "-001", visitNumber);
 		
 	}
 	
@@ -211,7 +211,7 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 		patientQueueingService.assignVisitNumberForToday(patientQueue);
 		patientQueueingService.savePatientQue(patientQueue);
 		
-		Assertions.assertEquals(visitNumber, patientQueue.getVisitNumber());
+		Assert.assertEquals(visitNumber, patientQueue.getVisitNumber());
 	}
 	
 	@Test
@@ -245,7 +245,7 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 		patientQueueingService.assignVisitNumberForToday(patientQueue2);
 		patientQueueingService.savePatientQue(patientQueue2);
 		
-		Assertions.assertEquals(patientQueue.getVisitNumber(), patientQueue2.getVisitNumber());
+		Assert.assertEquals(patientQueue.getVisitNumber(), patientQueue2.getVisitNumber());
 	}
 	
 	@Test
@@ -256,7 +256,7 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 		
 		PatientQueue patientQueue = patientQueueingService.getPatientQueueById(2);
 		
-		Assertions.assertEquals(patientQueue, patientQueueingService.getMostRecentQueue(patient));
+		Assert.assertEquals(patientQueue, patientQueueingService.getMostRecentQueue(patient));
 		
 	}
 	
@@ -287,9 +287,9 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 		
 		PatientQueue editedPatientQueue = patientQueueingService.savePatientQue(patientQueueToEdit);
 		
-		Assertions.assertEquals(QUEUE_PRIORITY_ONE, editedPatientQueue.getPriority());
-		Assertions.assertEquals("Non-Emergency", editedPatientQueue.getPriorityComment());
-		Assertions.assertEquals(PatientQueue.Status.PENDING, editedPatientQueue.getStatus());
+		Assert.assertEquals(QUEUE_PRIORITY_ONE, editedPatientQueue.getPriority());
+		Assert.assertEquals("Non-Emergency", editedPatientQueue.getPriorityComment());
+		Assert.assertEquals(PatientQueue.Status.PENDING, editedPatientQueue.getStatus());
 	}
 	
 	@Test
@@ -309,7 +309,7 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 		patientQueue.setVisitNumber("20/10/2019-002");
 		patientQueueingService.savePatientQue(patientQueue);
 		
-		Assertions.assertNotEquals(STANDARD_VISIT_NUMBER_LENGTH, patientQueue.getVisitNumber());
+		Assert.assertNotEquals(STANDARD_VISIT_NUMBER_LENGTH, patientQueue.getVisitNumber());
 		
 		patientQueueingService.generateVisitNumber(location, patient);
 	}
@@ -327,11 +327,11 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 		    OpenmrsUtil.firstSecondOfDay(dateCreated), OpenmrsUtil.getLastMomentOfDay(dateCreated), null, null,
 		    PatientQueue.Status.PENDING);
 		
-		Assertions.assertEquals(1, patientQueueList.size());
+		Assert.assertEquals(1, patientQueueList.size());
 		
-		Assertions.assertEquals(patient, patientQueueList.get(0).getPatient());
+		Assert.assertEquals(patient, patientQueueList.get(0).getPatient());
 		
-		Assertions.assertEquals("Mukasa", patientQueueList.get(0).getPatient().getFamilyName());
+		Assert.assertEquals("Mukasa", patientQueueList.get(0).getPatient().getFamilyName());
 	}
 	
 	@Test
@@ -344,12 +344,12 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 		
 		Location location = Context.getLocationService().getLocation(1);
 		
-		Assertions.assertEquals("Anet", patient.getGivenName());
+		Assert.assertEquals("Anet", patient.getGivenName());
 		
 		List<PatientQueue> patientQueueList = patientQueueingService.getPatientQueueListBySearchParams("Anet", null, null,
 		    null, location, null);
 		
-		Assertions.assertEquals(0, patientQueueList.size());
+		Assert.assertEquals(0, patientQueueList.size());
 		
 	}
 	
@@ -366,16 +366,16 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 		
 		PatientQueue patientQueue = patientQueueList.get(0);
 		
-		Assertions.assertEquals(PatientQueue.Status.PENDING, patientQueue.getStatus());
+		Assert.assertEquals(PatientQueue.Status.PENDING, patientQueue.getStatus());
 		
 		patientQueueingService.pickPatientQueue(patientQueue, null, null);
 		
 		PatientQueue pickedPatientQueue = patientQueueingService.getPatientQueueById(patientQueue.getPatientQueueId());
 		
-		Assertions.assertNotNull(pickedPatientQueue);
+		Assert.assertNotNull(pickedPatientQueue);
 		
-		Assertions.assertEquals(PatientQueue.Status.PICKED, pickedPatientQueue.getStatus());
-		Assertions.assertNotNull(pickedPatientQueue.getDatePicked());
+		Assert.assertEquals(PatientQueue.Status.PICKED, pickedPatientQueue.getStatus());
+		Assert.assertNotNull(pickedPatientQueue.getDatePicked());
 	}
 	
 	@Test
@@ -391,16 +391,16 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 		
 		PatientQueue patientQueue = patientQueueList.get(0);
 		
-		Assertions.assertEquals(PatientQueue.Status.PENDING, patientQueue.getStatus());
+		Assert.assertEquals(PatientQueue.Status.PENDING, patientQueue.getStatus());
 		
 		patientQueueingService.completePatientQueue(patientQueue);
 		
 		PatientQueue completedPatientQueue = patientQueueingService.getPatientQueueById(patientQueue.getPatientQueueId());
 		
-		Assertions.assertNotNull(completedPatientQueue);
+		Assert.assertNotNull(completedPatientQueue);
 		
-		Assertions.assertEquals(PatientQueue.Status.COMPLETED, completedPatientQueue.getStatus());
-		Assertions.assertNotNull(completedPatientQueue.getDateCompleted());
+		Assert.assertEquals(PatientQueue.Status.COMPLETED, completedPatientQueue.getStatus());
+		Assert.assertNotNull(completedPatientQueue.getDateCompleted());
 	}
 	
 	@Test
@@ -410,9 +410,9 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 		List<PatientQueue> patientQueueList = Context.getService(PatientQueueingService.class)
 		        .getPatientQueueByParentLocation(parentLocation, PatientQueue.Status.PENDING,
 		            OpenmrsUtil.firstSecondOfDay(dateCreated), OpenmrsUtil.getLastMomentOfDay(dateCreated), true);
-		Assertions.assertEquals(2, patientQueueList.size());
-		Assertions.assertEquals(patientQueueList.get(0).getQueueRoom().getParentLocation(), parentLocation);
-		Assertions.assertEquals(patientQueueList.get(0).getQueueRoom().getName(), "Room 1");
+		Assert.assertEquals(2, patientQueueList.size());
+		Assert.assertEquals(patientQueueList.get(0).getQueueRoom().getParentLocation(), parentLocation);
+		Assert.assertEquals(patientQueueList.get(0).getQueueRoom().getName(), "Room 1");
 	}
 	
 	@Test
@@ -422,8 +422,8 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 		List<PatientQueue> patientQueueList = Context.getService(PatientQueueingService.class)
 		        .getPatientQueueByParentLocation(parentLocation, PatientQueue.Status.PENDING,
 		            OpenmrsUtil.firstSecondOfDay(dateCreated), OpenmrsUtil.getLastMomentOfDay(dateCreated), false);
-		Assertions.assertTrue(patientQueueList.size() > 1);
-		Assertions.assertEquals(3, patientQueueList.size());
-		Assertions.assertEquals(patientQueueList.get(2).getQueueRoom().getName(), "Sub Sub Room 1 R2");
+		Assert.assertTrue(patientQueueList.size() > 1);
+		Assert.assertEquals(3, patientQueueList.size());
+		Assert.assertEquals(patientQueueList.get(2).getQueueRoom().getName(), "Sub Sub Room 1 R2");
 	}
 }

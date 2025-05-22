@@ -145,24 +145,25 @@ public interface PatientQueueingService extends OpenmrsService {
 	 */
 	@Transactional(readOnly = true)
 	public PatientQueue assignVisitNumberForToday(PatientQueue patientQueue);
-
-
+	
 	/**
 	 * Get Patient Queue List By search Params
+	 * 
 	 * @param searchString search string eg first name, last name, middle name.
 	 * @param fromDate lowest date a query will be built upon. It can be null
 	 * @param toDate highest date a query will be built upon. It Can be null
 	 * @param locationTo Location Where patient was sent to
 	 * @param locationFrom Location Where patient was sent from
 	 * @param status Status such as COMPLETED,PENDING
-	 * @return  List<PatientQueue> A list of patientQueue that meet the parameters
+	 * @return List<PatientQueue> A list of patientQueue that meet the parameters
 	 */
 	@Transactional(readOnly = true)
-	public List<PatientQueue> getPatientQueueListBySearchParams(String searchString, Date fromDate, Date toDate, Location locationTo, Location locationFrom, PatientQueue.Status status);
-
+	public List<PatientQueue> getPatientQueueListBySearchParams(String searchString, Date fromDate, Date toDate,
+	        Location locationTo, Location locationFrom, PatientQueue.Status status);
+	
 	/**
 	 * Get Patient Queue List By search Params
-	 *
+	 * 
 	 * @param searchString search string eg first name, last name, middle name.
 	 * @param fromDate lowest date a query will be built upon. It can be null
 	 * @param toDate highest date a query will be built upon. It Can be null
@@ -172,38 +173,42 @@ public interface PatientQueueingService extends OpenmrsService {
 	 * @param queueRoom The room where the patient has been sent to
 	 * @return List<PatientQueue> A list of patientQueue that meet the parameters
 	 */
-
+	
 	@Transactional(readOnly = true)
 	public List<PatientQueue> getPatientQueueListBySearchParams(String searchString, Date fromDate, Date toDate,
-																Location locationTo, Location locationFrom, PatientQueue.Status status, Location queueRoom);
+	        Location locationTo, Location locationFrom, PatientQueue.Status status, Location queueRoom);
+	
 	/**
 	 * Get a single patient queue record by queueId. The uuid can not be null
+	 * 
 	 * @param uuid Id of the patient queue to be retrieved
 	 * @return The patient queue that matches the uuid
 	 */
 	@Transactional(readOnly = true)
 	PatientQueue getPatientQueueByUuid(String uuid);
-
-    /**
-     * Change status of a patient queue from pending to picked
-     *
-     * @param patientQueue the queue which will be picked
-     * @param provider the health worker who is picking the patient
-     * @param queueRoom the specific room where the provider is at the time of picking the patient
-     * @return the queue which has been picked
-     */
-    @Transactional(readOnly = true)
-    PatientQueue pickPatientQueue(PatientQueue patientQueue, Provider provider, Location queueRoom);
-
+	
+	/**
+	 * Change status of a patient queue from pending to picked
+	 * 
+	 * @param patientQueue the queue which will be picked
+	 * @param provider the health worker who is picking the patient
+	 * @param queueRoom the specific room where the provider is at the time of picking the patient
+	 * @return the queue which has been picked
+	 */
+	@Transactional(readOnly = true)
+	PatientQueue pickPatientQueue(PatientQueue patientQueue, Provider provider, Location queueRoom);
+	
 	/**
 	 * Get Patient Queues of parent location queue rooms
+	 * 
 	 * @param parentLocation the parent location of patient queue rooms to search patients from
 	 * @param status Status such as COMPLETED,PENDING,PICKED
 	 * @param fromDate lowest date a query will be built upon. It can be null
 	 * @param toDate highest date a query will be built upon. It Can be null
-	 * @param onlyInQueueRooms when set to true only includes patients in child locations with tag queue room
+	 * @param onlyInQueueRooms when set to true only includes patients in child locations with tag
+	 *            queue room
 	 */
 	@Transactional(readOnly = true)
 	public List<PatientQueue> getPatientQueueByParentLocation(Location parentLocation, PatientQueue.Status status,
-															  Date fromDate, Date toDate,boolean onlyInQueueRooms);
+	        Date fromDate, Date toDate, boolean onlyInQueueRooms);
 }
