@@ -67,16 +67,16 @@ public class PatientQueue extends BaseOpenmrsData implements Serializable {
 	@ManyToOne
 	@JoinColumn(name = "queue_room")
 	private Location queueRoom;
-	
-	/**
-	 * Date when a provider selects a picks or selects from the queue
-	 */
+
+    /**
+     * Date when a provider selects a picks or selects from the queue
+     */
 	@Column(name = "date_picked")
 	private Date datePicked;
-	
-	/**
-	 * Date when the patient queue is completed
-	 */
+
+    /**
+     * Date when the patient queue is completed
+     */
 	@Column(name = "date_completed")
 	private Date dateCompleted;
 	
