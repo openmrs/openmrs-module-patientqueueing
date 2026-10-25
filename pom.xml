@@ -70,6 +70,15 @@
 				<scope>test</scope>
 			</dependency>
 
+			<!-- Surefire 3.x refuses JUnit < 4.12; override the 4.11 pulled in
+				by the platform 1.12 test dependencies -->
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.13.2</version>
+				<scope>test</scope>
+			</dependency>
+
 			<!-- End OpenMRS core -->
 
 			<!-- Importing versions from refapp distro -->

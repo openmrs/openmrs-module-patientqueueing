@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+	<suppress>
+		<notes><![CDATA[
+		False positive: OWASP dependency-check infers cpe:/a:openmrs:openmrs from the
+		org.openmrs.module groupId and flags CVE-2018-19276 (an OpenMRS core platform
+		vulnerability) against this module's own artifacts.]]></notes>
+		<packageUrl regex="true">^pkg:maven/org\.openmrs\.module/patientqueueing.*@.*$</packageUrl>
+		<cve>CVE-2018-19276</cve>
+	</suppress>
+</suppressions>
