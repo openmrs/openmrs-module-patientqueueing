@@ -298,6 +298,15 @@ public class QueueKioskResource extends DelegatingCrudResource<SimpleObject> {
 		return statsMap;
 	}
 	
+	/**
+	 * REST routes GETs carrying any filter parameter here rather than to doGetAll, so all kiosk
+	 * lookups (?journey=, ?visitNumber=, ?ticketNumber=) must be handled in doSearch.
+	 */
+	@Override
+	protected PageableResult doSearch(RequestContext context) throws ResponseException {
+		return doGetAll(context);
+	}
+	
 	@Override
 	public PageableResult doGetAll(RequestContext context) throws ResponseException {
 		// Check for journey endpoint request
@@ -455,44 +464,6 @@ public class QueueKioskResource extends DelegatingCrudResource<SimpleObject> {
 		
 		// Not found
 		throw new IllegalArgumentException("No queue entry found for ticket number: " + ticketNumber);
-	}
-	
-	/**
-	 * Get all queue entries for a specific location (facility or room) Returns both patient and
-	 * non-patient queues, sorted by creation date
-	 * 
-	 * @param context the request context
-	 * @return list of QueueEntry objects
-	 */
-	
-	/**
-	 * Parse patient queue status string to enum
-	 */
-	private PatientQueue.Status getPatientQueueStatus(String status) {
-		if (status == null || status.isEmpty()) {
-			return null;
-		}
-		try {
-			return PatientQueue.Status.valueOf(status.toUpperCase());
-		}
-		catch (IllegalArgumentException e) {
-			return null;
-		}
-	}
-	
-	/**
-	 * Parse non-patient queue status string to enum
-	 */
-	private NonPatientQueue.NonPatientQueueStatus getNonPatientQueueStatus(String status) {
-		if (status == null || status.isEmpty()) {
-			return null;
-		}
-		try {
-			return NonPatientQueue.NonPatientQueueStatus.valueOf(status.toUpperCase());
-		}
-		catch (IllegalArgumentException e) {
-			return null;
-		}
 	}
 	
 	/**

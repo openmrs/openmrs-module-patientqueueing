@@ -285,4 +285,74 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 		return description;
 	}
 	
+	@Override
+	public io.swagger.models.Model getGETModel(Representation rep) {
+		io.swagger.models.ModelImpl model = (io.swagger.models.ModelImpl) super.getGETModel(rep);
+		if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
+			model.property("uuid", new io.swagger.models.properties.StringProperty())
+			        .property("dateCreated", new io.swagger.models.properties.DateProperty())
+			        .property("voided", new io.swagger.models.properties.BooleanProperty())
+			        .property("priority", new io.swagger.models.properties.IntegerProperty())
+			        .property("priorityComment", new io.swagger.models.properties.StringProperty())
+			        .property("visitNumber", new io.swagger.models.properties.StringProperty())
+			        .property("comment", new io.swagger.models.properties.StringProperty())
+			        .property("status", new io.swagger.models.properties.StringProperty())
+			        .property("datePicked", new io.swagger.models.properties.DateProperty())
+			        .property("dateCompleted", new io.swagger.models.properties.DateProperty());
+		}
+		if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
+			model.property("patient", new io.swagger.models.properties.RefProperty("#/definitions/PatientGetRef"))
+			        .property("creator", new io.swagger.models.properties.RefProperty("#/definitions/UserGetRef"))
+			        .property("changedBy", new io.swagger.models.properties.RefProperty("#/definitions/UserGetRef"))
+			        .property("voidedBy", new io.swagger.models.properties.RefProperty("#/definitions/UserGetRef"))
+			        .property("provider", new io.swagger.models.properties.RefProperty("#/definitions/ProviderGetRef"))
+			        .property("locationFrom", new io.swagger.models.properties.RefProperty("#/definitions/LocationGetRef"))
+			        .property("locationTo", new io.swagger.models.properties.RefProperty("#/definitions/LocationGetRef"))
+			        .property("encounter", new io.swagger.models.properties.RefProperty("#/definitions/EncounterGetRef"));
+		}
+		return model;
+	}
+	
+	@Override
+	public io.swagger.models.Model getCREATEModel(Representation rep) {
+		io.swagger.models.ModelImpl model = (io.swagger.models.ModelImpl) super.getGETModel(rep);
+		if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
+			model.property("uuid", new io.swagger.models.properties.StringProperty())
+			        .property("dateCreated", new io.swagger.models.properties.DateProperty())
+			        .property("voided", new io.swagger.models.properties.BooleanProperty())
+			        .property("status", new io.swagger.models.properties.StringProperty())
+			        .property("priority", new io.swagger.models.properties.IntegerProperty())
+			        .property("priorityComment", new io.swagger.models.properties.StringProperty())
+			        .property("visitNumber", new io.swagger.models.properties.StringProperty())
+			        .property("comment", new io.swagger.models.properties.StringProperty())
+			        .property("datePicked", new io.swagger.models.properties.DateProperty())
+			        .property("dateCompleted", new io.swagger.models.properties.DateProperty());
+		}
+		if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
+			model.property("patient", new io.swagger.models.properties.RefProperty("#/definitions/PatientCreate"))
+			        .property("creator", new io.swagger.models.properties.RefProperty("#/definitions/UserCreate"))
+			        .property("changedBy", new io.swagger.models.properties.RefProperty("#/definitions/UserCreate"))
+			        .property("voidedBy", new io.swagger.models.properties.RefProperty("#/definitions/UserCreate"))
+			        .property("provider", new io.swagger.models.properties.RefProperty("#/definitions/ProviderCreate"))
+			        .property("locationFrom", new io.swagger.models.properties.RefProperty("#/definitions/LocationCreate"))
+			        .property("locationTo", new io.swagger.models.properties.RefProperty("#/definitions/LocationCreate"))
+			        .property("encounter", new io.swagger.models.properties.RefProperty("#/definitions/EncounterCreate"));
+		}
+		return model;
+	}
+	
+	@Override
+	public io.swagger.models.Model getUPDATEModel(Representation rep) {
+		return new io.swagger.models.ModelImpl().property("status", new io.swagger.models.properties.StringProperty())
+		        .property("priority", new io.swagger.models.properties.IntegerProperty())
+		        .property("priorityComment", new io.swagger.models.properties.StringProperty())
+		        .property("comment", new io.swagger.models.properties.StringProperty())
+		        .property("encounter", new io.swagger.models.properties.StringProperty())
+		        .property("datePicked", new io.swagger.models.properties.DateProperty())
+		        .property("dateCompleted", new io.swagger.models.properties.DateProperty())
+		        .property("provider", new io.swagger.models.properties.RefProperty("#/definitions/ProviderCreate"))
+		        .property("voided", new io.swagger.models.properties.BooleanProperty())
+		        .property("queueRoom", new io.swagger.models.properties.StringProperty());
+	}
+	
 }

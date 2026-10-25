@@ -182,6 +182,15 @@ public class PatientQueueingServiceImpl extends BaseOpenmrsService implements Pa
 	}
 	
 	/**
+	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#countPatientsByPersonAttributeValue(java.lang.Integer,
+	 *      java.lang.String)
+	 */
+	@Override
+	public int countPatientsByPersonAttributeValue(Integer personAttributeTypeId, String attributeValue) {
+		return dao.countPatientsByPersonAttributeValue(personAttributeTypeId, attributeValue);
+	}
+	
+	/**
 	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#getPatientQueueListBySearchParams(java.lang.String,
 	 *      java.util.Date, java.util.Date, org.openmrs.Location, org.openmrs.Location,
 	 *      org.openmrs.module.patientqueueing.model.PatientQueue.Status)

@@ -56,6 +56,18 @@ public interface PatientQueueingService extends OpenmrsService {
 	Patient getPatientByPersonAttributeValue(Integer personAttributeTypeId, String attributeValue);
 	
 	/**
+	 * Count distinct patients matching a person attribute value, for the given attribute type only.
+	 * Used to refuse check-ins when an attribute value (e.g. a shared phone number) cannot uniquely
+	 * identify a patient.
+	 * 
+	 * @param personAttributeTypeId the person attribute type ID
+	 * @param attributeValue the attribute value to match
+	 * @return the number of distinct non-voided patients holding this attribute value
+	 */
+	@Transactional(readOnly = true)
+	int countPatientsByPersonAttributeValue(Integer personAttributeTypeId, String attributeValue);
+	
+	/**
 	 * Get a single patient queue record by queueId. The queueId can not be null
 	 * 
 	 * @param queueId Id of the patient queue to be retrieved

@@ -24,6 +24,7 @@ import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
+import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.resource.api.PageableResult;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingCrudResource;
@@ -118,7 +119,9 @@ public class QueueDisplayResource extends DelegatingCrudResource<QueueDisplayDto
 	
 	@Override
 	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
-		if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
+		// No ref description is defined, so serve the default model for ref requests too,
+		// otherwise a call without v= fails with 400 ("Don't know how to get ... as ref").
+		if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation || rep instanceof RefRepresentation) {
 			DelegatingResourceDescription d = new DelegatingResourceDescription();
 			d.addProperty("context");
 			d.addProperty("nowServing");

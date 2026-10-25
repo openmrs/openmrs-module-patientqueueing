@@ -87,7 +87,48 @@ Configure global properties in OpenMRS (Advanced Settings → Patient Queueing):
 |----------|-------------|---------|
 | `patientqueueing.providerAssignmentStrategy` | Provider assignment strategy (leastBusy, roundRobin, random) | leastBusy |
 
-### 3. Basic Usage
+### 3. Privileges & Roles
+
+The module defines the following privileges in its `config.xml`. They are created automatically when the module starts.
+
+| Privilege | Description | Used by |
+|-----------|-------------|---------|
+| `Task: patientqueueing.viewQueue` | Ability to view queue status and entries | Queue view, kiosk, display, provider dashboard (GET) |
+| `Task: patientqueueing.sendPatientToQueue` | Ability to send a patient to the queue | Check-in (save patient queue entry) |
+| `Task: patientqueueing.checkIn` | Ability to perform patient check-in | Non-patient check-in |
+| `Task: patientqueueing.manageQueue` | Ability to manage queue entries (pick, complete, skip, call) | Provider dashboard actions |
+| `Task: patientqueueing.completePatientQueue` | Able to complete a patient queue | Completing queue entries |
+| `App: patientqueueing.providerDashboard` | Able to access Provider Dashboard | Provider dashboard app |
+| `App: patientqueueing.selfCheckIn` | Ability to access self check-in kiosk | Self check-in kiosk app |
+| `App: patientqueueing.queueDisplay` | Ability to access queue display/kiosk view | Public queue display |
+
+#### Managing privileges with Initializer
+
+Distributions using the [Initializer](https://github.com/mekom/openmrs-module-initializer) module can manage these privileges (and their role assignments) through their own iniz configuration instead of manual role editing. A ready-to-use fragment is shipped with the module at:
+
+```
+omod/src/main/resources/configuration/privileges/patientqueueing-privileges.csv
+```
+
+Copy it into your distribution's iniz configuration folder (e.g. `configuration/privileges/`). The module does not require Initializer — the CSV is provided as a convenience for distributions that use it, and iniz safely skips rows that already exist.
+
+#### Required privileges by role
+
+Grant the following privileges to each role that works with the queue. Role names differ between distributions; the UgandaEMR equivalents are noted so instances setting up there know exactly which roles to touch.
+
+| Role | Required privileges | What users of this role can do | UgandaEMR role |
+|------|---------------------|--------------------------------|----------------|
+| Reception / Registration clerk | `Task: patientqueueing.viewQueue`<br>`Task: patientqueueing.sendPatientToQueue`<br>`Task: patientqueueing.checkIn` | Check patients in (front desk fragment and self check-in fallback), get a ticket number, and see the day's queue | `Reception` |
+| Triage / Nurse | `Task: patientqueueing.viewQueue`<br>`Task: patientqueueing.manageQueue` | See waiting patients, call them in, and forward them between rooms | `Triage` |
+| Clinician / Provider | `Task: patientqueueing.viewQueue`<br>`Task: patientqueueing.manageQueue`<br>`Task: patientqueueing.completePatientQueue`<br>`App: patientqueueing.providerDashboard` | Run the provider dashboard: call, start serving, skip, cancel, complete consultations | `OPD Clinic` (users are also members of `Organizational: Clinician`) |
+| Kiosk / display device account | `Task: patientqueueing.viewQueue`<br>`App: patientqueueing.queueDisplay`<br>`App: patientqueueing.selfCheckIn`<br>`Task: patientqueueing.checkIn` | Unattended accounts for public display screens and self check-in kiosks: view the display feed, look up ticket status, and self check-in | — (create a dedicated account) |
+| System administrator | all of the privileges above | Full configuration, monitoring and troubleshooting of the queue | `Organizational: System Administrator` |
+
+Without these grants the corresponding actions fail with a privilege error — most visibly, a Reception role without `sendPatientToQueue` can no longer check patients in after upgrading from an older module version that did not check privileges.
+
+Assign them by editing the roles in **Admin → Roles**, or by adding the privileges to the roles' entries in your iniz `roles/` configuration (e.g. UgandaEMR's `Role_Privilege.xml` metadata).
+
+### 4. Basic Usage
 
 #### Patient Check-in
 ```bash

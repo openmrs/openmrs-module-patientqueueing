@@ -27,7 +27,6 @@ import org.openmrs.module.patientqueueing.PatientQueueingConfig;
 import org.openmrs.module.patientqueueing.api.PatientQueueingService;
 import org.openmrs.module.patientqueueing.api.ProviderAssignmentService;
 import org.openmrs.module.patientqueueing.web.customdto.CheckInResult;
-import org.openmrs.module.patientqueueing.web.customdto.QueueEntry;
 import org.openmrs.module.webservices.rest.web.RequestContext;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.annotation.Resource;
@@ -76,7 +75,7 @@ public class CheckInResource extends DelegatingCrudResource<CheckInResult> {
 	}
 	
 	@Override
-	public CheckInResult create(SimpleObject propertiesToCreate, RequestContext context) throws ResponseException {
+	public Object create(SimpleObject propertiesToCreate, RequestContext context) throws ResponseException {
 		PatientService patientService = Context.getPatientService();
 		LocationService locationService = Context.getLocationService();
 		ProviderService providerService = Context.getProviderService();
@@ -98,6 +97,7 @@ public class CheckInResource extends DelegatingCrudResource<CheckInResult> {
 		}
 		
 		// Extract optional properties
+		String locationFromUuid = propertiesToCreate.get("locationFrom");
 		String visitTypeUuid = propertiesToCreate.get("visitType");
 		String queueRoomUuid = propertiesToCreate.get("queueRoom");
 		String providerUuid = propertiesToCreate.get("provider");
@@ -111,6 +111,12 @@ public class CheckInResource extends DelegatingCrudResource<CheckInResult> {
 		
 		Location locationTo = locationService.getLocationByUuid(locationToUuid);
 		validateNotNull(locationTo, "Location not found for UUID: " + locationToUuid);
+		
+		Location locationFrom = null;
+		if (StringUtils.isNotBlank(locationFromUuid)) {
+			locationFrom = locationService.getLocationByUuid(locationFromUuid);
+			validateNotNull(locationFrom, "Location not found for UUID: " + locationFromUuid);
+		}
 		
 		Location queueRoom = null;
 		if (StringUtils.isNotBlank(queueRoomUuid)) {
@@ -135,6 +141,7 @@ public class CheckInResource extends DelegatingCrudResource<CheckInResult> {
 		// Create patient queue entry
 		PatientQueue patientQueue = new PatientQueue();
 		patientQueue.setPatient(patient);
+		patientQueue.setLocationFrom(locationFrom != null ? locationFrom : locationTo);
 		patientQueue.setLocationTo(locationTo);
 		patientQueue.setQueueRoom(queueRoom);
 		patientQueue.setStatus(PatientQueue.Status.PENDING);
@@ -142,9 +149,8 @@ public class CheckInResource extends DelegatingCrudResource<CheckInResult> {
 		patientQueue.setPriority(priority);
 		patientQueue.setComment(comment);
 		
-		// Generate visit number (ticket number)
-		String visitNumber = queueingService.generateVisitNumber(locationTo, patient);
-		patientQueue.setVisitNumber(visitNumber);
+		// Reuse today's visit number for this patient, or generate a fresh one
+		patientQueue = queueingService.assignVisitNumberForToday(patientQueue);
 		
 		// Auto-assign provider if requested and no provider specified
 		if (provider == null && shouldAutoAssignProvider(adminService, autoAssignProvider)) {
@@ -164,17 +170,36 @@ public class CheckInResource extends DelegatingCrudResource<CheckInResult> {
 		// Calculate estimated wait time
 		int estimatedWaitMinutes = calculateEstimatedWait(queuePosition, adminService);
 		
-		// Build and return result
-		CheckInResult result = new CheckInResult();
-		result.setPatient(patient);
-		result.setVisit(visit);
-		result.setQueueEntry(new QueueEntry(patientQueue));
-		result.setTicketNumber(patientQueue.getVisitNumber());
-		result.setQueuePosition(queuePosition);
-		result.setEstimatedWaitMinutes(estimatedWaitMinutes);
-		result.setSuccess(true);
+		// Build a SimpleObject response. Returning the CheckInResult bean directly makes Jackson
+		// recurse through Patient -> creator -> User -> Person -> creator and fail with invalid JSON.
+		SimpleObject response = new SimpleObject();
+		response.put("uuid", patientQueue.getUuid());
+		response.put("ticketNumber", patientQueue.getVisitNumber());
+		response.put("status", patientQueue.getStatus() != null ? patientQueue.getStatus().name() : null);
+		response.put("dateCreated", patientQueue.getDateCreated());
+		response.put("queuePosition", queuePosition);
+		response.put("estimatedWaitMinutes", estimatedWaitMinutes);
+		response.put("success", true);
 		
-		return result;
+		SimpleObject patientObject = new SimpleObject();
+		patientObject.put("uuid", patient.getUuid());
+		patientObject.put("display", patient.getPersonName() != null ? patient.getPersonName().getFullName() : null);
+		response.put("patient", patientObject);
+		
+		SimpleObject visitObject = new SimpleObject();
+		visitObject.put("uuid", visit.getUuid());
+		visitObject.put("startDatetime", visit.getStartDatetime());
+		visitObject.put("visitType", visit.getVisitType() != null ? visit.getVisitType().getName() : null);
+		response.put("visit", visitObject);
+		
+		SimpleObject queueEntryObject = new SimpleObject();
+		queueEntryObject.put("uuid", patientQueue.getUuid());
+		queueEntryObject.put("visitNumber", patientQueue.getVisitNumber());
+		queueEntryObject.put("status", patientQueue.getStatus() != null ? patientQueue.getStatus().name() : null);
+		queueEntryObject.put("dateCreated", patientQueue.getDateCreated());
+		response.put("queueEntry", queueEntryObject);
+		
+		return response;
 	}
 	
 	/**
@@ -362,6 +387,7 @@ public class CheckInResource extends DelegatingCrudResource<CheckInResult> {
 		DelegatingResourceDescription description = new DelegatingResourceDescription();
 		description.addProperty("patient");
 		description.addProperty("locationTo");
+		description.addProperty("locationFrom");
 		description.addProperty("visitType");
 		description.addProperty("queueRoom");
 		description.addProperty("provider");

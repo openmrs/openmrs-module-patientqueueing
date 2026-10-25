@@ -212,15 +212,16 @@ public class SelfCheckInPatientResource extends DelegatingCrudResource<SelfCheck
 	}
 	
 	/**
-	 * Find patient by phone number using the configured phone number attribute type.
+	 * Find patient by phone number using the configured phone number attribute type. Refuses to
+	 * guess when the number is shared by more than one patient.
 	 */
 	private Patient findPatientByPhoneNumber(String phoneNumber, String phoneNumberAttributeTypeUuid) {
+		if (StringUtils.isBlank(phoneNumberAttributeTypeUuid)) {
+			log.info("No phone number attribute type configured, skipping phone-based patient lookup");
+			return null;
+		}
+		
 		try {
-			if (StringUtils.isBlank(phoneNumberAttributeTypeUuid)) {
-				log.info("No phone number attribute type configured, skipping phone-based patient lookup");
-				return null;
-			}
-			
 			PersonAttributeType attributeType = Context.getPersonService().getPersonAttributeTypeByUuid(
 			    phoneNumberAttributeTypeUuid);
 			if (attributeType == null) {
@@ -229,7 +230,20 @@ public class SelfCheckInPatientResource extends DelegatingCrudResource<SelfCheck
 			}
 			
 			PatientQueueingService queueingService = Context.getService(PatientQueueingService.class);
-			return queueingService.getPatientByPersonAttributeValue(attributeType.getPersonAttributeTypeId(), phoneNumber);
+			int matches = queueingService.countPatientsByPersonAttributeValue(attributeType.getPersonAttributeTypeId(),
+			    phoneNumber);
+			if (matches > 1) {
+				throw new IllegalArgumentException(
+				        "This phone number is shared by more than one patient. Please check in with another identifier.");
+			}
+			if (matches == 1) {
+				return queueingService.getPatientByPersonAttributeValue(attributeType.getPersonAttributeTypeId(),
+				    phoneNumber);
+			}
+			return null;
+		}
+		catch (IllegalArgumentException e) {
+			throw e;
 		}
 		catch (Exception e) {
 			log.error("Error finding patient by phone number: " + e.getMessage(), e);
@@ -254,9 +268,9 @@ public class SelfCheckInPatientResource extends DelegatingCrudResource<SelfCheck
 			patientQueue.setPriority(priority);
 		}
 		
-		// Generate visit number (ticket number)
-		String visitNumber = service.generateVisitNumber(locationTo, patient);
-		patientQueue.setVisitNumber(visitNumber);
+		// Reuse today's visit number for this patient, or generate a fresh one
+		patientQueue = service.assignVisitNumberForToday(patientQueue);
+		String visitNumber = patientQueue.getVisitNumber();
 		
 		// Start a new visit for the patient (or reuse existing active visit)
 		// NOTE: Visit and queue are saved in separate transactions. If savePatientQue fails
@@ -439,16 +453,25 @@ public class SelfCheckInPatientResource extends DelegatingCrudResource<SelfCheck
 					continue;
 				}
 				
-				// Use efficient database query instead of loading all patients
-				Patient patient = queueingService.getPatientByPersonAttributeValue(attributeType.getPersonAttributeTypeId(),
+				// Refuse to guess when the attribute value is shared by more than one patient
+				int matches = queueingService.countPatientsByPersonAttributeValue(attributeType.getPersonAttributeTypeId(),
 				    attributeValue);
+				if (matches > 1) {
+					throw new IllegalArgumentException("This " + attributeType.getName()
+					        + " is shared by more than one patient. Please check in with another identifier.");
+				}
 				
-				if (patient != null) {
-					return patient;
+				// Use efficient database query instead of loading all patients
+				if (matches == 1) {
+					return queueingService.getPatientByPersonAttributeValue(attributeType.getPersonAttributeTypeId(),
+					    attributeValue);
 				}
 			}
 			
 			return null;
+		}
+		catch (IllegalArgumentException e) {
+			throw e;
 		}
 		catch (Exception e) {
 			log.error("Error finding patient by person attributes", e);

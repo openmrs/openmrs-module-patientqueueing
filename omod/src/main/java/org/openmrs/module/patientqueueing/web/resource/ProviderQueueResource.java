@@ -26,6 +26,7 @@ import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingCrudResou
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceDescription;
 import org.openmrs.module.webservices.rest.web.representation.DefaultRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.FullRepresentation;
+import org.openmrs.module.webservices.rest.web.representation.RefRepresentation;
 import org.openmrs.module.webservices.rest.web.representation.Representation;
 import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOperationException;
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
@@ -116,7 +117,9 @@ public class ProviderQueueResource extends DelegatingCrudResource<ProviderQueueE
 	
 	@Override
 	public DelegatingResourceDescription getRepresentationDescription(Representation rep) {
-		if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
+		// No ref description is defined, so serve the default model for ref requests too,
+		// otherwise a call without v= fails with 400 ("Don't know how to get ... as ref").
+		if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation || rep instanceof RefRepresentation) {
 			DelegatingResourceDescription description = new DelegatingResourceDescription();
 			description.addProperty("uuid");
 			description.addProperty("queueNumber");
@@ -388,16 +391,6 @@ public class ProviderQueueResource extends DelegatingCrudResource<ProviderQueueE
 			throw new IllegalArgumentException("NonPatientQueue not found for uuid=" + dto.getUuid());
 		}
 		
-		if (dto.getStatus() != null) {
-			npq.setStatus(toNonPatientQueueStatus(dto.getStatus()));
-			if (NonPatientQueue.NonPatientQueueStatus.CALLED.equals(npq.getStatus())) {
-				npq.setCalledAt(new Date());
-			}
-			if (NonPatientQueue.NonPatientQueueStatus.COMPLETED.equals(npq.getStatus())) {
-				npq.setEndedAt(new Date());
-			}
-		}
-		
 		if (dto.getPriority() != null) {
 			npq.setPriority(dto.getPriority());
 		}
@@ -423,7 +416,39 @@ public class ProviderQueueResource extends DelegatingCrudResource<ProviderQueueE
 		}
 		
 		patientQueueingService().saveNonPatientQueue(npq);
+		
+		// Route status changes through the service transition methods so their rules are enforced
+		if (dto.getStatus() != null) {
+			npq = applyNonPatientQueueTransition(npq, toNonPatientQueueStatus(dto.getStatus()));
+		}
 		return toDto(npq);
+	}
+	
+	/**
+	 * Applies a status change via the service transition methods, which validate that the
+	 * transition is legal from the entry's current status.
+	 */
+	private NonPatientQueue applyNonPatientQueueTransition(NonPatientQueue npq, NonPatientQueue.NonPatientQueueStatus target) {
+		if (npq.getStatus() == target) {
+			return npq;
+		}
+		
+		switch (target) {
+			case CALLED:
+				return patientQueueingService().callNonPatientQueue(npq, null);
+			case ARRIVED:
+				return patientQueueingService().markNonPatientQueueArrived(npq);
+			case SERVING:
+				return patientQueueingService().startServingNonPatientQueue(npq, null);
+			case COMPLETED:
+				return patientQueueingService().completeNonPatientQueue(npq, null);
+			case WAITING:
+				return patientQueueingService().skipNonPatientQueue(npq);
+			case CANCELLED:
+				return patientQueueingService().cancelNonPatientQueue(npq);
+			default:
+				throw new IllegalArgumentException("Status transition to " + target + " is not supported");
+		}
 	}
 	
 	private ProviderQueueEntry forwardPatientQueue(ProviderQueueEntry dto) {

@@ -633,26 +633,26 @@ public class PatientQueueingDao {
 	}
 	
 	/**
-	 * Find a patient by person attribute value using attribute type UUID.
+	 * Count distinct patients matching a person attribute value.
 	 * 
-	 * @param attributeTypeUuid the person attribute type UUID (more stable than numeric ID)
+	 * @param personAttributeTypeId the person attribute type ID
 	 * @param attributeValue the attribute value to match
-	 * @return the first matching patient, or null if not found
+	 * @return the number of distinct non-voided patients holding this attribute value
 	 */
-	public Patient getPatientByPersonAttributeValue(final String attributeTypeUuid, final String attributeValue) {
-		if (attributeTypeUuid == null) {
-			throw new IllegalArgumentException("attributeTypeUuid cannot be null");
+	public int countPatientsByPersonAttributeValue(final Integer personAttributeTypeId, final String attributeValue) {
+		if (personAttributeTypeId == null) {
+			throw new IllegalArgumentException("personAttributeTypeId cannot be null");
 		}
 		if (attributeValue == null || attributeValue.trim().isEmpty()) {
 			throw new IllegalArgumentException("attributeValue cannot be null or empty");
 		}
 		
-		final String sql = "SELECT p.patient_id FROM person_attribute pa "
+		final String sql = "SELECT COUNT(DISTINCT p.patient_id) FROM person_attribute pa "
 		        + "INNER JOIN person_attribute_type pat ON pa.person_attribute_type_id = pat.person_attribute_type_id "
-		        + "INNER JOIN patient p ON pa.person_id = p.patient_id " + "WHERE pat.uuid = ? AND pa.value = ? "
-		        + "AND p.voided = 0 AND pa.voided = 0";
+		        + "INNER JOIN patient p ON pa.person_id = p.patient_id "
+		        + "WHERE pat.person_attribute_type_id = ? AND pa.value = ? AND p.voided = 0 AND pa.voided = 0";
 		
-		final Integer[] patientIdHolder = new Integer[1];
+		final int[] countHolder = new int[1];
 		
 		try {
 			getSession().doWork(new org.hibernate.jdbc.Work() {
@@ -662,16 +662,12 @@ public class PatientQueueingDao {
 					PreparedStatement ps = null;
 					try {
 						ps = connection.prepareStatement(sql);
-						ps.setString(1, attributeTypeUuid);
+						ps.setInt(1, personAttributeTypeId);
 						ps.setString(2, attributeValue);
-						ps.setMaxRows(1);
 						ResultSet rs = ps.executeQuery();
 						try {
 							if (rs.next()) {
-								int id = rs.getInt("patient_id");
-								if (!rs.wasNull()) {
-									patientIdHolder[0] = id;
-								}
+								countHolder[0] = rs.getInt(1);
 							}
 						}
 						finally {
@@ -687,11 +683,11 @@ public class PatientQueueingDao {
 			});
 		}
 		catch (Exception e) {
-			log.error("Error executing patient lookup query for attribute type UUID: " + attributeTypeUuid, e);
-			return null;
+			log.error("Error executing patient count query for attribute type: " + personAttributeTypeId, e);
+			throw new org.openmrs.api.db.DAOException("Failed to count patients by person attribute value", e);
 		}
 		
-		return patientIdHolder[0] != null ? (Patient) getSession().get(Patient.class, patientIdHolder[0]) : null;
+		return countHolder[0];
 	}
 	
 }
