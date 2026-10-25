@@ -3,9 +3,9 @@
 	<suppress>
 		<notes><![CDATA[
 		False positive: OWASP dependency-check infers cpe:/a:openmrs:openmrs from the
-		org.openmrs.module groupId and flags CVE-2018-19276 (an OpenMRS core platform
-		vulnerability) against this module's own artifacts.]]></notes>
+		org.openmrs.module groupId and flags OpenMRS core platform vulnerabilities
+		against this module's own artifacts. This module is not OpenMRS core.]]></notes>
 		<packageUrl regex="true">^pkg:maven/org\.openmrs\.module/patientqueueing.*@.*$</packageUrl>
-		<cve>CVE-2018-19276</cve>
+		<cpe>cpe:/a:openmrs:openmrs</cpe>
 	</suppress>
 </suppressions>
