@@ -84,7 +84,7 @@ public class PatientQueue extends BaseOpenmrsData implements Serializable {
 	}
 	
 	public enum Status {
-		PENDING, COMPLETED, PICKED;
+		PENDING, COMPLETED, PICKED, ON_HOLD, NO_SHOW, TRANSFERRED;
 	}
 	
 	public Integer getId() {

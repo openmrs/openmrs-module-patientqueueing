@@ -277,6 +277,130 @@ public class PatientQueueingServiceImpl extends BaseOpenmrsService implements Pa
 	}
 	
 	/**
+	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#holdPatientQueue(org.openmrs.module.patientqueueing.model.PatientQueue)
+	 */
+	@Override
+	public PatientQueue holdPatientQueue(PatientQueue patientQueue) {
+		if (patientQueue == null) {
+			throw new IllegalArgumentException("Queue cannot be null");
+		}
+		if (patientQueue.getStatus() != PatientQueue.Status.PENDING
+		        && patientQueue.getStatus() != PatientQueue.Status.PICKED) {
+			throw new APIException("Can only hold queue entries with status PENDING or PICKED");
+		}
+		
+		patientQueue.setStatus(PatientQueue.Status.ON_HOLD);
+		patientQueue.setDateChanged(new Date());
+		return dao.savePatientQueue(patientQueue);
+	}
+	
+	/**
+	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#recallPatientQueue(org.openmrs.module.patientqueueing.model.PatientQueue,
+	 *      org.openmrs.Provider)
+	 */
+	@Override
+	public PatientQueue recallPatientQueue(PatientQueue patientQueue, Provider provider) {
+		if (patientQueue == null) {
+			throw new IllegalArgumentException("Queue cannot be null");
+		}
+		if (patientQueue.getStatus() != PatientQueue.Status.ON_HOLD
+		        && patientQueue.getStatus() != PatientQueue.Status.NO_SHOW) {
+			throw new APIException("Can only recall queue entries with status ON_HOLD or NO_SHOW");
+		}
+		
+		patientQueue.setStatus(PatientQueue.Status.PICKED);
+		patientQueue.setDatePicked(new Date());
+		if (provider != null) {
+			patientQueue.setProvider(provider);
+		}
+		patientQueue.setDateChanged(new Date());
+		return dao.savePatientQueue(patientQueue);
+	}
+	
+	/**
+	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#markPatientQueueNoShow(org.openmrs.module.patientqueueing.model.PatientQueue)
+	 */
+	@Override
+	public PatientQueue markPatientQueueNoShow(PatientQueue patientQueue) {
+		if (patientQueue == null) {
+			throw new IllegalArgumentException("Queue cannot be null");
+		}
+		if (patientQueue.getStatus() != PatientQueue.Status.PICKED) {
+			throw new APIException("Can only mark as no-show queue entries with status PICKED");
+		}
+		
+		patientQueue.setStatus(PatientQueue.Status.NO_SHOW);
+		patientQueue.setDateChanged(new Date());
+		return dao.savePatientQueue(patientQueue);
+	}
+	
+	/**
+	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#reopenPatientQueue(org.openmrs.module.patientqueueing.model.PatientQueue)
+	 */
+	@Override
+	public PatientQueue reopenPatientQueue(PatientQueue patientQueue) {
+		if (patientQueue == null) {
+			throw new IllegalArgumentException("Queue cannot be null");
+		}
+		if (patientQueue.getStatus() != PatientQueue.Status.PICKED
+		        && patientQueue.getStatus() != PatientQueue.Status.ON_HOLD
+		        && patientQueue.getStatus() != PatientQueue.Status.NO_SHOW) {
+			throw new APIException("Can only reopen queue entries with status PICKED, ON_HOLD or NO_SHOW");
+		}
+		
+		patientQueue.setStatus(PatientQueue.Status.PENDING);
+		patientQueue.setDatePicked(null);
+		patientQueue.setDateCompleted(null);
+		patientQueue.setDateChanged(new Date());
+		return dao.savePatientQueue(patientQueue);
+	}
+	
+	/**
+	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#transferPatientQueue(org.openmrs.module.patientqueueing.model.PatientQueue,
+	 *      org.openmrs.Location, org.openmrs.Location)
+	 */
+	@Override
+	public PatientQueue transferPatientQueue(PatientQueue patientQueue, Location locationTo, Location queueRoom) {
+		if (patientQueue == null) {
+			throw new IllegalArgumentException("Queue cannot be null");
+		}
+		if (locationTo == null) {
+			throw new IllegalArgumentException("locationTo is required to transfer a queue entry");
+		}
+		
+		PatientQueue.Status status = patientQueue.getStatus();
+		if (status != PatientQueue.Status.PENDING && status != PatientQueue.Status.PICKED
+		        && status != PatientQueue.Status.ON_HOLD && status != PatientQueue.Status.NO_SHOW) {
+			throw new APIException("Can only transfer queue entries with status PENDING, PICKED, ON_HOLD or NO_SHOW");
+		}
+		
+		Location previousLocation = patientQueue.getLocationTo() != null ? patientQueue.getLocationTo() : patientQueue
+		        .getQueueRoom();
+		
+		patientQueue.setStatus(PatientQueue.Status.TRANSFERRED);
+		patientQueue.setLocationTo(locationTo);
+		if (queueRoom != null) {
+			patientQueue.setQueueRoom(queueRoom);
+		}
+		patientQueue.setDateChanged(new Date());
+		dao.savePatientQueue(patientQueue);
+		
+		PatientQueue next = new PatientQueue();
+		next.setPatient(patientQueue.getPatient());
+		next.setProvider(patientQueue.getProvider());
+		next.setLocationFrom(previousLocation);
+		next.setLocationTo(locationTo);
+		next.setEncounter(patientQueue.getEncounter());
+		next.setStatus(PatientQueue.Status.PENDING);
+		next.setVisitNumber(patientQueue.getVisitNumber());
+		next.setPriority(patientQueue.getPriority());
+		next.setPriorityComment(patientQueue.getPriorityComment());
+		next.setComment(patientQueue.getComment());
+		next.setQueueRoom(queueRoom);
+		return dao.savePatientQueue(next);
+	}
+	
+	/**
 	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#
 	 *      getPatientQueueByParentLocation(org.openmrs.Location,
 	 *      org.openmrs.module.patientqueueing.model.PatientQueue.Status, java.util.Date dateFrom,
@@ -513,14 +637,113 @@ public class PatientQueueingServiceImpl extends BaseOpenmrsService implements Pa
 			throw new IllegalArgumentException("Queue cannot be null");
 		}
 		if (queue.getStatus() == NonPatientQueue.NonPatientQueueStatus.COMPLETED
-		        || queue.getStatus() == NonPatientQueue.NonPatientQueueStatus.CANCELLED) {
-			throw new APIException("Cannot cancel queue entries that are completed or already cancelled");
+		        || queue.getStatus() == NonPatientQueue.NonPatientQueueStatus.CANCELLED
+		        || queue.getStatus() == NonPatientQueue.NonPatientQueueStatus.TRANSFERRED) {
+			throw new APIException("Cannot cancel queue entries that are completed, cancelled or transferred");
 		}
 		
 		queue.setStatus(NonPatientQueue.NonPatientQueueStatus.CANCELLED);
 		queue.setEndedAt(new Date());
 		
 		return saveNonPatientQueue(queue);
+	}
+	
+	/**
+	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#holdNonPatientQueue(org.openmrs.module.patientqueueing.model.NonPatientQueue)
+	 */
+	@Override
+	public NonPatientQueue holdNonPatientQueue(NonPatientQueue queue) {
+		if (queue == null) {
+			throw new IllegalArgumentException("Queue cannot be null");
+		}
+		if (queue.getStatus() != NonPatientQueue.NonPatientQueueStatus.WAITING
+		        && queue.getStatus() != NonPatientQueue.NonPatientQueueStatus.CALLED
+		        && queue.getStatus() != NonPatientQueue.NonPatientQueueStatus.ARRIVED) {
+			throw new APIException("Can only hold queue entries with status WAITING, CALLED or ARRIVED");
+		}
+		
+		queue.setStatus(NonPatientQueue.NonPatientQueueStatus.HOLD);
+		return saveNonPatientQueue(queue);
+	}
+	
+	/**
+	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#recallNonPatientQueue(org.openmrs.module.patientqueueing.model.NonPatientQueue,
+	 *      org.openmrs.Provider)
+	 */
+	@Override
+	public NonPatientQueue recallNonPatientQueue(NonPatientQueue queue, Provider provider) {
+		if (queue == null) {
+			throw new IllegalArgumentException("Queue cannot be null");
+		}
+		if (queue.getStatus() != NonPatientQueue.NonPatientQueueStatus.HOLD
+		        && queue.getStatus() != NonPatientQueue.NonPatientQueueStatus.NO_SHOW) {
+			throw new APIException("Can only recall queue entries with status HOLD or NO_SHOW");
+		}
+		
+		queue.setStatus(NonPatientQueue.NonPatientQueueStatus.CALLED);
+		queue.setCalledBy(provider);
+		queue.setCalledAt(new Date());
+		return saveNonPatientQueue(queue);
+	}
+	
+	/**
+	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#markNonPatientQueueNoShow(org.openmrs.module.patientqueueing.model.NonPatientQueue)
+	 */
+	@Override
+	public NonPatientQueue markNonPatientQueueNoShow(NonPatientQueue queue) {
+		if (queue == null) {
+			throw new IllegalArgumentException("Queue cannot be null");
+		}
+		if (queue.getStatus() != NonPatientQueue.NonPatientQueueStatus.CALLED
+		        && queue.getStatus() != NonPatientQueue.NonPatientQueueStatus.ARRIVED) {
+			throw new APIException("Can only mark as no-show queue entries with status CALLED or ARRIVED");
+		}
+		
+		queue.setStatus(NonPatientQueue.NonPatientQueueStatus.NO_SHOW);
+		return saveNonPatientQueue(queue);
+	}
+	
+	/**
+	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#transferNonPatientQueue(org.openmrs.module.patientqueueing.model.NonPatientQueue,
+	 *      org.openmrs.Location, org.openmrs.Location)
+	 */
+	@Override
+	public NonPatientQueue transferNonPatientQueue(NonPatientQueue queue, Location locationTo, Location queueRoom) {
+		if (queue == null) {
+			throw new IllegalArgumentException("Queue cannot be null");
+		}
+		if (locationTo == null) {
+			throw new IllegalArgumentException("locationTo is required to transfer a queue entry");
+		}
+		
+		NonPatientQueue.NonPatientQueueStatus status = queue.getStatus();
+		if (status == NonPatientQueue.NonPatientQueueStatus.COMPLETED
+		        || status == NonPatientQueue.NonPatientQueueStatus.CANCELLED
+		        || status == NonPatientQueue.NonPatientQueueStatus.TRANSFERRED) {
+			throw new APIException("Cannot transfer queue entries that are completed, cancelled or already transferred");
+		}
+		
+		Location previousLocation = queue.getLocationTo() != null ? queue.getLocationTo() : queue.getQueueRoom();
+		
+		queue.setStatus(NonPatientQueue.NonPatientQueueStatus.TRANSFERRED);
+		queue.setLocationTo(locationTo);
+		if (queueRoom != null) {
+			queue.setQueueRoom(queueRoom);
+		}
+		saveNonPatientQueue(queue);
+		
+		NonPatientQueue next = new NonPatientQueue();
+		next.setTicketNumber(queue.getTicketNumber());
+		next.setDisplayName(queue.getDisplayName());
+		next.setPhoneNumber(queue.getPhoneNumber());
+		next.setQueueType(queue.getQueueType());
+		next.setStatus(NonPatientQueue.NonPatientQueueStatus.WAITING);
+		next.setCurrentLocation(previousLocation);
+		next.setLocationTo(locationTo);
+		next.setQueueRoom(queueRoom);
+		next.setPriority(queue.getPriority());
+		next.setComment(queue.getComment());
+		return saveNonPatientQueue(next);
 	}
 	
 	@Override

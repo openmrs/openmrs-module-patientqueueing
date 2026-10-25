@@ -96,7 +96,7 @@ The module defines the following privileges in its `config.xml`. They are create
 | `Task: patientqueueing.viewQueue` | Ability to view queue status and entries | Queue view, kiosk, display, provider dashboard (GET) |
 | `Task: patientqueueing.sendPatientToQueue` | Ability to send a patient to the queue | Check-in (save patient queue entry) |
 | `Task: patientqueueing.checkIn` | Ability to perform patient check-in | Non-patient check-in |
-| `Task: patientqueueing.manageQueue` | Ability to manage queue entries (pick, complete, skip, call) | Provider dashboard actions |
+| `Task: patientqueueing.manageQueue` | Ability to manage queue entries (pick, call, hold, recall, skip, no-show, transfer, complete) | Provider dashboard actions |
 | `Task: patientqueueing.completePatientQueue` | Able to complete a patient queue | Completing queue entries |
 | `App: patientqueueing.providerDashboard` | Able to access Provider Dashboard | Provider dashboard app |
 | `App: patientqueueing.selfCheckIn` | Ability to access self check-in kiosk | Self check-in kiosk app |

@@ -236,6 +236,62 @@ public interface PatientQueueingService extends OpenmrsService {
 	PatientQueue pickPatientQueue(PatientQueue patientQueue, Provider provider, Location queueRoom);
 	
 	/**
+	 * Put a patient queue entry on hold - transitions status from PENDING or PICKED to ON_HOLD
+	 * 
+	 * @param patientQueue the queue entry to hold
+	 * @return the updated queue entry
+	 */
+	@Transactional
+	@Authorized("Task: patientqueueing.manageQueue")
+	PatientQueue holdPatientQueue(PatientQueue patientQueue);
+	
+	/**
+	 * Recall a patient queue entry that was held or marked as a no-show - transitions status from
+	 * ON_HOLD or NO_SHOW to PICKED
+	 * 
+	 * @param patientQueue the queue entry to recall
+	 * @param provider the provider recalling the patient
+	 * @return the updated queue entry
+	 */
+	@Transactional
+	@Authorized("Task: patientqueueing.manageQueue")
+	PatientQueue recallPatientQueue(PatientQueue patientQueue, Provider provider);
+	
+	/**
+	 * Mark a patient queue entry as a no-show - transitions status from PICKED to NO_SHOW
+	 * 
+	 * @param patientQueue the queue entry to mark as a no-show
+	 * @return the updated queue entry
+	 */
+	@Transactional
+	@Authorized("Task: patientqueueing.manageQueue")
+	PatientQueue markPatientQueueNoShow(PatientQueue patientQueue);
+	
+	/**
+	 * Reopen a patient queue entry - transitions status from PICKED, ON_HOLD or NO_SHOW back to
+	 * PENDING, clearing the picked and completed timestamps
+	 * 
+	 * @param patientQueue the queue entry to reopen
+	 * @return the updated queue entry
+	 */
+	@Transactional
+	@Authorized("Task: patientqueueing.manageQueue")
+	PatientQueue reopenPatientQueue(PatientQueue patientQueue);
+	
+	/**
+	 * Transfer a patient queue entry to another location or room - transitions status to
+	 * TRANSFERRED and creates a new PENDING entry at the destination carrying the same visit number
+	 * 
+	 * @param patientQueue the queue entry to transfer
+	 * @param locationTo the destination location (required)
+	 * @param queueRoom the destination room (optional)
+	 * @return the newly created PENDING entry at the destination
+	 */
+	@Transactional
+	@Authorized("Task: patientqueueing.manageQueue")
+	PatientQueue transferPatientQueue(PatientQueue patientQueue, Location locationTo, Location queueRoom);
+	
+	/**
 	 * Get Patient Queues of parent location queue rooms
 	 * 
 	 * @param parentLocation the parent location of patient queue rooms to search patients from
@@ -481,6 +537,53 @@ public interface PatientQueueingService extends OpenmrsService {
 	@Transactional
 	@Authorized("Task: patientqueueing.manageQueue")
 	NonPatientQueue cancelNonPatientQueue(NonPatientQueue queue);
+	
+	/**
+	 * Hold a non-patient queue entry - transitions status from WAITING, CALLED or ARRIVED to HOLD
+	 * 
+	 * @param queue the queue entry to hold
+	 * @return the updated NonPatientQueue entry
+	 */
+	@Transactional
+	@Authorized("Task: patientqueueing.manageQueue")
+	NonPatientQueue holdNonPatientQueue(NonPatientQueue queue);
+	
+	/**
+	 * Recall a non-patient queue entry that was held or marked as a no-show - transitions status
+	 * from HOLD or NO_SHOW to CALLED
+	 * 
+	 * @param queue the queue entry to recall
+	 * @param provider the provider recalling the entry
+	 * @return the updated NonPatientQueue entry
+	 */
+	@Transactional
+	@Authorized("Task: patientqueueing.manageQueue")
+	NonPatientQueue recallNonPatientQueue(NonPatientQueue queue, Provider provider);
+	
+	/**
+	 * Mark a non-patient queue entry as a no-show - transitions status from CALLED or ARRIVED to
+	 * NO_SHOW
+	 * 
+	 * @param queue the queue entry to mark as a no-show
+	 * @return the updated NonPatientQueue entry
+	 */
+	@Transactional
+	@Authorized("Task: patientqueueing.manageQueue")
+	NonPatientQueue markNonPatientQueueNoShow(NonPatientQueue queue);
+	
+	/**
+	 * Transfer a non-patient queue entry to another location or room - transitions status to
+	 * TRANSFERRED and creates a new WAITING entry at the destination carrying the same ticket
+	 * number
+	 * 
+	 * @param queue the queue entry to transfer
+	 * @param locationTo the destination location (required)
+	 * @param queueRoom the destination room (optional)
+	 * @return the newly created WAITING entry at the destination
+	 */
+	@Transactional
+	@Authorized("Task: patientqueueing.manageQueue")
+	NonPatientQueue transferNonPatientQueue(NonPatientQueue queue, Location locationTo, Location queueRoom);
 	
 	/**
 	 * Generate a unique ticket number for a non-patient queue entry

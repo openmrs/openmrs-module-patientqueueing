@@ -697,9 +697,15 @@ public class QueueKioskResource extends DelegatingCrudResource<SimpleObject> {
 			Date checkedInAt = (Date) serviceInfo.get("checkedInAt");
 			serviceInfo.put("checkedInAt", formatDate(checkedInAt));
 
-			// Use enum comparison instead of string matching
+			// Use enum comparison instead of string matching; treat NO_SHOW, CANCELLED and
+			// TRANSFERRED as terminal so they are not picked up as the current service
 			boolean isCompleted = PatientQueue.Status.COMPLETED.name().equals(status)
-					|| NonPatientQueue.NonPatientQueueStatus.COMPLETED.name().equals(status);
+					|| NonPatientQueue.NonPatientQueueStatus.COMPLETED.name().equals(status)
+					|| PatientQueue.Status.NO_SHOW.name().equals(status)
+					|| NonPatientQueue.NonPatientQueueStatus.NO_SHOW.name().equals(status)
+					|| PatientQueue.Status.TRANSFERRED.name().equals(status)
+					|| NonPatientQueue.NonPatientQueueStatus.TRANSFERRED.name().equals(status)
+					|| NonPatientQueue.NonPatientQueueStatus.CANCELLED.name().equals(status);
 			boolean isWaiting = PatientQueue.Status.PENDING.name().equals(status)
 					|| NonPatientQueue.NonPatientQueueStatus.WAITING.name().equals(status);
 

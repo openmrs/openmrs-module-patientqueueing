@@ -88,7 +88,7 @@ public class NonPatientQueue extends BaseOpenmrsData implements Serializable {
 	}
 	
 	public enum NonPatientQueueStatus {
-		WAITING, CALLED, ARRIVED, SERVING, COMPLETED, SKIPPED, CANCELLED
+		WAITING, CALLED, ARRIVED, SERVING, COMPLETED, SKIPPED, CANCELLED, HOLD, NO_SHOW, TRANSFERRED
 	}
 	
 	@Override

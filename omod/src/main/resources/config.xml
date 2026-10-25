@@ -98,7 +98,7 @@
 
 	<privilege>
 		<name>Task: patientqueueing.manageQueue</name>
-		<description>Ability to manage queue entries (pick, complete, skip, call)</description>
+		<description>Ability to manage queue entries (pick, call, hold, recall, skip, no-show, transfer, complete)</description>
 	</privilege>
 
 	<privilege>

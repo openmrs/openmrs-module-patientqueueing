@@ -300,6 +300,8 @@ public class ProviderQueueResource extends DelegatingCrudResource<ProviderQueueE
 			return PatientQueue.Status.PICKED;
 		if ("IN_SERVICE".equals(s))
 			return PatientQueue.Status.PICKED;
+		if ("HOLD".equals(s))
+			return PatientQueue.Status.ON_HOLD;
 		
 		try {
 			return PatientQueue.Status.valueOf(s);
@@ -333,9 +335,15 @@ public class ProviderQueueResource extends DelegatingCrudResource<ProviderQueueE
 			return 1;
 		if ("WAITING".equals(s))
 			return 2;
+		if ("HOLD".equals(s))
+			return 3;
 		if ("SKIPPED".equals(s))
 			return 3;
+		if ("NO_SHOW".equals(s))
+			return 4;
 		if ("COMPLETED".equals(s))
+			return 4;
+		if ("TRANSFERRED".equals(s))
 			return 4;
 		
 		return 5;
@@ -345,16 +353,6 @@ public class ProviderQueueResource extends DelegatingCrudResource<ProviderQueueE
 		PatientQueue pq = patientQueueingService().getPatientQueueByUuid(dto.getUuid());
 		if (pq == null) {
 			throw new IllegalArgumentException("PatientQueue not found for uuid=" + dto.getUuid());
-		}
-		
-		if (dto.getStatus() != null) {
-			pq.setStatus(toPatientQueueStatus(dto.getStatus()));
-			if (PatientQueue.Status.PICKED.equals(pq.getStatus())) {
-				pq.setDatePicked(new Date());
-			}
-			if (PatientQueue.Status.COMPLETED.equals(pq.getStatus())) {
-				pq.setDateCompleted(new Date());
-			}
 		}
 		
 		if (dto.getPriority() != null) {
@@ -382,7 +380,38 @@ public class ProviderQueueResource extends DelegatingCrudResource<ProviderQueueE
 		}
 		
 		patientQueueingService().savePatientQue(pq);
+		
+		// Route status changes through the service transition methods so their rules are enforced
+		if (dto.getStatus() != null) {
+			pq = applyPatientQueueTransition(pq, toPatientQueueStatus(dto.getStatus()));
+		}
 		return toDto(pq);
+	}
+	
+	/**
+	 * Applies a patient queue status change via the service transition methods, which validate that
+	 * the transition is legal from the entry's current status.
+	 */
+	private PatientQueue applyPatientQueueTransition(PatientQueue pq, PatientQueue.Status target) {
+		if (pq.getStatus() == target) {
+			return pq;
+		}
+		
+		switch (target) {
+			case PICKED:
+				return patientQueueingService().pickPatientQueue(pq, pq.getProvider(), pq.getQueueRoom());
+			case COMPLETED:
+				return patientQueueingService().completePatientQueue(pq);
+			case ON_HOLD:
+				return patientQueueingService().holdPatientQueue(pq);
+			case NO_SHOW:
+				return patientQueueingService().markPatientQueueNoShow(pq);
+			case PENDING:
+				return patientQueueingService().reopenPatientQueue(pq);
+			default:
+				throw new IllegalArgumentException("Status transition to " + target
+				        + " is not supported directly; use action=FORWARD to transfer");
+		}
 	}
 	
 	private ProviderQueueEntry updateNonPatientQueue(ProviderQueueEntry dto) {
@@ -446,8 +475,13 @@ public class ProviderQueueResource extends DelegatingCrudResource<ProviderQueueE
 				return patientQueueingService().skipNonPatientQueue(npq);
 			case CANCELLED:
 				return patientQueueingService().cancelNonPatientQueue(npq);
+			case HOLD:
+				return patientQueueingService().holdNonPatientQueue(npq);
+			case NO_SHOW:
+				return patientQueueingService().markNonPatientQueueNoShow(npq);
 			default:
-				throw new IllegalArgumentException("Status transition to " + target + " is not supported");
+				throw new IllegalArgumentException("Status transition to " + target
+				        + " is not supported directly; use action=FORWARD to transfer");
 		}
 	}
 	
@@ -460,29 +494,15 @@ public class ProviderQueueResource extends DelegatingCrudResource<ProviderQueueE
 		Location nextLocation = requireLocation(dto.getLocationToUuid(), "locationToUuid");
 		Location nextQueueRoom = requireLocation(dto.getQueueRoomUuid(), "queueRoomUuid");
 		
-		current.setStatus(PatientQueue.Status.COMPLETED);
-		current.setDateCompleted(new Date());
 		if (dto.getComment() != null) {
 			current.setComment(dto.getComment());
 		}
-		patientQueueingService().savePatientQue(current);
 		
-		PatientQueue next = new PatientQueue();
-		next.setPatient(current.getPatient());
-		next.setProvider(current.getProvider());
-		next.setLocationFrom(current.getLocationTo() != null ? current.getLocationTo() : current.getQueueRoom());
-		next.setLocationTo(nextLocation);
-		next.setEncounter(current.getEncounter());
-		next.setStatus(PatientQueue.Status.PENDING);
-		next.setVisitNumber(current.getVisitNumber());
-		next.setPriority(current.getPriority());
-		next.setPriorityComment(current.getPriorityComment());
-		next.setComment(dto.getComment() != null ? dto.getComment() : current.getComment());
-		next.setQueueRoom(nextQueueRoom);
-		next.setDatePicked(null);
-		next.setDateCompleted(null);
-		
-		patientQueueingService().savePatientQue(next);
+		PatientQueue next = patientQueueingService().transferPatientQueue(current, nextLocation, nextQueueRoom);
+		if (dto.getComment() != null) {
+			next.setComment(dto.getComment());
+			patientQueueingService().savePatientQue(next);
+		}
 		return toDto(next);
 	}
 	
@@ -495,32 +515,15 @@ public class ProviderQueueResource extends DelegatingCrudResource<ProviderQueueE
 		Location nextLocation = requireLocation(dto.getLocationToUuid(), "locationToUuid");
 		Location nextQueueRoom = requireLocation(dto.getQueueRoomUuid(), "queueRoomUuid");
 		
-		current.setStatus(NonPatientQueue.NonPatientQueueStatus.COMPLETED);
-		current.setEndedAt(new Date());
 		if (dto.getComment() != null) {
 			current.setComment(dto.getComment());
 		}
-		patientQueueingService().saveNonPatientQueue(current);
 		
-		NonPatientQueue next = new NonPatientQueue();
-		next.setTicketNumber(current.getTicketNumber());
-		next.setDisplayName(current.getDisplayName());
-		next.setPhoneNumber(current.getPhoneNumber());
-		next.setQueueType(current.getQueueType());
-		next.setStatus(NonPatientQueue.NonPatientQueueStatus.WAITING);
-		next.setCurrentLocation(current.getLocationTo() != null ? current.getLocationTo() : current.getQueueRoom());
-		next.setLocationTo(nextLocation);
-		next.setQueueRoom(nextQueueRoom);
-		next.setPriority(current.getPriority());
-		next.setComment(dto.getComment() != null ? dto.getComment() : current.getComment());
-		next.setCalledBy(null);
-		next.setServedBy(null);
-		next.setCalledAt(null);
-		next.setArrivedAt(null);
-		next.setStartedAt(null);
-		next.setEndedAt(null);
-		
-		patientQueueingService().saveNonPatientQueue(next);
+		NonPatientQueue next = patientQueueingService().transferNonPatientQueue(current, nextLocation, nextQueueRoom);
+		if (dto.getComment() != null) {
+			next.setComment(dto.getComment());
+			patientQueueingService().saveNonPatientQueue(next);
+		}
 		return toDto(next);
 	}
 	

@@ -2,7 +2,7 @@ Uuid,privilege name,description
 eebcc9a1-0a2c-4adc-bd7b-568021f2dee2,Task: patientqueueing.viewQueue,"Ability to view queue status and entries"
 bbccf45e-72d9-44de-85cb-83d80b14d3ec,Task: patientqueueing.sendPatientToQueue,"Ability to send Patient To Queue"
 193b3be4-ba06-4150-8a1c-70b9c2a07ab5,Task: patientqueueing.checkIn,"Ability to perform patient check-in"
-1a6406d2-a0cb-4ac8-91d0-59411153df62,Task: patientqueueing.manageQueue,"Ability to manage queue entries (pick, complete, skip, call)"
+1a6406d2-a0cb-4ac8-91d0-59411153df62,Task: patientqueueing.manageQueue,"Ability to manage queue entries (pick, call, hold, recall, skip, no-show, transfer, complete)"
 6192ce88-9135-4c95-9c76-7802baae0b3a,Task: patientqueueing.completePatientQueue,"Able to complete a patient queue"
 4e620af6-74a7-49db-92ff-ff53ad511117,App: patientqueueing.providerDashboard,"Able to access Provider Dashboard"
 16311215-b8af-4654-8654-9f16016d64bf,App: patientqueueing.selfCheckIn,"Ability to access self check-in kiosk"
