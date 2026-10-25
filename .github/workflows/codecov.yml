@@ -12,4 +12,4 @@ jobs:
       actions: read
       id-token: write
       pull-requests: read
-    uses: openmrs/openmrs-contrib-gha-workflows/.github/workflows/upload-coverage.yml@master
+    uses: openmrs/openmrs-contrib-gha-workflows/.github/workflows/upload-coverage.yml@main

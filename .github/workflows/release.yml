@@ -16,7 +16,7 @@ on:
 
 jobs:
   release:
-    uses: openmrs/openmrs-contrib-gha-workflows/.github/workflows/release-backend-module.yml@master
+    uses: openmrs/openmrs-contrib-gha-workflows/.github/workflows/release-backend-module.yml@main
     permissions:
       contents: write
     with:
