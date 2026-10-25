@@ -42,13 +42,15 @@ import java.util.List;
 public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 	
 	private static final String QUEUE_STANDARD_DATASET_XML = "org/openmrs/module/patientqueueing/standardTestDataset.xml";
-
+	
 	private static Logger logger = LoggerFactory.getLogger(PatientQueueingServiceTest.class);
-
-    private static final Integer QUEUE_PRIORITY_ZERO = 0;
-    private static final Integer QUEUE_PRIORITY_ONE = 1;
-    private static final int STANDARD_VISIT_NUMBER_LENGTH = 18;
-
+	
+	private static final Integer QUEUE_PRIORITY_ZERO = 0;
+	
+	private static final Integer QUEUE_PRIORITY_ONE = 1;
+	
+	private static final int STANDARD_VISIT_NUMBER_LENGTH = 18;
+	
 	@Before
 	public void initialize() throws Exception {
 		executeDataSet(QUEUE_STANDARD_DATASET_XML);
@@ -249,59 +251,59 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 		
 		Assert.assertEquals(patientQueue.getVisitNumber(), patientQueue2.getVisitNumber());
 	}
-
+	
 	@Test
 	public void getMostRecentQueue_shouldReturnMostRecentPatientQueue() throws ParseException {
 		PatientQueueingService patientQueueingService = Context.getService(PatientQueueingService.class);
-
+		
 		Patient patient = Context.getPatientService().getPatient(10000);
-
+		
 		PatientQueue patientQueue = patientQueueingService.getPatientQueueById(2);
-
+		
 		Assert.assertEquals(patientQueue, patientQueueingService.getMostRecentQueue(patient));
-
+		
 	}
-
-    @Test
-    public void savePatientQueue_shouldNotCompletePatientQueueOnEdit() throws Exception {
-
-        PatientQueueingService patientQueueingService = Context.getService(PatientQueueingService.class);
-
-        Patient patient = Context.getPatientService().getPatient(10000);
-
-        Location location = Context.getLocationService().getLocation(1);
-
-        PatientQueue patientQueue = new PatientQueue();
-        patientQueue.setPatient(patient);
-        patientQueue.setStatus(PatientQueue.Status.PENDING);
-        patientQueue.setEncounter(Context.getEncounterService().getEncounter(10000));
-        patientQueue.setLocationFrom(location);
-        patientQueue.setLocationTo(location);
-        patientQueue.setPriority(QUEUE_PRIORITY_ZERO);
-        patientQueue.setPriorityComment("Emergency");
-        patientQueueingService.assignVisitNumberForToday(patientQueue);
-        patientQueueingService.savePatientQue(patientQueue);
-
-        PatientQueue patientQueueToEdit = patientQueueingService.getPatientQueueById(patientQueue.getPatientQueueId());
-
-        patientQueueToEdit.setPriority(QUEUE_PRIORITY_ONE);
-        patientQueueToEdit.setPriorityComment("Non-Emergency");
-
-        PatientQueue editedPatientQueue = patientQueueingService.savePatientQue(patientQueueToEdit);
-
-        Assert.assertEquals(QUEUE_PRIORITY_ONE, editedPatientQueue.getPriority());
-        Assert.assertEquals("Non-Emergency", editedPatientQueue.getPriorityComment());
-        Assert.assertEquals(PatientQueue.Status.PENDING, editedPatientQueue.getStatus());
-    }
-
+	
+	@Test
+	public void savePatientQueue_shouldNotCompletePatientQueueOnEdit() throws Exception {
+		
+		PatientQueueingService patientQueueingService = Context.getService(PatientQueueingService.class);
+		
+		Patient patient = Context.getPatientService().getPatient(10000);
+		
+		Location location = Context.getLocationService().getLocation(1);
+		
+		PatientQueue patientQueue = new PatientQueue();
+		patientQueue.setPatient(patient);
+		patientQueue.setStatus(PatientQueue.Status.PENDING);
+		patientQueue.setEncounter(Context.getEncounterService().getEncounter(10000));
+		patientQueue.setLocationFrom(location);
+		patientQueue.setLocationTo(location);
+		patientQueue.setPriority(QUEUE_PRIORITY_ZERO);
+		patientQueue.setPriorityComment("Emergency");
+		patientQueueingService.assignVisitNumberForToday(patientQueue);
+		patientQueueingService.savePatientQue(patientQueue);
+		
+		PatientQueue patientQueueToEdit = patientQueueingService.getPatientQueueById(patientQueue.getPatientQueueId());
+		
+		patientQueueToEdit.setPriority(QUEUE_PRIORITY_ONE);
+		patientQueueToEdit.setPriorityComment("Non-Emergency");
+		
+		PatientQueue editedPatientQueue = patientQueueingService.savePatientQue(patientQueueToEdit);
+		
+		Assert.assertEquals(QUEUE_PRIORITY_ONE, editedPatientQueue.getPriority());
+		Assert.assertEquals("Non-Emergency", editedPatientQueue.getPriorityComment());
+		Assert.assertEquals(PatientQueue.Status.PENDING, editedPatientQueue.getStatus());
+	}
+	
 	@Test
 	public void generateVisitNumber_shouldNotThrowOutOfIndexExceptionWhenPreviousQueueVisitNumberLengthLessThanStandardLength() {
 		PatientQueueingService patientQueueingService = Context.getService(PatientQueueingService.class);
-
+		
 		Patient patient = Context.getPatientService().getPatient(10000);
-
+		
 		Location location = Context.getLocationService().getLocation(1);
-
+		
 		PatientQueue patientQueue = new PatientQueue();
 		patientQueue.setPatient(patient);
 		patientQueue.setStatus(PatientQueue.Status.PENDING);
@@ -310,190 +312,195 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 		patientQueue.setLocationTo(location);
 		patientQueue.setVisitNumber("20/10/2019-002");
 		patientQueueingService.savePatientQue(patientQueue);
-
+		
 		Assert.assertNotEquals(STANDARD_VISIT_NUMBER_LENGTH, patientQueue.getVisitNumber());
-
+		
 		patientQueueingService.generateVisitNumber(location, patient);
 	}
-
-    @Test
-    public void getPatientQueueListBySearchParams_shouldReturnPatientQueuesThatMatchesParameters() throws Exception {
-
-        PatientQueueingService patientQueueingService = Context.getService(PatientQueueingService.class);
-
+	
+	@Test
+	public void getPatientQueueListBySearchParams_shouldReturnPatientQueuesThatMatchesParameters() throws Exception {
+		
+		PatientQueueingService patientQueueingService = Context.getService(PatientQueueingService.class);
+		
 		Date dateCreated = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2019-10-07 19:08:26");
-
-        Patient patient = Context.getPatientService().getPatient(10000);
-
-
-		List<PatientQueue> patientQueueList = patientQueueingService.getPatientQueueListBySearchParams("Mukasa", OpenmrsUtil.firstSecondOfDay(dateCreated), OpenmrsUtil.getLastMomentOfDay(dateCreated), null, null, PatientQueue.Status.PENDING);
-
-        Assert.assertEquals(1, patientQueueList.size());
-
-        Assert.assertEquals(patient, patientQueueList.get(0).getPatient());
-
-        Assert.assertEquals("Mukasa", patientQueueList.get(0).getPatient().getFamilyName());
-    }
-
-    @Test
-    public void getPatientQueueListBySearchParams_shouldReturnNotReturnPatientQueuesThatDontMatchParameters() throws Exception {
-
-        PatientQueueingService patientQueueingService = Context.getService(PatientQueueingService.class);
-
-        Patient patient = Context.getPatientService().getPatient(8);
-
-        Location location = Context.getLocationService().getLocation(1);
-
-        Assert.assertEquals("Anet", patient.getGivenName());
-
-        List<PatientQueue> patientQueueList = patientQueueingService.getPatientQueueListBySearchParams("Anet", null, null, null, location, null);
-
-        Assert.assertEquals(0, patientQueueList.size());
-
-    }
-
+		
+		Patient patient = Context.getPatientService().getPatient(10000);
+		
+		List<PatientQueue> patientQueueList = patientQueueingService.getPatientQueueListBySearchParams("Mukasa",
+		    OpenmrsUtil.firstSecondOfDay(dateCreated), OpenmrsUtil.getLastMomentOfDay(dateCreated), null, null,
+		    PatientQueue.Status.PENDING);
+		
+		Assert.assertEquals(1, patientQueueList.size());
+		
+		Assert.assertEquals(patient, patientQueueList.get(0).getPatient());
+		
+		Assert.assertEquals("Mukasa", patientQueueList.get(0).getPatient().getFamilyName());
+	}
+	
+	@Test
+	public void getPatientQueueListBySearchParams_shouldReturnNotReturnPatientQueuesThatDontMatchParameters()
+	        throws Exception {
+		
+		PatientQueueingService patientQueueingService = Context.getService(PatientQueueingService.class);
+		
+		Patient patient = Context.getPatientService().getPatient(8);
+		
+		Location location = Context.getLocationService().getLocation(1);
+		
+		Assert.assertEquals("Anet", patient.getGivenName());
+		
+		List<PatientQueue> patientQueueList = patientQueueingService.getPatientQueueListBySearchParams("Anet", null, null,
+		    null, location, null);
+		
+		Assert.assertEquals(0, patientQueueList.size());
+		
+	}
+	
 	@Test
 	public void pickPatientQueue_shouldSetAndReturnPatientQueueWithPickedStatus() throws Exception {
-
+		
 		PatientQueueingService patientQueueingService = Context.getService(PatientQueueingService.class);
-
+		
 		Patient patient = Context.getPatientService().getPatient(10000);
 		Location location = Context.getLocationService().getLocation(1);
-
+		
 		List<PatientQueue> patientQueueList = Context.getService(PatientQueueingService.class).getPatientQueueList(null,
-				null, null, location, null, patient, PatientQueue.Status.PENDING);
-
+		    null, null, location, null, patient, PatientQueue.Status.PENDING);
+		
 		PatientQueue patientQueue = patientQueueList.get(0);
-
+		
 		Assert.assertEquals(PatientQueue.Status.PENDING, patientQueue.getStatus());
-
+		
 		patientQueueingService.pickPatientQueue(patientQueue, null, null);
-
+		
 		PatientQueue pickedPatientQueue = patientQueueingService.getPatientQueueById(patientQueue.getPatientQueueId());
-
+		
 		Assert.assertNotNull(pickedPatientQueue);
-
+		
 		Assert.assertEquals(PatientQueue.Status.PICKED, pickedPatientQueue.getStatus());
 		Assert.assertNotNull(pickedPatientQueue.getDatePicked());
 	}
-
+	
 	@Test
 	public void completePatientQueue_shouldSetAndReturnPatientQueueWithDateCompleted() throws Exception {
-
+		
 		PatientQueueingService patientQueueingService = Context.getService(PatientQueueingService.class);
-
+		
 		Patient patient = Context.getPatientService().getPatient(10000);
 		Location location = Context.getLocationService().getLocation(1);
-
+		
 		List<PatientQueue> patientQueueList = Context.getService(PatientQueueingService.class).getPatientQueueList(null,
-				null, null, location, null, patient, PatientQueue.Status.PENDING);
-
+		    null, null, location, null, patient, PatientQueue.Status.PENDING);
+		
 		PatientQueue patientQueue = patientQueueList.get(0);
-
+		
 		Assert.assertEquals(PatientQueue.Status.PENDING, patientQueue.getStatus());
-
+		
 		patientQueueingService.completePatientQueue(patientQueue);
-
+		
 		PatientQueue completedPatientQueue = patientQueueingService.getPatientQueueById(patientQueue.getPatientQueueId());
-
+		
 		Assert.assertNotNull(completedPatientQueue);
-
+		
 		Assert.assertEquals(PatientQueue.Status.COMPLETED, completedPatientQueue.getStatus());
 		Assert.assertNotNull(completedPatientQueue.getDateCompleted());
 	}
-
+	
 	@Test
 	public void getPatientsInQueueRoom_ShouldReturnPatientsInQueueRoomsOfParentLocation() throws ParseException {
 		Location parentLocation = Context.getLocationService().getLocation(1);
 		Date dateCreated = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2023-07-07 19:08:26");
-		List<PatientQueue> patientQueueList=Context.getService(PatientQueueingService.class).getPatientQueueByParentLocation(parentLocation,PatientQueue.Status.PENDING,OpenmrsUtil.firstSecondOfDay(dateCreated),
-				OpenmrsUtil.getLastMomentOfDay(dateCreated),true);
+		List<PatientQueue> patientQueueList = Context.getService(PatientQueueingService.class)
+		        .getPatientQueueByParentLocation(parentLocation, PatientQueue.Status.PENDING,
+		            OpenmrsUtil.firstSecondOfDay(dateCreated), OpenmrsUtil.getLastMomentOfDay(dateCreated), true);
 		Assert.assertEquals(2, patientQueueList.size());
-		Assert.assertEquals( patientQueueList.get(0).getQueueRoom().getParentLocation(),parentLocation);
-		Assert.assertEquals( patientQueueList.get(0).getQueueRoom().getName(),"Room 1");
+		Assert.assertEquals(patientQueueList.get(0).getQueueRoom().getParentLocation(), parentLocation);
+		Assert.assertEquals(patientQueueList.get(0).getQueueRoom().getName(), "Room 1");
 	}
-
+	
 	@Test
 	public void getPatientsInQueue_ShouldReturnPatientsInQueueChildLocationsOfParentLocation() throws ParseException {
 		Location parentLocation = Context.getLocationService().getLocation(1);
 		Date dateCreated = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2023-07-07 19:08:26");
-		List<PatientQueue> patientQueueList=Context.getService(PatientQueueingService.class).getPatientQueueByParentLocation(parentLocation,PatientQueue.Status.PENDING,OpenmrsUtil.firstSecondOfDay(dateCreated),
-				OpenmrsUtil.getLastMomentOfDay(dateCreated),false);
-		Assert.assertTrue( patientQueueList.size()>1);
+		List<PatientQueue> patientQueueList = Context.getService(PatientQueueingService.class)
+		        .getPatientQueueByParentLocation(parentLocation, PatientQueue.Status.PENDING,
+		            OpenmrsUtil.firstSecondOfDay(dateCreated), OpenmrsUtil.getLastMomentOfDay(dateCreated), false);
+		Assert.assertTrue(patientQueueList.size() > 1);
 		Assert.assertEquals(3, patientQueueList.size());
-		Assert.assertEquals(patientQueueList.get(2).getQueueRoom().getName(),"Sub Sub Room 1 R2");
+		Assert.assertEquals(patientQueueList.get(2).getQueueRoom().getName(), "Sub Sub Room 1 R2");
 	}
-
+	
 	@Test
 	public void getPatientQueueByVisitNumber_shouldDelegateToDaoAndReturnResults() throws Exception {
 		String visitNumber = "VISIT-001";
 		Date fromDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2023-07-07 00:00:00");
 		Date toDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2023-07-07 23:59:59");
-
+		
 		PatientQueue patientQueue = new PatientQueue();
 		patientQueue.setVisitNumber(visitNumber);
-
+		
 		List<PatientQueue> expected = Arrays.asList(patientQueue);
-
+		
 		Mockito.when(dao.getPatientQueueByVisitNumber(visitNumber, fromDate, toDate)).thenReturn(expected);
-
+		
 		List<PatientQueue> result = patientQueueingService.getPatientQueueByVisitNumber(visitNumber, fromDate, toDate);
-
+		
 		Assert.assertNotNull(result);
 		Assert.assertEquals(1, result.size());
 		Assert.assertEquals(visitNumber, result.get(0).getVisitNumber());
-
+		
 		Mockito.verify(dao).getPatientQueueByVisitNumber(visitNumber, fromDate, toDate);
 	}
-
+	
 	@Test
 	public void getPatientQueueListFifo_shouldDelegateToDaoAndReturnResultsInFifoOrder() throws Exception {
 		Provider provider = new Provider();
 		provider.setId(1);
-
+		
 		Date fromDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2023-07-07 00:00:00");
 		Date toDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2023-07-07 23:59:59");
-
+		
 		Location locationTo = Context.getLocationService().getLocation(1);
 		Location locationFrom = Context.getLocationService().getLocation(2);
 		Patient patient = Context.getPatientService().getPatient(10000);
 		PatientQueue.Status status = PatientQueue.Status.PENDING;
 		Location queueRoom = Context.getLocationService().getLocation(3);
-
+		
 		PatientQueue firstQueue = new PatientQueue();
 		firstQueue.setPatient(patient);
 		firstQueue.setStatus(status);
 		firstQueue.setQueueRoom(queueRoom);
-
+		
 		PatientQueue secondQueue = new PatientQueue();
 		secondQueue.setPatient(patient);
 		secondQueue.setStatus(status);
 		secondQueue.setQueueRoom(queueRoom);
-
+		
 		List<PatientQueue> expected = Arrays.asList(firstQueue, secondQueue);
-
+		
 		Mockito.when(
-						dao.getPatientQueueListFifo(provider, fromDate, toDate, locationTo, locationFrom, patient, status, queueRoom))
-				.thenReturn(expected);
-
+		    dao.getPatientQueueListFifo(provider, fromDate, toDate, locationTo, locationFrom, patient, status, queueRoom))
+		        .thenReturn(expected);
+		
 		List<PatientQueue> result = patientQueueingService.getPatientQueueListFifo(provider, fromDate, toDate, locationTo,
-				locationFrom, patient, status, queueRoom);
-
+		    locationFrom, patient, status, queueRoom);
+		
 		Assert.assertNotNull(result);
 		Assert.assertEquals(2, result.size());
 		Assert.assertEquals(expected, result);
-
+		
 		Mockito.verify(dao).getPatientQueueListFifo(provider, fromDate, toDate, locationTo, locationFrom, patient, status,
-				queueRoom);
+		    queueRoom);
 	}
-
+	
 	@Test
 	public void getPatientQueueByParentLocationFifo_shouldReturnNullWhenNoChildLocationsMatch() throws Exception {
 		Location parentLocation = Context.getLocationService().getLocation(1);
-
+		
 		List<PatientQueue> result = patientQueueingService.getPatientQueueByParentLocationFifo(parentLocation,
-				PatientQueue.Status.PENDING, null, null, true);
-
+		    PatientQueue.Status.PENDING, null, null, true);
+		
 		if (result == null) {
 			Assert.assertNull(result);
 			Mockito.verifyZeroInteractions(dao);
@@ -501,31 +508,31 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 			Assert.assertNotNull(result);
 		}
 	}
-
+	
 	@Test
 	public void getPatientQueueByParentLocationFifo_shouldDelegateToDaoWhenChildQueueRoomsExist() throws Exception {
 		Location parentLocation = Context.getLocationService().getLocation(1);
 		Date fromDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2023-07-07 00:00:00");
 		Date toDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2023-07-07 23:59:59");
-
+		
 		PatientQueue queue1 = new PatientQueue();
 		PatientQueue queue2 = new PatientQueue();
 		List<PatientQueue> expected = Arrays.asList(queue1, queue2);
-
+		
 		Mockito.when(
-				dao.getPatientsInQueueRoomFifo(Mockito.anyList(), Mockito.eq(PatientQueue.Status.PENDING), Mockito.eq(fromDate),
-						Mockito.eq(toDate))).thenReturn(expected);
-
+		    dao.getPatientsInQueueRoomFifo(Mockito.anyList(), Mockito.eq(PatientQueue.Status.PENDING), Mockito.eq(fromDate),
+		        Mockito.eq(toDate))).thenReturn(expected);
+		
 		List<PatientQueue> result = patientQueueingService.getPatientQueueByParentLocationFifo(parentLocation,
-				PatientQueue.Status.PENDING, fromDate, toDate, true);
-
+		    PatientQueue.Status.PENDING, fromDate, toDate, true);
+		
 		Assert.assertNotNull(result);
 		Assert.assertEquals(2, result.size());
-
+		
 		ArgumentCaptor<List> locationsCaptor = ArgumentCaptor.forClass(List.class);
 		Mockito.verify(dao).getPatientsInQueueRoomFifo(locationsCaptor.capture(), Mockito.eq(PatientQueue.Status.PENDING),
-				Mockito.eq(fromDate), Mockito.eq(toDate));
-
+		    Mockito.eq(fromDate), Mockito.eq(toDate));
+		
 		List capturedLocations = locationsCaptor.getValue();
 		Assert.assertNotNull(capturedLocations);
 		Assert.assertFalse(capturedLocations.isEmpty());

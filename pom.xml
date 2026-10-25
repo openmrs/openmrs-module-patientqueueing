@@ -10,7 +10,7 @@
 
 	<groupId>org.openmrs.module</groupId>
 	<artifactId>patientqueueing</artifactId>
-	<version>2.0.2-SNAPSHOT</version>
+	<version>3.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Patient Queueing</name>
 	<description>This Module Provides functionality to Queue Patient In a Hospital with a health care provider Dashboard to allow them to see the people in queue, message other providers and receive messages from other providers regarding patient care</description>
@@ -103,21 +103,6 @@
 				<type>test-jar</type>
 			</dependency>
 
-			<dependency>
-				<groupId>org.openmrs.module</groupId>
-				<artifactId>webservices.rest-omod-1.8</artifactId>
-				<version>${webservicesRestVersion}</version>
-				<type>test-jar</type>
-				<scope>test</scope>
-			</dependency>
-
-			<dependency>
-				<groupId>org.openmrs.module</groupId>
-				<artifactId>webservices.rest-omod-1.11</artifactId>
-				<version>${webservicesRestVersion}</version>
-				<scope>provided</scope>
-			</dependency>
-
 		</dependencies>
 	</dependencyManagement>
 	<build>
@@ -126,9 +111,10 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.13.0</version>
 					<configuration>
-						<target>1.7</target>
-						<source>1.7</source>
+						<target>1.8</target>
+						<source>1.8</source>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -144,6 +130,23 @@
 						<autoVersionSubmodules>true</autoVersionSubmodules>
 						<tagNameFormat>@{project.version}</tagNameFormat>
 					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.22.2</version>
+					<configuration>
+						<useSystemClassLoader>false</useSystemClassLoader>
+						<junitArtifactName>junit:junit</junitArtifactName>
+						<!-- add-opens flags removed - they are Java 9+ only and this module targets Java 8 -->
+					</configuration>
+					<dependencies>
+						<dependency>
+							<groupId>org.apache.maven.surefire</groupId>
+							<artifactId>surefire-junit47</artifactId>
+							<version>2.22.2</version>
+						</dependency>
+					</dependencies>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -188,7 +191,7 @@
 	</distributionManagement>
 
 	<properties>
-		<webservicesRestVersion>2.28.0</webservicesRestVersion>
-		<openmrsPlatformVersion>1.12.0</openmrsPlatformVersion>
+		<webservicesRestVersion>3.0.0</webservicesRestVersion>
+		<openmrsPlatformVersion>2.8.0</openmrsPlatformVersion>
 	</properties>
 </project>

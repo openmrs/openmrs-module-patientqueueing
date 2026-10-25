@@ -55,4 +55,32 @@
             </list>
         </property>
     </bean>
+
+    <!-- Wraps ProviderAssignmentService methods in DB transactions and OpenMRS interceptors -->
+    <bean id="patientqueueing.ProviderAssignmentService"
+          class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+        <property name="transactionManager">
+            <ref bean="transactionManager"/>
+        </property>
+        <property name="target">
+            <bean class="org.openmrs.module.patientqueueing.api.impl.ProviderAssignmentServiceImpl"/>
+        </property>
+        <property name="preInterceptors">
+            <ref bean="serviceInterceptors"/>
+        </property>
+        <property name="transactionAttributeSource">
+            <ref bean="transactionAttributeSource"/>
+        </property>
+    </bean>
+
+    <!-- Adds ProviderAssignmentService to OpenMRS context so it can be accessed
+    calling Context.getService(ProviderAssignmentService.class) -->
+    <bean parent="serviceContext">
+        <property name="moduleService">
+            <list>
+                <value>org.openmrs.module.patientqueueing.api.ProviderAssignmentService</value>
+                <ref bean="patientqueueing.ProviderAssignmentService"/>
+            </list>
+        </property>
+    </bean>
 </beans>

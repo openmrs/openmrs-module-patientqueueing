@@ -163,4 +163,143 @@
             <column name="date_completed" type="datetime" />
         </addColumn>
     </changeSet>
+
+    <changeSet author="patientqueueing" id="non_patient_queue-20260420-1">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="non_patient_queue"/></not>
+        </preConditions>
+        <comment>
+            Create non_patient_queue table for self check-in and non-patient queue management
+        </comment>
+        <createTable tableName="non_patient_queue">
+            <column name="non_patient_queue_id" type="INT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="uuid" type="varchar(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+
+            <column name="creator" type="INT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="changed_by" type="INT"/>
+            <column name="date_changed" type="datetime"/>
+            <column name="voided" type="bit" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="INT"/>
+            <column name="date_voided" type="datetime"/>
+            <column name="void_reason" type="varchar(255)"/>
+
+            <column name="ticket_number" type="varchar(50)"/>
+            <column name="display_name" type="varchar(255)"/>
+            <column name="phone_number" type="varchar(50)"/>
+            <column name="queue_type_concept_id" type="INT"/>
+            <column name="status" type="varchar(50)"/>
+
+            <column name="current_location" type="INT"/>
+            <column name="location_to" type="INT"/>
+            <column name="queue_room" type="INT"/>
+
+            <column name="called_by" type="INT"/>
+            <column name="served_by" type="INT"/>
+
+            <column name="priority" type="INT"/>
+            <column name="comment" type="TEXT"/>
+
+            <column name="called_at" type="datetime"/>
+            <column name="arrived_at" type="datetime"/>
+            <column name="started_at" type="datetime"/>
+            <column name="ended_at" type="datetime"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="non_patient_queue"
+                baseColumnNames="creator"
+                referencedTableName="users"
+                referencedColumnNames="user_id"
+                constraintName="fk_npq_creator"/>
+
+        <addForeignKeyConstraint
+                baseTableName="non_patient_queue"
+                baseColumnNames="changed_by"
+                referencedTableName="users"
+                referencedColumnNames="user_id"
+                constraintName="fk_npq_changed_by"/>
+
+        <addForeignKeyConstraint
+                baseTableName="non_patient_queue"
+                baseColumnNames="voided_by"
+                referencedTableName="users"
+                referencedColumnNames="user_id"
+                constraintName="fk_npq_voided_by"/>
+
+        <addForeignKeyConstraint
+                baseTableName="non_patient_queue"
+                baseColumnNames="queue_type_concept_id"
+                referencedTableName="concept"
+                referencedColumnNames="concept_id"
+                constraintName="fk_npq_queue_type_concept"/>
+
+        <addForeignKeyConstraint
+                baseTableName="non_patient_queue"
+                baseColumnNames="current_location"
+                referencedTableName="location"
+                referencedColumnNames="location_id"
+                constraintName="fk_npq_current_location"/>
+
+        <addForeignKeyConstraint
+                baseTableName="non_patient_queue"
+                baseColumnNames="location_to"
+                referencedTableName="location"
+                referencedColumnNames="location_id"
+                constraintName="fk_npq_location_to"/>
+
+        <addForeignKeyConstraint
+                baseTableName="non_patient_queue"
+                baseColumnNames="queue_room"
+                referencedTableName="location"
+                referencedColumnNames="location_id"
+                constraintName="fk_npq_queue_room"/>
+
+        <addForeignKeyConstraint
+                baseTableName="non_patient_queue"
+                baseColumnNames="called_by"
+                referencedTableName="provider"
+                referencedColumnNames="provider_id"
+                constraintName="fk_npq_called_by"/>
+
+        <addForeignKeyConstraint
+                baseTableName="non_patient_queue"
+                baseColumnNames="served_by"
+                referencedTableName="provider"
+                referencedColumnNames="provider_id"
+                constraintName="fk_npq_served_by"/>
+
+        <createIndex tableName="non_patient_queue" indexName="idx_npq_ticket_number">
+            <column name="ticket_number"/>
+        </createIndex>
+
+        <createIndex tableName="non_patient_queue" indexName="idx_npq_status">
+            <column name="status"/>
+        </createIndex>
+
+        <createIndex tableName="non_patient_queue" indexName="idx_npq_queue_room">
+            <column name="queue_room"/>
+        </createIndex>
+
+        <createIndex tableName="non_patient_queue" indexName="idx_npq_date_created">
+            <column name="date_created"/>
+        </createIndex>
+
+        <createIndex tableName="non_patient_queue" indexName="idx_npq_location_to">
+            <column name="location_to"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>

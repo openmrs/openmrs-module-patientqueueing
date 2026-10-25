@@ -8,6 +8,7 @@ import io.swagger.models.properties.DateProperty;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.properties.IntegerProperty;
 import org.openmrs.Location;
+import org.openmrs.annotation.Authorized;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.patientqueueing.api.PatientQueueingService;
 import org.openmrs.module.patientqueueing.model.PatientQueue;
@@ -52,6 +53,7 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 	}
 	
 	@Override
+	@Authorized("Task: patientqueueing.viewQueue")
 	public PatientQueue getByUniqueId(String uniqueId) {
 		PatientQueue patientQueue = null;
 		Integer id = null;
@@ -109,6 +111,7 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 	}
 
 	@Override
+	@Authorized("Task: patientqueueing.viewQueue")
 	public NeedsPaging<PatientQueue> doGetAll(RequestContext context) throws ResponseException {
 		return new NeedsPaging<PatientQueue>(new ArrayList<PatientQueue>(Context.getService(PatientQueueingService.class)
 		        .getPatientQueueList(null, null, null, null, null, null, null)), context);
@@ -226,6 +229,7 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 		boolean onlyInQueueRooms = Boolean.parseBoolean(context.getParameter("onlyInQueueRooms"));
 		String status = context.getParameter("status");
 		String queueRoomQuery = context.getParameter("room");
+		boolean includeHistory = Boolean.parseBoolean(context.getParameter("includeHistory"));
 		PatientQueue.Status queueStatus = null;
 		
 		Location location = null;
@@ -259,6 +263,17 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 			    OpenmrsUtil.getLastMomentOfDay(new Date()), location, null, queueStatus, room);
 		}
 
+		// Filter out COMPLETED entries unless includeHistory is true
+		if (!includeHistory && PatientQueuesByQuery != null && queueStatus != PatientQueue.Status.COMPLETED) {
+			List<PatientQueue> filtered = new java.util.ArrayList<PatientQueue>();
+			for (PatientQueue queue : PatientQueuesByQuery) {
+				if (queue.getStatus() != PatientQueue.Status.COMPLETED) {
+					filtered.add(queue);
+				}
+			}
+			PatientQueuesByQuery = filtered;
+		}
+		
 		return new NeedsPaging<PatientQueue>(PatientQueuesByQuery, context);
 	}
 
@@ -287,17 +302,7 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 			        .property("comment", new StringProperty()).property("status", new StringProperty())
 			        .property("datePicked", new DateProperty()).property("dateCompleted", new DateProperty());
 		}
-		if (rep instanceof DefaultRepresentation) {
-			model.property("patient", new RefProperty("#/definitions/PatientGetRef"))
-			        .property("creator", new RefProperty("#/definitions/UserGetRef"))
-			        .property("changedBy", new RefProperty("#/definitions/UserGetRef"))
-			        .property("voidedBy", new RefProperty("#/definitions/UserGetRef"))
-			        .property("provider", new RefProperty("#/definitions/ProviderGetRef"))
-			        .property("locationFrom", new RefProperty("#/definitions/LocationGetRef"))
-			        .property("locationTo", new RefProperty("#/definitions/LocationGetRef"))
-			        .property("encounter", new RefProperty("#/definitions/EncounterGetRef"));
-			
-		} else if (rep instanceof FullRepresentation) {
+		if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
 			model.property("patient", new RefProperty("#/definitions/PatientGetRef"))
 			        .property("creator", new RefProperty("#/definitions/UserGetRef"))
 			        .property("changedBy", new RefProperty("#/definitions/UserGetRef"))
@@ -321,17 +326,7 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 			        .property("status", new StringProperty()).property("datePicked", new DateProperty())
 			        .property("dateCompleted", new DateProperty());
 		}
-		if (rep instanceof DefaultRepresentation) {
-			model.property("patient", new RefProperty("#/definitions/PatientCreate"))
-			        .property("creator", new RefProperty("#/definitions/UserCreate"))
-			        .property("changedBy", new RefProperty("#/definitions/UserCreate"))
-			        .property("voidedBy", new RefProperty("#/definitions/UserCreate"))
-			        .property("provider", new RefProperty("#/definitions/ProviderCreate"))
-			        .property("locationFrom", new RefProperty("#/definitions/LocationCreate"))
-			        .property("locationTo", new RefProperty("#/definitions/LocationCreate"))
-			        .property("encounter", new RefProperty("#/definitions/EncounterCreate"));
-			
-		} else if (rep instanceof FullRepresentation) {
+		if (rep instanceof DefaultRepresentation || rep instanceof FullRepresentation) {
 			model.property("patient", new RefProperty("#/definitions/PatientCreate"))
 			        .property("creator", new RefProperty("#/definitions/UserCreate"))
 			        .property("changedBy", new RefProperty("#/definitions/UserCreate"))
@@ -357,6 +352,6 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 		        .property("dateCompleted", new DateProperty())
 		        .property("provider", new RefProperty("#/definitions/ProviderCreate"))
 				.property("voided", new BooleanProperty())
-				.property("queueRoom", new BooleanProperty());
+				.property("queueRoom", new StringProperty());
 	}
 }
