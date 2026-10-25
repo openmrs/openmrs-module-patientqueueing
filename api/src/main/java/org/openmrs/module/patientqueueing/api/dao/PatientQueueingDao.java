@@ -187,7 +187,8 @@ public class PatientQueueingDao {
 	 *      org.openmrs.module.patientqueueing.model.PatientQueue.Status,java.util.Date dateFrom,
 	 *      java.util.Date)
 	 */
-	public List<PatientQueue> getPatientsInQueueRoom(List<Location> queueRooms, PatientQueue.Status status, Date fromDate, Date toDate) {
+	public List<PatientQueue> getPatientsInQueueRoom(List<Location> queueRooms, PatientQueue.Status status, Date fromDate,
+	        Date toDate) {
 		Criteria criteria = getSession().createCriteria(PatientQueue.class);
 		
 		if (fromDate != null && toDate != null) {
@@ -227,28 +228,28 @@ public class PatientQueueingDao {
 		if (fromDate != null && toDate != null) {
 			criteria.add(Restrictions.between("dateCreated", fromDate, toDate));
 		}
-
+		
 		if (provider != null) {
 			criteria.add(Restrictions.eq("provider", provider));
 		}
-
+		
 		if (locationTo != null) {
 			criteria.add(Restrictions.eq("locationTo", locationTo));
 		}
-
+		
 		if (locationFrom != null) {
 			criteria.add(Restrictions.eq("locationFrom", locationFrom));
 		}
-
+		
 		if (patient != null) {
 			criteria.add(Restrictions.eq("patient", patient));
-
+			
 		}
-
-		if (status != null){
+		
+		if (status != null) {
 			criteria.add(Restrictions.eq("status", status));
 		}
-
+		
 		if (queueRoom != null) {
 			criteria.add(Restrictions.eq("queueRoom", queueRoom));
 		}
@@ -264,11 +265,11 @@ public class PatientQueueingDao {
 		if (fromDate != null && toDate != null) {
 			criteria.add(Restrictions.between("dateCreated", fromDate, toDate));
 		}
-
+		
 		if (status != null) {
 			criteria.add(Restrictions.eq("status", status));
 		}
-
+		
 		if (queueRooms != null) {
 			criteria.add(Restrictions.in("queueRoom", queueRooms));
 		}
