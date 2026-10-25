@@ -17,12 +17,16 @@ on:
 jobs:
   release:
     uses: openmrs/openmrs-contrib-gha-workflows/.github/workflows/release-backend-module.yml@main
-    permissions:
-      contents: write
+    # The release would otherwise infer Java 7 from the compiler's 1.7
+    # settings, which Temurin no longer distributes; JDK 8 can still
+    # compile -source/-target 1.7
     with:
+      java_version: '8'
       release_version: ${{ inputs.release_version }}
       development_version: ${{ inputs.development_version }}
       branch: ${{ inputs.branch }}
+    permissions:
+      contents: write
     secrets:
       MAVEN_REPO_USERNAME: ${{ secrets.MAVEN_REPO_USERNAME }}
       MAVEN_REPO_API_KEY: ${{ secrets.MAVEN_REPO_API_KEY }}
