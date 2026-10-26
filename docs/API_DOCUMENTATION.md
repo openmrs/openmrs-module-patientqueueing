@@ -154,7 +154,7 @@ curl -X POST \
 
 Look up a queue entry by ticket number. Searches both patient and non-patient queues.
 
-**Endpoint**: `GET /ws/rest/v1/kiosk`
+**Endpoint**: `GET /ws/rest/v1/patientqueueing/kiosk`
 
 **Parameters**:
 | Parameter | Type | Required | Description |
@@ -189,14 +189,14 @@ Look up a queue entry by ticket number. Searches both patient and non-patient qu
 **Example**:
 ```bash
 curl -X GET \
-  'http://localhost:8080/openmrs/ws/rest/v1/kiosk?ticketNumber=21/04/2026-LOC-001'
+  'http://localhost:8080/openmrs/ws/rest/v1/patientqueueing/kiosk?ticketNumber=21/04/2026-LOC-001'
 ```
 
 ### Get All Queue Entries
 
 Get all queue entries for a location, including both patient and non-patient queues.
 
-**Endpoint**: `GET /ws/rest/v1/kiosk`
+**Endpoint**: `GET /ws/rest/v1/patientqueueing/kiosk`
 
 **Parameters**:
 | Parameter | Type | Required | Description |
@@ -238,14 +238,14 @@ Get all queue entries for a location, including both patient and non-patient que
 **Example**:
 ```bash
 curl -X GET \
-  'http://localhost:8080/openmrs/ws/rest/v1/kiosk?location=b1e39c4d-1234-5678-9abc-def456789013&status=PENDING'
+  'http://localhost:8080/openmrs/ws/rest/v1/patientqueueing/kiosk?location=b1e39c4d-1234-5678-9abc-def456789013&status=PENDING'
 ```
 
 ### Get Queue Display Data
 
 Get display data for public queue monitors, including "now serving" and "up next" information.
 
-**Endpoint**: `GET /ws/rest/v1/display`
+**Endpoint**: `GET /ws/rest/v1/patientqueueing/display`
 
 **Parameters**:
 | Parameter | Type | Required | Description |

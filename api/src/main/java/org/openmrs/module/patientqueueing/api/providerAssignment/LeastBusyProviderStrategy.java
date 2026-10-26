@@ -16,10 +16,11 @@ import org.openmrs.module.patientqueueing.api.PatientQueueingService;
 import org.openmrs.module.patientqueueing.model.PatientQueue;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Assigns the provider with the fewest active patient queues
@@ -46,17 +47,19 @@ public class LeastBusyProviderStrategy implements ProviderAssignmentStrategy {
 		if (availableProviders == null || availableProviders.isEmpty()) {
 			return null;
 		}
-		
+
 		if (availableProviders.size() == 1) {
 			return availableProviders.get(0);
 		}
-		
-		// Sort providers by their current queue count (ascending)
-		final Location finalLocation = location;
-		final Date today = new Date();
+
+		// One query for the whole location/day, then count per provider in memory —
+		// counting per provider inside the comparator would issue O(n log n) queries
+		// and risks "Comparison method violates its general contract" if counts
+		// shift mid-sort
+		Map<String, Integer> activeQueueCounts = countActiveQueuesByProvider(location, new Date());
+
 		List<Provider> sortedProviders = new ArrayList<>(availableProviders);
-		sortedProviders.sort(Comparator.comparingInt(p -> getActiveQueueCount(finalLocation, p, today)));
-		
+		sortedProviders.sort(Comparator.comparingInt(p -> activeQueueCounts.getOrDefault(p.getUuid(), 0)));
 		return sortedProviders.get(0);
 	}
 	
@@ -66,26 +69,25 @@ public class LeastBusyProviderStrategy implements ProviderAssignmentStrategy {
 	}
 	
 	/**
-	 * Get the count of active queues for a provider at a location
+	 * Count each provider's active (non-completed) queues at a location for a single day, with one
+	 * query for all providers.
 	 * 
 	 * @param location the location
-	 * @param provider the provider
-	 * @param today the date to use for the query (ensures all comparisons use the same time
-	 *            reference)
-	 * @return the number of active queues
+	 * @param today the date to query
+	 * @return map of provider UUID to active queue count (providers with no queues are absent)
 	 */
-	private int getActiveQueueCount(Location location, Provider provider, Date today) {
-		List<PatientQueue> queues = queueingService.getPatientQueueList(provider,
+	private Map<String, Integer> countActiveQueuesByProvider(Location location, Date today) {
+		List<PatientQueue> queues = queueingService.getPatientQueueList(null,
 		    org.openmrs.util.OpenmrsUtil.firstSecondOfDay(today), org.openmrs.util.OpenmrsUtil.getLastMomentOfDay(today),
 		    location, null, null, null, null);
-		
-		int count = 0;
+
+		Map<String, Integer> counts = new HashMap<>();
 		for (PatientQueue queue : queues) {
-			if (queue.getStatus() != PatientQueue.Status.COMPLETED) {
-				count++;
+			if (queue.getProvider() == null || queue.getStatus() == PatientQueue.Status.COMPLETED) {
+				continue;
 			}
+			counts.merge(queue.getProvider().getUuid(), 1, Integer::sum);
 		}
-		
-		return count;
+		return counts;
 	}
 }

@@ -42,6 +42,8 @@ public class ProviderAssignmentServiceImpl extends BaseOpenmrsService implements
 	
 	private ProviderAssignmentStrategy strategy;
 	
+	private String cachedStrategyName;
+	
 	@Override
 	public Provider assignProvider(Location location) {
 		List<Provider> providers = getProvidersForLocation(location);
@@ -73,18 +75,16 @@ public class ProviderAssignmentServiceImpl extends BaseOpenmrsService implements
 	
 	@Override
 	public ProviderAssignmentStrategy getProviderAssignmentStrategy() {
-		// NOTE: Strategy is cached for the lifetime of the module context.
-		// Changes to the GP_PROVIDER_ASSIGNMENT_STRATEGY global property require
-		// a module restart to take effect.
-		if (strategy != null) {
-			return strategy;
-		}
-		
+		// The strategy instance is cached (RoundRobin keeps rotation state), but the GP
+		// is re-read on every call so a change takes effect without a module restart
 		AdministrationService adminService = Context.getAdministrationService();
 		String strategyName = adminService.getGlobalProperty(PatientQueueingConfig.GP_PROVIDER_ASSIGNMENT_STRATEGY,
 		    PatientQueueingConfig.DEFAULT_PROVIDER_ASSIGNMENT_STRATEGY);
 		
-		strategy = createStrategy(strategyName);
+		if (strategy == null || !strategyName.equals(cachedStrategyName)) {
+			strategy = createStrategy(strategyName);
+			cachedStrategyName = strategyName;
+		}
 		
 		return strategy;
 	}

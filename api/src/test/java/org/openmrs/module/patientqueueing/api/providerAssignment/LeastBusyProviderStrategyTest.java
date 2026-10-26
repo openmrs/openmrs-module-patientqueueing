@@ -39,6 +39,11 @@ public class LeastBusyProviderStrategyTest {
 	@Mock
 	private PatientQueueingService queueingService;
 	
+	/**
+	 * All queues the mocked service returns for the single per-location query the strategy issues
+	 */
+	private List<PatientQueue> allQueues;
+	
 	private Location testLocation;
 	
 	private Provider provider1;
@@ -50,18 +55,20 @@ public class LeastBusyProviderStrategyTest {
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
-		
+
 		// Create strategy with injected mock service for testing
 		strategy = new LeastBusyProviderStrategy(queueingService);
-		
+
 		// Create test location
 		testLocation = new Location();
 		testLocation.setUuid("location-uuid-123");
-		
+
 		// Create test providers
 		provider1 = createProvider("provider-uuid-1", "Provider One");
 		provider2 = createProvider("provider-uuid-2", "Provider Two");
 		provider3 = createProvider("provider-uuid-3", "Provider Three");
+
+		allQueues = new ArrayList<>();
 	}
 	
 	@Test
@@ -166,8 +173,9 @@ public class LeastBusyProviderStrategyTest {
 		
 		strategy.assignProvider(testLocation, providers);
 		
-		// Verify that queueingService.getPatientQueueList was called with today's date range
-		verify(queueingService, atLeastOnce()).getPatientQueueList(eq(provider1), any(Date.class), any(Date.class),
+		// Verify that queueingService.getPatientQueueList was called once (provider=null) with
+		// today's date range, instead of once per provider
+		verify(queueingService, times(1)).getPatientQueueList(isNull(Provider.class), any(Date.class), any(Date.class),
 		    any(Location.class), any(Location.class), isNull(Patient.class), isNull(PatientQueue.Status.class),
 		    any(Location.class));
 	}
@@ -216,43 +224,46 @@ public class LeastBusyProviderStrategyTest {
 	}
 	
 	/**
-	 * Mock the service to return a specific number of queues for a provider
+	 * Mock the service to return a specific number of active queues for a provider
 	 */
 	private void mockQueueCount(Provider provider, int count) {
-		List<PatientQueue> queues = new ArrayList<>();
 		for (int i = 0; i < count; i++) {
 			PatientQueue queue = new PatientQueue();
 			queue.setStatus(PatientQueue.Status.PENDING);
 			queue.setProvider(provider);
-			queues.add(queue);
+			allQueues.add(queue);
 		}
-
-		when(queueingService.getPatientQueueList(eq(provider), any(Date.class), any(Date.class), any(Location.class),
-		    any(Location.class), isNull(Patient.class), isNull(PatientQueue.Status.class), any(Location.class))).thenReturn(queues);
+		stubLocationQuery();
 	}
 	
 	/**
 	 * Mock the service to return a mix of completed and active queues
 	 */
 	private void mockMixedQueues(Provider provider, int completedCount, int activeCount) {
-		List<PatientQueue> queues = new ArrayList<>();
-
 		for (int i = 0; i < completedCount; i++) {
 			PatientQueue queue = new PatientQueue();
 			queue.setStatus(PatientQueue.Status.COMPLETED);
 			queue.setProvider(provider);
-			queues.add(queue);
+			allQueues.add(queue);
 		}
-
+		
 		for (int i = 0; i < activeCount; i++) {
 			PatientQueue queue = new PatientQueue();
 			queue.setStatus(PatientQueue.Status.PENDING);
 			queue.setProvider(provider);
-			queues.add(queue);
+			allQueues.add(queue);
 		}
-
-		when(queueingService.getPatientQueueList(eq(provider), any(Date.class), any(Date.class), any(Location.class),
-		    any(Location.class), isNull(Patient.class), isNull(PatientQueue.Status.class), any(Location.class))).thenReturn(queues);
+		stubLocationQuery();
+	}
+	
+	/**
+	 * The strategy issues a single query with provider=null and counts per provider in memory
+	 */
+	private void stubLocationQuery() {
+		when(
+		    queueingService.getPatientQueueList(isNull(Provider.class), any(Date.class), any(Date.class),
+		        any(Location.class), any(Location.class), isNull(Patient.class), isNull(PatientQueue.Status.class),
+		        any(Location.class))).thenReturn(allQueues);
 	}
 	
 	/**

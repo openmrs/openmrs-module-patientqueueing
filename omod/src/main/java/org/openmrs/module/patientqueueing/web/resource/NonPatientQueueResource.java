@@ -277,6 +277,8 @@ public class NonPatientQueueResource extends DelegatingCrudResource<NonPatientQu
 		
 		String ticketNumber = context.getParameter("ticketNumber");
 		String queueRoomParam = context.getParameter("queueRoom");
+		String locationToParam = context.getParameter("locationTo");
+		String queueTypeParam = context.getParameter("queueType");
 		String statusParam = context.getParameter("status");
 		String fromDateParam = context.getParameter("fromDate");
 		String toDateParam = context.getParameter("toDate");
@@ -285,6 +287,16 @@ public class NonPatientQueueResource extends DelegatingCrudResource<NonPatientQu
 		Location queueRoom = null;
 		if (queueRoomParam != null && !queueRoomParam.isEmpty()) {
 			queueRoom = Context.getLocationService().getLocationByUuid(queueRoomParam);
+		}
+		
+		Location locationTo = null;
+		if (locationToParam != null && !locationToParam.isEmpty()) {
+			locationTo = Context.getLocationService().getLocationByUuid(locationToParam);
+		}
+		
+		Concept queueType = null;
+		if (queueTypeParam != null && !queueTypeParam.isEmpty()) {
+			queueType = Context.getConceptService().getConceptByUuid(queueTypeParam);
 		}
 		
 		NonPatientQueue.NonPatientQueueStatus status = null;
@@ -320,16 +332,13 @@ public class NonPatientQueueResource extends DelegatingCrudResource<NonPatientQu
 		if (ticketNumber != null && !ticketNumber.isEmpty()) {
 			// Search by ticket number
 			results = service.getNonPatientQueueByTicketNumber(ticketNumber, fromDate, toDate);
-		} else if (queueRoom != null) {
-			// Search by queue room
-			if (status != null) {
-				results = service.getNonPatientQueuesByQueueRoomAndStatus(queueRoom, status);
-			} else {
-				results = service.getNonPatientQueuesByQueueRoom(queueRoom, fromDate, toDate);
-			}
+		} else if (queueRoom != null && status != null) {
+			// Search by queue room and status
+			results = service.getNonPatientQueuesByQueueRoomAndStatus(queueRoom, status);
 		} else {
-			// Get all active queues
-			results = service.getAllActiveNonPatientQueues();
+			// Filtered search: status, queueType, locationTo, queueRoom and dates are all
+			// applied so a filtered request never falls back to everyone's queue
+			results = service.getNonPatientQueues(status, queueType, locationTo, queueRoom, fromDate, toDate);
 		}
 		
 		// Filter out COMPLETED entries unless includeHistory is true

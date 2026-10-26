@@ -305,8 +305,9 @@ public class CheckInResource extends DelegatingCrudResource<CheckInResult> {
 		List<PatientQueue> pendingQueues = queueingService.getPatientQueueList(null, startOfDay, endOfDay, location, null,
 		    null, PatientQueue.Status.PENDING, queueRoom);
 		
-		// Position is count of people ahead + 1 for current patient
-		return pendingQueues.size() + 1;
+		// This runs after the patient's own PENDING entry is saved, so the count already
+		// includes them: an empty queue means position 1, not 2
+		return pendingQueues.size();
 	}
 	
 	/**

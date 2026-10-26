@@ -46,9 +46,8 @@ GET  /ws/rest/v1/patientqueueing/selfcheckin       - Self check-in for booth/kio
 
 ### Queue Display & Kiosk
 ```
-GET  /ws/rest/v1/kiosk              - Queue lookup by ticket number
-GET  /ws/rest/v1/display            - Display data (now serving, up next)
-POST /ws/rest/v1/display/statistics - Queue statistics (if implemented)
+GET  /ws/rest/v1/patientqueueing/kiosk              - Queue lookup by ticket number
+GET  /ws/rest/v1/patientqueueing/display            - Display data (now serving, up next)
 ```
 
 ### Non-Patient Queue Management
@@ -151,7 +150,7 @@ curl -X POST \
 #### Queue Display
 ```bash
 curl -X GET \
-  'http://localhost:8080/openmrs/ws/rest/v1/display?location=b1e39c4d-1234-5678-9abc-def456789013'
+  'http://localhost:8080/openmrs/ws/rest/v1/patientqueueing/display?location=b1e39c4d-1234-5678-9abc-def456789013'
 ```
 
 ---

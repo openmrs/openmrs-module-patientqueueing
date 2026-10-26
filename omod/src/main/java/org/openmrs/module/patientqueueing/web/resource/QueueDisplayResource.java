@@ -9,6 +9,8 @@
  */
 package org.openmrs.module.patientqueueing.web.resource;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openmrs.Location;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.api.context.Context;
@@ -33,6 +35,8 @@ import org.openmrs.module.webservices.rest.web.response.ResourceDoesNotSupportOp
 import org.openmrs.module.webservices.rest.web.response.ResponseException;
 import org.openmrs.util.OpenmrsUtil;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -47,6 +51,8 @@ import java.util.List;
  */
 @Resource(name = RestConstants.VERSION_1 + "/patientqueueing/display", supportedClass = QueueDisplayDto.class, supportedOpenmrsVersions = { "1.9.* - 9.*" })
 public class QueueDisplayResource extends DelegatingCrudResource<QueueDisplayDto> {
+	
+	private static final Log log = LogFactory.getLog(QueueDisplayResource.class);
 	
 	private PatientQueueingService service() {
 		return Context.getService(PatientQueueingService.class);
@@ -326,7 +332,19 @@ public class QueueDisplayResource extends DelegatingCrudResource<QueueDisplayDto
 	}
 	
 	private DateRange resolveDateRange(String dateParam) {
-		Date target = new Date();
+		Date target;
+		if (dateParam == null || dateParam.trim().isEmpty() || "today".equalsIgnoreCase(dateParam.trim())) {
+			target = new Date();
+		} else {
+			try {
+				// Documented format: date=today|YYYY-MM-DD
+				target = new SimpleDateFormat("yyyy-MM-dd").parse(dateParam.trim());
+			}
+			catch (ParseException e) {
+				log.warn("Unparseable date parameter '" + dateParam + "', defaulting to today");
+				target = new Date();
+			}
+		}
 		return new DateRange(OpenmrsUtil.firstSecondOfDay(target), OpenmrsUtil.getLastMomentOfDay(target));
 	}
 	
