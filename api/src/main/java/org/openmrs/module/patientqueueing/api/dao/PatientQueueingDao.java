@@ -129,7 +129,8 @@ public class PatientQueueingDao {
 			criteria.add(Restrictions.eq("queueRoom", queueRoom));
 		}
 		
-		criteria.add(Restrictions.ne("status", PatientQueue.Status.COMPLETED));
+		criteria.add(Restrictions.not(Restrictions.in("status", PatientQueue.Status.COMPLETED,
+		    PatientQueue.Status.TRANSFERRED)));
 		criteria.add(Restrictions.eq("voided", false));
 		
 		return (PatientQueue) criteria.uniqueResult();

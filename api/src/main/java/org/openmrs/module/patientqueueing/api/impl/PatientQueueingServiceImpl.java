@@ -378,10 +378,6 @@ public class PatientQueueingServiceImpl extends BaseOpenmrsService implements Pa
 		        .getQueueRoom();
 		
 		patientQueue.setStatus(PatientQueue.Status.TRANSFERRED);
-		patientQueue.setLocationTo(locationTo);
-		if (queueRoom != null) {
-			patientQueue.setQueueRoom(queueRoom);
-		}
 		patientQueue.setDateChanged(new Date());
 		dao.savePatientQueue(patientQueue);
 		

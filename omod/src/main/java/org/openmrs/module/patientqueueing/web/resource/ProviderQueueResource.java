@@ -276,6 +276,8 @@ public class ProviderQueueResource extends DelegatingCrudResource<ProviderQueueE
 			return "WAITING";
 		if (status == PatientQueue.Status.PICKED)
 			return "CALLED";
+		if (status == PatientQueue.Status.ON_HOLD)
+			return "HOLD";
 		return status.name();
 	}
 	
@@ -306,8 +308,8 @@ public class ProviderQueueResource extends DelegatingCrudResource<ProviderQueueE
 		try {
 			return PatientQueue.Status.valueOf(s);
 		}
-		catch (Exception e) {
-			return PatientQueue.Status.PENDING;
+		catch (IllegalArgumentException e) {
+			throw new IllegalArgumentException("Unsupported status for a patient queue entry: " + s);
 		}
 	}
 	
@@ -464,6 +466,10 @@ public class ProviderQueueResource extends DelegatingCrudResource<ProviderQueueE
 		
 		switch (target) {
 			case CALLED:
+				if (npq.getStatus() == NonPatientQueue.NonPatientQueueStatus.HOLD
+				        || npq.getStatus() == NonPatientQueue.NonPatientQueueStatus.NO_SHOW) {
+					return patientQueueingService().recallNonPatientQueue(npq, null);
+				}
 				return patientQueueingService().callNonPatientQueue(npq, null);
 			case ARRIVED:
 				return patientQueueingService().markNonPatientQueueArrived(npq);
