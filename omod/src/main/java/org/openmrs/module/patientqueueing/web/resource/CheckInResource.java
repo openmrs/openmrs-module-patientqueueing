@@ -197,6 +197,8 @@ public class CheckInResource extends DelegatingCrudResource<CheckInResult> {
 		queueEntryObject.put("visitNumber", patientQueue.getVisitNumber());
 		queueEntryObject.put("status", patientQueue.getStatus() != null ? patientQueue.getStatus().name() : null);
 		queueEntryObject.put("dateCreated", patientQueue.getDateCreated());
+		// Null when no provider could be picked; the dashboard assigns one later
+		queueEntryObject.put("provider", patientQueue.getProvider() != null ? patientQueue.getProvider().getUuid() : null);
 		response.put("queueEntry", queueEntryObject);
 		
 		return response;

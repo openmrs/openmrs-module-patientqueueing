@@ -11,7 +11,6 @@ package org.openmrs.module.patientqueueing.api.providerAssignment;
 
 import org.openmrs.Location;
 import org.openmrs.Provider;
-import org.openmrs.api.APIException;
 
 import java.util.List;
 
@@ -19,15 +18,15 @@ import java.util.List;
  * Manual provider assignment strategy.
  * <p>
  * This strategy indicates that provider assignment is done manually by users, not automatically by
- * the system. When this strategy is selected, any attempt to auto-assign a provider will throw an
- * exception.
+ * the system. It always declines to pick by returning null, which callers treat as "queue the
+ * patient unassigned" rather than failing the check-in.
  */
 public class ManualProviderAssignmentStrategy implements ProviderAssignmentStrategy {
 	
 	@Override
 	public Provider assignProvider(Location location, List<Provider> availableProviders) {
-		throw new APIException("Manual provider assignment is enabled. Automatic provider assignment is disabled. "
-		        + "Please assign providers manually through the provider dashboard.");
+		// Manual means providers are assigned by hand through the provider dashboard later
+		return null;
 	}
 	
 	@Override

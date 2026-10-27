@@ -73,6 +73,24 @@
 		<description>Estimated minutes of wait time per person ahead in queue. Used to calculate estimated wait time for self check-in.</description>
 	</globalProperty>
 
+	<globalProperty>
+		<property>patientqueueing.providerLocationAttributeTypeUuid</property>
+		<defaultValue></defaultValue>
+		<description>UUID of the provider attribute type that maps a provider to a location (attribute value = location UUID). Used by automatic provider assignment to find providers for a location. Leave empty to fall back to matching each provider's user default location instead. If neither is configured, check-in still succeeds and the patient is queued unassigned.</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>patientqueueing.personLocationAttributeName</property>
+		<defaultValue>defaultLocation</defaultValue>
+		<description>Name of the person attribute type holding a provider's default location UUID, used for provider-location matching when patientqueueing.providerLocationAttributeTypeUuid is not configured.</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>patientqueueing.autoAssignProvider</property>
+		<defaultValue>true</defaultValue>
+		<description>Whether check-in should automatically assign a provider using the configured assignment strategy. Set to false (or pass autoAssignProvider=false on the request) to always queue patients unassigned for manual assignment from the provider dashboard.</description>
+	</globalProperty>
+
 	<!-- Internationalization -->
 	<!-- All message codes should start with @MODULE_ID@.* -->
 

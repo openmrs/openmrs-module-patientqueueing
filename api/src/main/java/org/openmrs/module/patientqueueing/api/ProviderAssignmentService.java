@@ -27,8 +27,8 @@ public interface ProviderAssignmentService extends OpenmrsService {
 	 * Assign a provider to a location using the configured strategy
 	 * 
 	 * @param location the location to assign a provider to
-	 * @return the assigned provider
-	 * @throws APIException if no providers are available
+	 * @return the assigned provider, or null if no provider can be picked (callers should queue the
+	 *         patient unassigned rather than fail)
 	 */
 	@Transactional(readOnly = true)
 	Provider assignProvider(Location location);
@@ -38,8 +38,8 @@ public interface ProviderAssignmentService extends OpenmrsService {
 	 * 
 	 * @param location the location
 	 * @param availableProviders the list of providers to choose from
-	 * @return the assigned provider
-	 * @throws APIException if no providers are available
+	 * @return the assigned provider, or null if no provider can be picked (e.g. the MANUAL strategy
+	 *         always declines; callers should queue the patient unassigned rather than fail)
 	 */
 	@Transactional(readOnly = true)
 	Provider assignProvider(Location location, List<Provider> availableProviders);

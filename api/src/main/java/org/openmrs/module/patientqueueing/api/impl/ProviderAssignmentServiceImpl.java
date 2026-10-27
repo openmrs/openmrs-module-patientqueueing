@@ -14,7 +14,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Location;
 import org.openmrs.Provider;
-import org.openmrs.api.APIException;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
@@ -48,8 +47,12 @@ public class ProviderAssignmentServiceImpl extends BaseOpenmrsService implements
 	public Provider assignProvider(Location location) {
 		List<Provider> providers = getProvidersForLocation(location);
 		
+		// Returning null (rather than throwing) lets callers like CheckInResource queue
+		// the patient unassigned instead of failing the check-in
 		if (providers.isEmpty()) {
-			throw new APIException("No providers available for location: " + location.getName());
+			log.warn("No providers available for location " + (location == null ? "(null)" : location.getName())
+			        + ", returning null");
+			return null;
 		}
 		
 		return assignProvider(location, providers);
@@ -58,19 +61,15 @@ public class ProviderAssignmentServiceImpl extends BaseOpenmrsService implements
 	@Override
 	public Provider assignProvider(Location location, List<Provider> availableProviders) {
 		if (availableProviders == null || availableProviders.isEmpty()) {
-			throw new APIException("No providers available for assignment");
+			log.warn("No providers available for assignment, returning null");
+			return null;
 		}
 		
 		ProviderAssignmentStrategy currentStrategy = getProviderAssignmentStrategy();
-		// Strategy is always non-null after getProviderAssignmentStrategy()
 		
-		Provider provider = currentStrategy.assignProvider(location, availableProviders);
-		
-		if (provider == null) {
-			throw new APIException("Provider assignment strategy returned null");
-		}
-		
-		return provider;
+		// A strategy may legitimately decline to pick (e.g. MANUAL means providers are
+		// assigned by hand later); returning null queues the patient unassigned
+		return currentStrategy.assignProvider(location, availableProviders);
 	}
 	
 	@Override
