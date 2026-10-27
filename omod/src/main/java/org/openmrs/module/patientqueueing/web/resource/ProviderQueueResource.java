@@ -401,6 +401,12 @@ public class ProviderQueueResource extends DelegatingCrudResource<ProviderQueueE
 		
 		switch (target) {
 			case PICKED:
+				if (pq.getStatus() == PatientQueue.Status.ON_HOLD || pq.getStatus() == PatientQueue.Status.NO_SHOW) {
+					return patientQueueingService().recallPatientQueue(pq, pq.getProvider());
+				}
+				if (pq.getStatus() != PatientQueue.Status.PENDING) {
+					throw new IllegalArgumentException("Can only call queue entries with status PENDING");
+				}
 				return patientQueueingService().pickPatientQueue(pq, pq.getProvider(), pq.getQueueRoom());
 			case COMPLETED:
 				return patientQueueingService().completePatientQueue(pq);
