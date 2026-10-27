@@ -54,6 +54,13 @@ public class PatientQueueingServiceImpl extends BaseOpenmrsService implements Pa
 	 * @see org.openmrs.module.patientqueueing.api.PatientQueueingService#savePatientQue(org.openmrs.module.patientqueueing.model.PatientQueue)
 	 */
 	public PatientQueue savePatientQue(PatientQueue patientQueue) {
+		if (patientQueue == null) {
+			throw new IllegalArgumentException("Queue cannot be null");
+		}
+		if (patientQueue.getPatient() == null) {
+			throw new IllegalArgumentException("Patient is required to save a queue entry");
+		}
+		
 		PatientQueue currentQueue = dao.getIncompletePatientQueue(patientQueue.getPatient(), patientQueue.getLocationTo(),
 		    null);
 		
@@ -86,6 +93,14 @@ public class PatientQueueingServiceImpl extends BaseOpenmrsService implements Pa
 	 */
 	@Override
 	public PatientQueue completePatientQueue(PatientQueue patientQueue) {
+		if (patientQueue == null) {
+			throw new IllegalArgumentException("Queue cannot be null");
+		}
+		// Idempotent: re-completing must not overwrite the original completion time
+		if (patientQueue.getStatus() == PatientQueue.Status.COMPLETED) {
+			return patientQueue;
+		}
+		
 		patientQueue.setStatus(PatientQueue.Status.COMPLETED);
 		patientQueue.setDateCompleted(new Date());
 		return dao.savePatientQueue(patientQueue);
@@ -269,6 +284,13 @@ public class PatientQueueingServiceImpl extends BaseOpenmrsService implements Pa
 	 */
 	@Override
 	public PatientQueue pickPatientQueue(PatientQueue patientQueue, Provider provider, Location queueRoom) {
+		if (patientQueue == null) {
+			throw new IllegalArgumentException("Queue cannot be null");
+		}
+		if (patientQueue.getStatus() != PatientQueue.Status.PENDING) {
+			throw new APIException("Can only call queue entries with status PENDING; use recall for ON_HOLD or NO_SHOW");
+		}
+		
 		patientQueue.setStatus(PatientQueue.Status.PICKED);
 		patientQueue.setDatePicked(new Date());
 		patientQueue.setProvider(provider);
@@ -393,7 +415,10 @@ public class PatientQueueingServiceImpl extends BaseOpenmrsService implements Pa
 		next.setPriorityComment(patientQueue.getPriorityComment());
 		next.setComment(patientQueue.getComment());
 		next.setQueueRoom(queueRoom);
-		return dao.savePatientQueue(next);
+		// Save through savePatientQue so it completes any entry the patient still has open
+		// at the destination (e.g. transferred back to a location queued at earlier today);
+		// saving directly would leave two incomplete rows and 500 the next CALLED
+		return savePatientQue(next);
 	}
 	
 	/**
@@ -425,8 +450,18 @@ public class PatientQueueingServiceImpl extends BaseOpenmrsService implements Pa
 	 */
 	private void flattenLocationHierarchy(Location parentLocation, List<Location> childLocations, LocationTag locationTag,
 	        boolean onlyInQueueRooms) {
+		flattenLocationHierarchy(parentLocation, childLocations, locationTag, onlyInQueueRooms, new HashSet<Location>());
+	}
+	
+	private void flattenLocationHierarchy(Location parentLocation, List<Location> childLocations, LocationTag locationTag,
+	        boolean onlyInQueueRooms, Set<Location> visited) {
+		// Guard against null entries and cyclic parent/child data, which would recurse forever
+		if (parentLocation == null || !visited.add(parentLocation)) {
+			return;
+		}
+		
 		if (onlyInQueueRooms) {
-			if (parentLocation.getTags().contains(locationTag)) {
+			if (parentLocation.getTags() != null && parentLocation.getTags().contains(locationTag)) {
 				childLocations.add(parentLocation);
 			}
 		} else {
@@ -434,7 +469,7 @@ public class PatientQueueingServiceImpl extends BaseOpenmrsService implements Pa
 		}
 		
 		for (Location childLocation : parentLocation.getChildLocations(false)) {
-			flattenLocationHierarchy(childLocation, childLocations, locationTag, onlyInQueueRooms);
+			flattenLocationHierarchy(childLocation, childLocations, locationTag, onlyInQueueRooms, visited);
 		}
 	}
 	
@@ -721,11 +756,9 @@ public class PatientQueueingServiceImpl extends BaseOpenmrsService implements Pa
 		
 		Location previousLocation = queue.getLocationTo() != null ? queue.getLocationTo() : queue.getQueueRoom();
 		
+		// Keep the source location on the TRANSFERRED row (mirrors transferPatientQueue) so
+		// the destination doesn't list the ticket twice and the source keeps its history
 		queue.setStatus(NonPatientQueue.NonPatientQueueStatus.TRANSFERRED);
-		queue.setLocationTo(locationTo);
-		if (queueRoom != null) {
-			queue.setQueueRoom(queueRoom);
-		}
 		saveNonPatientQueue(queue);
 		
 		NonPatientQueue next = new NonPatientQueue();

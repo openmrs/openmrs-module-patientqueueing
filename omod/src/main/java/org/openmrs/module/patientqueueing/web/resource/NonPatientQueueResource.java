@@ -313,8 +313,10 @@ public class NonPatientQueueResource extends DelegatingCrudResource<NonPatientQu
 		Date toDate = null;
 		if (fromDateParam != null && toDateParam != null) {
 			try {
-				fromDate = new Date(Long.parseLong(fromDateParam));
-				toDate = new Date(Long.parseLong(toDateParam));
+				// Bound to day edges like doGetAll, so a ticket created later on the toDate
+				// day is still found
+				fromDate = OpenmrsUtil.firstSecondOfDay(new Date(Long.parseLong(fromDateParam)));
+				toDate = OpenmrsUtil.getLastMomentOfDay(new Date(Long.parseLong(toDateParam)));
 			}
 			catch (NumberFormatException e) {
 				// Invalid date format, use today
@@ -332,12 +334,9 @@ public class NonPatientQueueResource extends DelegatingCrudResource<NonPatientQu
 		if (ticketNumber != null && !ticketNumber.isEmpty()) {
 			// Search by ticket number
 			results = service.getNonPatientQueueByTicketNumber(ticketNumber, fromDate, toDate);
-		} else if (queueRoom != null && status != null) {
-			// Search by queue room and status
-			results = service.getNonPatientQueuesByQueueRoomAndStatus(queueRoom, status);
 		} else {
-			// Filtered search: status, queueType, locationTo, queueRoom and dates are all
-			// applied so a filtered request never falls back to everyone's queue
+			// Single filtered path: status, queueType, locationTo, queueRoom and the date
+			// window are all applied so no filter combination skips the date window
 			results = service.getNonPatientQueues(status, queueType, locationTo, queueRoom, fromDate, toDate);
 		}
 		

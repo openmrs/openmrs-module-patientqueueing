@@ -485,6 +485,7 @@ public interface PatientQueueingService extends OpenmrsService {
 	 * @return the updated NonPatientQueue entry
 	 */
 	@Transactional
+	@Authorized("Task: patientqueueing.manageQueue")
 	NonPatientQueue callNonPatientQueue(NonPatientQueue queue, Provider provider);
 	
 	/**
@@ -505,6 +506,7 @@ public interface PatientQueueingService extends OpenmrsService {
 	 * @return the updated NonPatientQueue entry
 	 */
 	@Transactional
+	@Authorized("Task: patientqueueing.manageQueue")
 	NonPatientQueue startServingNonPatientQueue(NonPatientQueue queue, Provider provider);
 	
 	/**

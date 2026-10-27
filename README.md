@@ -41,7 +41,7 @@ The **Patient Queueing Module** is an API-based OpenMRS module designed to facil
 ### Check-in APIs
 ```
 POST /ws/rest/v1/patientqueueing/checkin           - Generic patient check-in (configurable visit type)
-GET  /ws/rest/v1/patientqueueing/selfcheckin       - Self check-in for booth/kiosk (existing)
+POST /ws/rest/v1/patientqueueing/selfcheckin       - Self check-in for booth/kiosk (existing)
 ```
 
 ### Queue Display & Kiosk
@@ -52,11 +52,11 @@ GET  /ws/rest/v1/patientqueueing/display            - Display data (now serving,
 
 ### Non-Patient Queue Management
 ```
-GET    /ws/rest/v1/nonpatientqueue              - List all (with filters)
-GET    /ws/rest/v1/nonpatientqueue/:uuid         - Get by UUID
-POST   /ws/rest/v1/nonpatientqueue              - Create new
-PUT    /ws/rest/v1/nonpatientqueue/:uuid         - Update
-GET    /ws/rest/v1/nonpatientqueue?q=search      - Search
+GET    /ws/rest/v1/patientqueueing/nonpatientqueue           - List all (with filters)
+GET    /ws/rest/v1/patientqueueing/nonpatientqueue/:uuid     - Get by UUID
+POST   /ws/rest/v1/patientqueueing/nonpatientqueue           - Create new
+PUT    /ws/rest/v1/patientqueueing/nonpatientqueue/:uuid     - Update
+GET    /ws/rest/v1/patientqueueing/nonpatientqueue?q=search  - Search
 ```
 
 ### Patient Queue Management (Existing)
@@ -150,7 +150,7 @@ curl -X POST \
 #### Queue Display
 ```bash
 curl -X GET \
-  'http://localhost:8080/openmrs/ws/rest/v1/patientqueueing/display?location=b1e39c4d-1234-5678-9abc-def456789013'
+  'http://localhost:8080/openmrs/ws/rest/v1/patientqueueing/display?type=location&uuid=b1e39c4d-1234-5678-9abc-def456789013'
 ```
 
 ---

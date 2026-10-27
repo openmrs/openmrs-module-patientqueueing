@@ -83,7 +83,10 @@ public class LeastBusyProviderStrategy implements ProviderAssignmentStrategy {
 
 		Map<String, Integer> counts = new HashMap<>();
 		for (PatientQueue queue : queues) {
-			if (queue.getProvider() == null || queue.getStatus() == PatientQueue.Status.COMPLETED) {
+			// Terminal statuses must not keep inflating a provider's busy count for the
+			// rest of the day (TRANSFERRED entries are never completed)
+			if (queue.getProvider() == null || queue.getStatus() == PatientQueue.Status.COMPLETED
+			        || queue.getStatus() == PatientQueue.Status.TRANSFERRED) {
 				continue;
 			}
 			counts.merge(queue.getProvider().getUuid(), 1, Integer::sum);

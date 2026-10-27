@@ -229,7 +229,6 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 		boolean onlyInQueueRooms = Boolean.parseBoolean(context.getParameter("onlyInQueueRooms"));
 		String status = context.getParameter("status");
 		String queueRoomQuery = context.getParameter("room");
-		boolean includeHistory = Boolean.parseBoolean(context.getParameter("includeHistory"));
 		PatientQueue.Status queueStatus = null;
 		
 		Location location = null;
@@ -239,11 +238,11 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 			location = Context.getLocationService().getLocationByUuid(locationQuery);
 		}
 		
-		if (status != null && status.equals("pending")) {
+		if (status != null && status.equalsIgnoreCase("pending")) {
 			queueStatus = PatientQueue.Status.PENDING;
-		} else if (status != null && status.equals("completed")) {
+		} else if (status != null && status.equalsIgnoreCase("completed")) {
 			queueStatus = PatientQueue.Status.COMPLETED;
-		} else if (status != null && status.equals("picked")) {
+		} else if (status != null && status.equalsIgnoreCase("picked")) {
 			queueStatus = PatientQueue.Status.PICKED;
 		}
 		
@@ -263,8 +262,11 @@ public class PatientQueueResource extends DelegatingCrudResource<PatientQueue> {
 			    OpenmrsUtil.getLastMomentOfDay(new Date()), location, null, queueStatus, room);
 		}
 		
-		// Filter out COMPLETED entries unless includeHistory is true
-		if (!includeHistory && PatientQueuesByQuery != null && queueStatus != PatientQueue.Status.COMPLETED) {
+		// COMPLETED entries stay in the default response so status=COMPLETED queries and
+		// clients' Completed tabs keep working; clients that only want the active queue
+		// opt out with &activeOnly=true
+		boolean activeOnly = Boolean.parseBoolean(context.getParameter("activeOnly"));
+		if (activeOnly && PatientQueuesByQuery != null && queueStatus != PatientQueue.Status.COMPLETED) {
 			List<PatientQueue> filtered = new java.util.ArrayList<PatientQueue>();
 			for (PatientQueue queue : PatientQueuesByQuery) {
 				if (queue.getStatus() != PatientQueue.Status.COMPLETED) {

@@ -84,7 +84,7 @@ curl -X POST \
 
 Self check-in endpoint for booth/kiosk scenarios. Simplified interface for self-service check-in.
 
-**Endpoint**: `GET /ws/rest/v1/patientqueueing/selfcheckin`
+**Endpoint**: `POST /ws/rest/v1/patientqueueing/selfcheckin`
 
 **Example**:
 ```bash
@@ -192,20 +192,37 @@ curl -X GET \
   'http://localhost:8080/openmrs/ws/rest/v1/patientqueueing/kiosk?ticketNumber=21/04/2026-LOC-001'
 ```
 
-### Get All Queue Entries
+### Get Patient Journey
 
-Get all queue entries for a location, including both patient and non-patient queues.
+Get a ticket's full journey through the facility (completed, current and upcoming services).
 
 **Endpoint**: `GET /ws/rest/v1/patientqueueing/kiosk`
 
 **Parameters**:
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| location | string | No | Filter by location UUID |
-| queueRoom | string | No | Filter by queue room UUID |
-| status | string | No | Filter by status (PENDING, WAITING, PICKED, etc.) |
-| dateFrom | long | No | Start date (milliseconds) |
-| dateTo | long | No | End date (milliseconds) |
+| journey | string | Yes | Must be `true` |
+| ticketNumber | string | Yes | Ticket number to search |
+
+**Example**:
+```bash
+curl -X GET \
+  'http://localhost:8080/openmrs/ws/rest/v1/patientqueueing/kiosk?journey=true&ticketNumber=21/04/2026-LOC-001'
+```
+
+### Look Up a Single Queue Entry
+
+Get one queue entry (patient or non-patient) by ticket or visit number.
+
+**Endpoint**: `GET /ws/rest/v1/patientqueueing/kiosk`
+
+**Parameters**:
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| ticketNumber | string | Yes (or visitNumber) | Ticket number to search |
+| visitNumber | string | Yes (or ticketNumber) | Visit number alias for ticketNumber |
+| dateFrom | long | No | Start date (milliseconds, default: start of today) |
+| dateTo | long | No | End date (milliseconds, default: end of today) |
 
 **Response**: Array of `QueueEntry`
 ```json
@@ -235,11 +252,7 @@ Get all queue entries for a location, including both patient and non-patient que
 ]
 ```
 
-**Example**:
-```bash
-curl -X GET \
-  'http://localhost:8080/openmrs/ws/rest/v1/patientqueueing/kiosk?location=b1e39c4d-1234-5678-9abc-def456789013&status=PENDING'
-```
+
 
 ### Get Queue Display Data
 
@@ -250,10 +263,9 @@ Get display data for public queue monitors, including "now serving" and "up next
 **Parameters**:
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| location | string | No | Filter by location UUID |
-| queueRoom | string | No | Filter by queue room UUID |
-| dateFrom | long | No | Start date (milliseconds) |
-| dateTo | long | No | End date (milliseconds) |
+| type | string | Yes | `facility`, `location` or `room` |
+| uuid | string | Yes | UUID of the location for the chosen type |
+| date | string | No | `today` (default) or `YYYY-MM-DD` |
 
 **Response**:
 ```json
@@ -308,7 +320,7 @@ Get display data for public queue monitors, including "now serving" and "up next
 **Example**:
 ```bash
 curl -X GET \
-  'http://localhost:8080/openmrs/ws/rest/v1/patientqueueing/display?location=b1e39c4d-1234-5678-9abc-def456789013'
+  'http://localhost:8080/openmrs/ws/rest/v1/patientqueueing/display?type=location&uuid=b1e39c4d-1234-5678-9abc-def456789013'
 ```
 
 ### Get Queue Statistics
@@ -324,7 +336,7 @@ Get queue statistics for a location.
 **Example**:
 ```bash
 curl -X GET \
-  'http://localhost:8080/openmrs/ws/rest/v1/patientqueueing/display?location=b1e39c4d-1234-5678-9abc-def456789013'
+  'http://localhost:8080/openmrs/ws/rest/v1/patientqueueing/display?type=location&uuid=b1e39c4d-1234-5678-9abc-def456789013'
 ```
 
 ---
@@ -333,7 +345,7 @@ curl -X GET \
 
 ### List All Non-Patient Queues
 
-**Endpoint**: `GET /ws/rest/v1/nonpatientqueue`
+**Endpoint**: `GET /ws/rest/v1/patientqueueing/nonpatientqueue`
 
 **Parameters**:
 | Parameter | Type | Required | Description |
@@ -350,24 +362,24 @@ curl -X GET \
 **Example**:
 ```bash
 curl -X GET \
-  'http://localhost:8080/openmrs/ws/rest/v1/nonpatientqueue?status=WAITING&queueRoom=c1e39c4d-1234-5678-9abc-def456789014'
+  'http://localhost:8080/openmrs/ws/rest/v1/patientqueueing/nonpatientqueue?status=WAITING&queueRoom=c1e39c4d-1234-5678-9abc-def456789014'
 ```
 
 ### Get Non-Patient Queue by UUID
 
-**Endpoint**: `GET /ws/rest/v1/nonpatientqueue/:uuid`
+**Endpoint**: `GET /ws/rest/v1/patientqueueing/nonpatientqueue/:uuid`
 
 **Response**: `NonPatientQueue` (full representation)
 
 **Example**:
 ```bash
 curl -X GET \
-  'http://localhost:8080/openmrs/ws/rest/v1/nonpatientqueue/a1e39c4d-1234-5678-9abc-def456789015'
+  'http://localhost:8080/openmrs/ws/rest/v1/patientqueueing/nonpatientqueue/a1e39c4d-1234-5678-9abc-def456789015'
 ```
 
 ### Create Non-Patient Queue
 
-**Endpoint**: `POST /ws/rest/v1/nonpatientqueue`
+**Endpoint**: `POST /ws/rest/v1/patientqueueing/nonpatientqueue`
 
 **Request Body**:
 ```json
@@ -388,7 +400,7 @@ curl -X GET \
 **Example**:
 ```bash
 curl -X POST \
-  'http://localhost:8080/openmrs/ws/rest/v1/nonpatientqueue' \
+  'http://localhost:8080/openmrs/ws/rest/v1/patientqueueing/nonpatientqueue' \
   -d 'displayName=Jane Smith' \
   -d 'phoneNumber=+1234567890' \
   -d 'locationTo=b1e39c4d-1234-5678-9abc-def456789013' \
@@ -397,7 +409,7 @@ curl -X POST \
 
 ### Update Non-Patient Queue
 
-**Endpoint**: `PUT /ws/rest/v1/nonpatientqueue/:uuid`
+**Endpoint**: `PUT /ws/rest/v1/patientqueueing/nonpatientqueue/:uuid`
 
 **Request Body** (all fields optional):
 ```json
@@ -414,14 +426,14 @@ curl -X POST \
 **Example**:
 ```bash
 curl -X PUT \
-  'http://localhost:8080/openmrs/ws/rest/v1/nonpatientqueue/a1e39c4d-1234-5678-9abc-def456789015' \
+  'http://localhost:8080/openmrs/ws/rest/v1/patientqueueing/nonpatientqueue/a1e39c4d-1234-5678-9abc-def456789015' \
   -d 'priority=2' \
   -d 'comment=Updated priority'
 ```
 
 ### Search Non-Patient Queues
 
-**Endpoint**: `GET /ws/rest/v1/nonpatientqueue?q=search`
+**Endpoint**: `GET /ws/rest/v1/patientqueueing/nonpatientqueue?q=search`
 
 **Search Parameters**:
 | Parameter | Type | Description |
@@ -437,7 +449,7 @@ curl -X PUT \
 **Example**:
 ```bash
 curl -X GET \
-  'http://localhost:8080/openmrs/ws/rest/v1/nonpatientqueue?q=search&ticketNumber=21/04/2026-LOC-TYPE-001'
+  'http://localhost:8080/openmrs/ws/rest/v1/patientqueueing/nonpatientqueue?q=search&ticketNumber=21/04/2026-LOC-TYPE-001'
 ```
 
 ---
@@ -550,7 +562,7 @@ All resources support multiple representations:
 Use `v=full` parameter:
 ```bash
 curl -X GET \
-  'http://localhost:8080/openmrs/ws/rest/v1/nonpatientqueue/:uuid?v=full'
+  'http://localhost:8080/openmrs/ws/rest/v1/patientqueueing/nonpatientqueue/:uuid?v=full'
 ```
 
 ---
@@ -567,7 +579,7 @@ List endpoints support pagination:
 **Example**:
 ```bash
 curl -X GET \
-  'http://localhost:8080/openmrs/ws/rest/v1/nonpatientqueue?startIndex=0&limit=20'
+  'http://localhost:8080/openmrs/ws/rest/v1/patientqueueing/nonpatientqueue?startIndex=0&limit=20'
 ```
 
 ---

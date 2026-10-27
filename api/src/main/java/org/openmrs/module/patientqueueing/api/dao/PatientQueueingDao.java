@@ -209,6 +209,10 @@ public class PatientQueueingDao {
 		}
 		
 		if (queueRooms != null) {
+			// An empty room list means "no matches", not "no filter"
+			if (queueRooms.isEmpty()) {
+				return java.util.Collections.emptyList();
+			}
 			criteria.add(Restrictions.in("queueRoom", queueRooms));
 		}
 		
@@ -283,6 +287,10 @@ public class PatientQueueingDao {
 		}
 		
 		if (queueRooms != null) {
+			// An empty room list means "no matches", not "no filter"
+			if (queueRooms.isEmpty()) {
+				return java.util.Collections.emptyList();
+			}
 			criteria.add(Restrictions.in("queueRoom", queueRooms));
 		}
 		criteria.add(Restrictions.eq("voided", false));
@@ -396,9 +404,11 @@ public class PatientQueueingDao {
 	 * @return list of all active NonPatientQueue entries
 	 */
 	public List<NonPatientQueue> getAllActiveNonPatientQueues() {
-		return getSession().createCriteria(NonPatientQueue.class)
-		        .add(Restrictions.ne("status", NonPatientQueue.NonPatientQueueStatus.COMPLETED))
-		        .add(Restrictions.ne("status", NonPatientQueue.NonPatientQueueStatus.CANCELLED))
+		return getSession()
+		        .createCriteria(NonPatientQueue.class)
+		        .add(
+		            Restrictions.not(Restrictions.in("status", NonPatientQueue.NonPatientQueueStatus.COMPLETED,
+		                NonPatientQueue.NonPatientQueueStatus.CANCELLED, NonPatientQueue.NonPatientQueueStatus.TRANSFERRED)))
 		        .add(Restrictions.eq("voided", false)).addOrder(Order.asc("dateCreated")).list();
 	}
 	
@@ -627,7 +637,9 @@ public class PatientQueueingDao {
 		}
 		catch (Exception e) {
 			log.error("Error executing patient lookup query for attribute type: " + personAttributeTypeId, e);
-			return null;
+			// Fail loudly (like countPatientsByPersonAttributeValue) instead of returning null,
+			// which would silently turn a patient check-in into a non-patient ticket
+			throw new org.openmrs.api.db.DAOException("Failed to look up patient by person attribute value", e);
 		}
 		
 		return patientIdHolder[0] != null ? (Patient) getSession().get(Patient.class, patientIdHolder[0]) : null;

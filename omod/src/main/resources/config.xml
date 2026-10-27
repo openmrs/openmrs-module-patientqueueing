@@ -91,6 +91,12 @@
 		<description>Whether check-in should automatically assign a provider using the configured assignment strategy. Set to false (or pass autoAssignProvider=false on the request) to always queue patients unassigned for manual assignment from the provider dashboard.</description>
 	</globalProperty>
 
+	<globalProperty>
+		<property>patientqueueing.defaultVisitTypeUuid</property>
+		<defaultValue></defaultValue>
+		<description>Visit type UUID used when the generic patient check-in endpoint (POST /patientqueueing/checkin) creates a visit and none is supplied on the request. Must be configured per implementation; leave empty only if every request supplies visitType.</description>
+	</globalProperty>
+
 	<!-- Internationalization -->
 	<!-- All message codes should start with @MODULE_ID@.* -->
 

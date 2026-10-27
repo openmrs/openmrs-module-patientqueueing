@@ -121,11 +121,16 @@ public class CheckInResource extends DelegatingCrudResource<CheckInResult> {
 		Location queueRoom = null;
 		if (StringUtils.isNotBlank(queueRoomUuid)) {
 			queueRoom = locationService.getLocationByUuid(queueRoomUuid);
+			// Failing loudly beats silently queueing the patient with no room
+			validateNotNull(queueRoom, "Location not found for UUID: " + queueRoomUuid);
 		}
 		
 		Provider provider = null;
 		if (StringUtils.isNotBlank(providerUuid)) {
 			provider = providerService.getProviderByUuid(providerUuid);
+			// Reject rather than silently falling through to auto-assignment: the client
+			// believes this specific provider took the patient
+			validateNotNull(provider, "Provider not found for UUID: " + providerUuid);
 		}
 		
 		// Determine visit type - use provided or default from configuration

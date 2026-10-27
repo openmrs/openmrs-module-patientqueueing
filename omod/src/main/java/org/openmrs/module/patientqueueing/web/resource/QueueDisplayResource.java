@@ -286,7 +286,7 @@ public class QueueDisplayResource extends DelegatingCrudResource<QueueDisplayDto
 		// Privacy: Mask patient name for public queue display (e.g., "John Doe" → "J. D***")
 		String fullName = pq.getPatient() != null && pq.getPatient().getPersonName() != null ? pq.getPatient()
 		        .getPersonName().getFullName() : null;
-		row.setDisplayName(maskPatientName(fullName));
+		row.setDisplayName(QueueNameMaskUtil.maskPatientName(fullName));
 		row.setQueueLocation(pq.getLocationTo() != null ? pq.getLocationTo().getName() : null);
 		row.setServiceLocation(pq.getQueueRoom() != null ? pq.getQueueRoom().getName() : null);
 		row.setDateCreated(pq.getDateCreated());
@@ -348,36 +348,4 @@ public class QueueDisplayResource extends DelegatingCrudResource<QueueDisplayDto
 		return new DateRange(OpenmrsUtil.firstSecondOfDay(target), OpenmrsUtil.getLastMomentOfDay(target));
 	}
 	
-	/**
-	 * Mask patient name for privacy in public queue displays. Examples: "John Doe" → "J. D***",
-	 * "Mary Jane Smith" → "M. J. S***"
-	 * 
-	 * @param fullName the full patient name
-	 * @return masked name, or null if input is null
-	 */
-	private String maskPatientName(String fullName) {
-		if (fullName == null || fullName.trim().isEmpty()) {
-			return null;
-		}
-		
-		String[] parts = fullName.trim().split("\\s+");
-		StringBuilder masked = new StringBuilder();
-		
-		for (int i = 0; i < parts.length; i++) {
-			String part = parts[i];
-			if (part.isEmpty()) {
-				continue;
-			}
-			// First character + dot + space (except last part)
-			if (part.length() > 0) {
-				masked.append(part.charAt(0));
-				if (i < parts.length - 1) {
-					masked.append(". ");
-				}
-			}
-		}
-		
-		masked.append("***");
-		return masked.toString();
-	}
 }

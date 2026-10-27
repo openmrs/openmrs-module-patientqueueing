@@ -19,6 +19,7 @@ import org.openmrs.VisitType;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.VisitService;
 import org.openmrs.api.context.Context;
+import org.openmrs.api.db.DAOException;
 import org.openmrs.module.patientqueueing.api.PatientQueueingService;
 import org.openmrs.module.patientqueueing.web.customdto.SelfCheckIn;
 import org.openmrs.module.patientqueueing.model.NonPatientQueue;
@@ -242,7 +243,7 @@ public class SelfCheckInPatientResource extends DelegatingCrudResource<SelfCheck
 			}
 			return null;
 		}
-		catch (IllegalArgumentException e) {
+		catch (IllegalArgumentException | DAOException e) {
 			throw e;
 		}
 		catch (Exception e) {
@@ -362,17 +363,16 @@ public class SelfCheckInPatientResource extends DelegatingCrudResource<SelfCheck
 	private SimpleObject buildPatientObject(Patient patient) {
 		SimpleObject patientObj = new SimpleObject();
 		patientObj.add("uuid", patient.getUuid());
-		// Safely get person name - handle potential null
+		// Safely get person name - handle potential null. Masked: this endpoint is reachable
+		// from an unattended kiosk by presenting a lookup value (phone number), so the full
+		// name would let anyone harvest patient identities
 		if (patient.getPersonName() != null) {
-			patientObj.add("display", patient.getPersonName().getFullName());
+			patientObj.add("display", QueueNameMaskUtil.maskPatientName(patient.getPersonName().getFullName()));
 		} else {
-			patientObj.add("display", patient.getPatientIdentifier() != null ? patient.getPatientIdentifier()
-			        .getIdentifier() : patient.getUuid());
+			patientObj.add("display", patient.getUuid());
 		}
-		// Add patient identifier if available
-		if (patient.getPatientIdentifier() != null) {
-			patientObj.add("patientId", patient.getPatientIdentifier().getIdentifier());
-		}
+		// No identifier or patientId here: the kiosk is unattended, and echoing a lookup
+		// value's identifier enables patient enumeration
 		return patientObj;
 	}
 	
@@ -413,7 +413,10 @@ public class SelfCheckInPatientResource extends DelegatingCrudResource<SelfCheck
 		// Check if it's a configured attribute type (person attribute like phone number)
 		if (parseUuidSet(personAttributeTypeUuidsStr).contains(identifierTypeUuid.trim())) {
 			log.info("Looking up patient by person attribute type: " + identifierTypeUuid);
-			Patient patient = getPatientByPersonAttributes(identifierValue, personAttributeTypeUuidsStr);
+			// Look up only under the type the kiosk sent — searching every configured type
+			// would match a value held as a different attribute (e.g. a phone number stored
+			// as another patient's next-of-kin phone)
+			Patient patient = getPatientByPersonAttribute(identifierValue, identifierTypeUuid.trim());
 			if (patient != null) {
 				return patient;
 			}
@@ -433,44 +436,38 @@ public class SelfCheckInPatientResource extends DelegatingCrudResource<SelfCheck
 	}
 	
 	/**
-	 * Find patient by person attribute value using configured attribute types (supports multiple).
-	 * Uses efficient database query instead of loading all patients into memory.
+	 * Find patient by person attribute value under exactly one attribute type. Callers must pass
+	 * the type the client sent — searching other configured types here would match a value held as
+	 * a different attribute (e.g. a phone number stored as another patient's next-of-kin). Uses
+	 * efficient database queries instead of loading all patients into memory.
 	 */
-	private Patient getPatientByPersonAttributes(String attributeValue, String attributeTypeUuidsStr) {
+	private Patient getPatientByPersonAttribute(String attributeValue, String attributeTypeUuid) {
 		try {
 			PatientQueueingService queueingService = Context.getService(PatientQueueingService.class);
-			String[] uuids = attributeTypeUuidsStr.split(",");
-			
-			for (String uuid : uuids) {
-				uuid = uuid.trim();
-				if (StringUtils.isBlank(uuid)) {
-					continue;
-				}
-				
-				PersonAttributeType attributeType = Context.getPersonService().getPersonAttributeTypeByUuid(uuid);
-				if (attributeType == null) {
-					log.warn("PersonAttributeType not found for UUID: " + uuid);
-					continue;
-				}
-				
-				// Refuse to guess when the attribute value is shared by more than one patient
-				int matches = queueingService.countPatientsByPersonAttributeValue(attributeType.getPersonAttributeTypeId(),
-				    attributeValue);
-				if (matches > 1) {
-					throw new IllegalArgumentException("This " + attributeType.getName()
-					        + " is shared by more than one patient. Please check in with another identifier.");
-				}
-				
-				// Use efficient database query instead of loading all patients
-				if (matches == 1) {
-					return queueingService.getPatientByPersonAttributeValue(attributeType.getPersonAttributeTypeId(),
-					    attributeValue);
-				}
+
+			PersonAttributeType attributeType = Context.getPersonService().getPersonAttributeTypeByUuid(attributeTypeUuid);
+			if (attributeType == null) {
+				log.warn("PersonAttributeType not found for UUID: " + attributeTypeUuid);
+				return null;
 			}
-			
+
+			// Refuse to guess when the attribute value is shared by more than one patient
+			int matches = queueingService.countPatientsByPersonAttributeValue(attributeType.getPersonAttributeTypeId(),
+			    attributeValue);
+			if (matches > 1) {
+				throw new IllegalArgumentException("This " + attributeType.getName()
+				        + " is shared by more than one patient. Please check in with another identifier.");
+			}
+
+			// Use efficient database query instead of loading all patients
+			if (matches == 1) {
+				return queueingService.getPatientByPersonAttributeValue(attributeType.getPersonAttributeTypeId(),
+				    attributeValue);
+			}
+
 			return null;
 		}
-		catch (IllegalArgumentException e) {
+		catch (IllegalArgumentException | DAOException e) {
 			throw e;
 		}
 		catch (Exception e) {

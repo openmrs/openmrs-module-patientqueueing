@@ -86,8 +86,9 @@ public class QueueKioskResource extends DelegatingCrudResource<SimpleObject> {
 				long totalTime = 0;
 				int count = 0;
 				for (PatientQueue pq : this.completedToday) {
-					if (pq.getDateCreated() != null && pq.getDateChanged() != null) {
-						totalTime += pq.getDateChanged().getTime() - pq.getDateCreated().getTime();
+					// Measure actual service time (check-in -> completed), not last edit time
+					if (pq.getDateCreated() != null && pq.getDateCompleted() != null) {
+						totalTime += pq.getDateCompleted().getTime() - pq.getDateCreated().getTime();
 						count++;
 					}
 				}
@@ -99,8 +100,8 @@ public class QueueKioskResource extends DelegatingCrudResource<SimpleObject> {
 				long totalTime = 0;
 				int count = 0;
 				for (NonPatientQueue npq : this.completedNonPatientsToday) {
-					if (npq.getDateCreated() != null && npq.getDateChanged() != null) {
-						totalTime += npq.getDateChanged().getTime() - npq.getDateCreated().getTime();
+					if (npq.getDateCreated() != null && npq.getEndedAt() != null) {
+						totalTime += npq.getEndedAt().getTime() - npq.getDateCreated().getTime();
 						count++;
 					}
 				}
@@ -329,7 +330,7 @@ public class QueueKioskResource extends DelegatingCrudResource<SimpleObject> {
 			result.put("ticketNumber", entry.getTicketNumber());
 			result.put("status", entry.getStatus());
 			// Privacy: Mask patient name for kiosk display
-			result.put("displayName", maskPatientName(entry.getDisplayName()));
+			result.put("displayName", QueueNameMaskUtil.maskPatientName(entry.getDisplayName()));
 			result.put("dateCreated", entry.getDateCreated());
 			return new NeedsPaging<SimpleObject>(Collections.singletonList(result), context);
 		}
@@ -478,9 +479,12 @@ public class QueueKioskResource extends DelegatingCrudResource<SimpleObject> {
 		status.put("queueLocation", pq.getLocationTo() != null ? pq.getLocationTo().getDisplayString() : null);
 		status.put("serviceLocation", pq.getQueueRoom() != null ? pq.getQueueRoom().getDisplayString() : null);
 		status.put("checkedInAt", formatDate(pq.getDateCreated()));
-		status.put("datePicked", formatDate(pq.getDateChanged()));
+		// Read the dedicated transition dates the service populates; dateChanged is only
+		// set by unrelated edits and would show hold times (or null) here
+		status.put("datePicked", formatDate(pq.getDatePicked()));
 		status.put("dateCreated", formatDate(pq.getDateCreated()));
-		status.put("dateCompleted", pq.getStatus() == PatientQueue.Status.COMPLETED ? formatDate(pq.getDateChanged()) : null);
+		status.put("dateCompleted", pq.getStatus() == PatientQueue.Status.COMPLETED ? formatDate(pq.getDateCompleted())
+		        : null);
 		
 		// Add nested objects like UgandaEMR
 		status.put("locationTo", createLocationRef(pq.getLocationTo()));
@@ -488,7 +492,7 @@ public class QueueKioskResource extends DelegatingCrudResource<SimpleObject> {
 		// Privacy: Mask patient name for kiosk display (e.g., "John Doe" → "J. D***")
 		String fullName = pq.getPatient() != null && pq.getPatient().getPersonName() != null ? pq.getPatient()
 		        .getPersonName().getFullName() : null;
-		status.put("displayName", maskPatientName(fullName));
+		status.put("displayName", QueueNameMaskUtil.maskPatientName(fullName));
 		status.put("queueType", "PATIENT");
 		
 		// Add queue position information for waiting patients using cached stats
@@ -501,7 +505,7 @@ public class QueueKioskResource extends DelegatingCrudResource<SimpleObject> {
 				if (avgTime != null) {
 					Integer position = stats.getPosition(pq.getUuid(), pq.getDateCreated(), "PATIENT");
 					if (position != null && position > 1) {
-						status.put("estimatedWaitMinutes", position * avgTime);
+						status.put("estimatedWaitMinutes", (position - 1) * avgTime);
 					} else {
 						status.put("estimatedWaitMinutes", 0);
 					}
@@ -536,7 +540,7 @@ public class QueueKioskResource extends DelegatingCrudResource<SimpleObject> {
 		status.put("checkedInAt", formatDate(npq.getDateCreated()));
 		status.put("dateCreated", formatDate(npq.getDateCreated()));
 		status.put("dateCompleted",
-		    npq.getStatus() == NonPatientQueue.NonPatientQueueStatus.COMPLETED ? formatDate(npq.getDateChanged()) : null);
+		    npq.getStatus() == NonPatientQueue.NonPatientQueueStatus.COMPLETED ? formatDate(npq.getEndedAt()) : null);
 		status.put("displayName", npq.getDisplayName());
 		status.put("queueType", "NON_PATIENT");
 		
@@ -555,7 +559,7 @@ public class QueueKioskResource extends DelegatingCrudResource<SimpleObject> {
 				if (avgTime != null) {
 					Integer position = stats.getPosition(npq.getUuid(), npq.getDateCreated(), "NON_PATIENT");
 					if (position != null && position > 1) {
-						status.put("estimatedWaitMinutes", position * avgTime);
+						status.put("estimatedWaitMinutes", (position - 1) * avgTime);
 					} else {
 						status.put("estimatedWaitMinutes", 0);
 					}
@@ -719,12 +723,12 @@ public class QueueKioskResource extends DelegatingCrudResource<SimpleObject> {
 				if ("PATIENT".equals(type)) {
 					PatientQueue pq = patientQueueMap.get(uuid);
 					if (pq != null) {
-						completedAt = pq.getDateChanged();
+						completedAt = pq.getDateCompleted();
 					}
 				} else {
 					NonPatientQueue npq = nonPatientQueueMap.get(uuid);
 					if (npq != null) {
-						completedAt = npq.getDateChanged();
+						completedAt = npq.getEndedAt();
 					}
 				}
 
@@ -756,7 +760,7 @@ public class QueueKioskResource extends DelegatingCrudResource<SimpleObject> {
 							if (avgTime != null) {
 								Integer position = stats.getPosition(uuid, checkedInAt, type);
 								if (position != null && position > 1) {
-									currentService.put("estimatedWaitMinutes", position * avgTime);
+									currentService.put("estimatedWaitMinutes", (position - 1) * avgTime);
 								} else {
 									currentService.put("estimatedWaitMinutes", 0);
 								}
@@ -779,7 +783,7 @@ public class QueueKioskResource extends DelegatingCrudResource<SimpleObject> {
 			String fullName = firstQueue.getPatient() != null && firstQueue.getPatient().getPersonName() != null
 			        ? firstQueue.getPatient().getPersonName().getFullName()
 			        : null;
-			journey.put("displayName", maskPatientName(fullName));
+			journey.put("displayName", QueueNameMaskUtil.maskPatientName(fullName));
 			// Security: Don't expose patientUuid in kiosk endpoint to prevent further patient data enumeration
 			journey.put("patientUuid", null);
 		} else if (!nonPatientQueues.isEmpty()) {
@@ -799,14 +803,6 @@ public class QueueKioskResource extends DelegatingCrudResource<SimpleObject> {
 	}
 	
 	/**
-	 * Mask patient name for privacy in kiosk display. Examples: "John Doe" → "J. D***",
-	 * "Mary Jane Smith" → "M. J. S***"
-	 * 
-	 * @param fullName the full patient name
-	 * @return masked name, or null if input is null
-	 */
-	
-	/**
 	 * Creates a Date at midnight (00:00:00.000) for the given year, month, and day.
 	 * 
 	 * @param year the year (e.g., 2024)
@@ -821,29 +817,4 @@ public class QueueKioskResource extends DelegatingCrudResource<SimpleObject> {
 		return cal.getTime();
 	}
 	
-	private String maskPatientName(String fullName) {
-		if (fullName == null || fullName.trim().isEmpty()) {
-			return null;
-		}
-		
-		String[] parts = fullName.trim().split("\\s+");
-		StringBuilder masked = new StringBuilder();
-		
-		for (int i = 0; i < parts.length; i++) {
-			String part = parts[i];
-			if (part.isEmpty()) {
-				continue;
-			}
-			// First character + dot + space (except last part)
-			if (part.length() > 0) {
-				masked.append(part.charAt(0));
-				if (i < parts.length - 1) {
-					masked.append(". ");
-				}
-			}
-		}
-		
-		masked.append("***");
-		return masked.toString();
-	}
 }
