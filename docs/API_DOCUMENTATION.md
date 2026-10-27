@@ -72,12 +72,14 @@ Generic patient check-in with configurable visit type. Supports provider auto-as
 
 **Example**:
 ```bash
-curl -X POST \
+curl -X POST -H 'Content-Type: application/json' \
   'http://localhost:8080/openmrs/ws/rest/v1/patientqueueing/checkin' \
-  -d 'patient=a9e39c4d-1234-5678-9abc-def456789012' \
-  -d 'locationTo=b1e39c4d-1234-5678-9abc-def456789013' \
-  -d 'visitType=d1e39c4d-1234-5678-9abc-def456789015' \
-  -d 'queueRoom=c1e39c4d-1234-5678-9abc-def456789014'
+  -d '{
+        "patient": "a9e39c4d-1234-5678-9abc-def456789012",
+        "locationTo": "b1e39c4d-1234-5678-9abc-def456789013",
+        "visitType": "d1e39c4d-1234-5678-9abc-def456789015",
+        "queueRoom": "c1e39c4d-1234-5678-9abc-def456789014"
+      }
 ```
 
 ### Self Check-in (Booth/Kiosk)
@@ -88,12 +90,14 @@ Self check-in endpoint for booth/kiosk scenarios. Simplified interface for self-
 
 **Example**:
 ```bash
-curl -X POST \
+curl -X POST -H 'Content-Type: application/json' \
   'http://localhost:8080/openmrs/ws/rest/v1/patientqueueing/selfcheckin' \
-  -d 'displayName=Jane Smith' \
-  -d 'phoneNumber=+1234567890' \
-  -d 'location=b1e39c4d-1234-5678-9abc-def456789013' \
-  -d 'queueRoom=c1e39c4d-1234-5678-9abc-def456789014'
+  -d '{
+        "displayName": "Jane Smith",
+        "currentLocation": "b1e39c4d-1234-5678-9abc-def456789013",
+        "locationTo": "b1e39c4d-1234-5678-9abc-def456789013",
+        "queueRoom": "c1e39c4d-1234-5678-9abc-def456789014"
+      }
 ```
 
 **Response**: `CheckInResult`
@@ -138,12 +142,15 @@ Create a non-patient queue entry (for visitors, companions, etc.).
 
 **Example**:
 ```bash
-curl -X POST \
+curl -X POST -H 'Content-Type: application/json' \
   'http://localhost:8080/openmrs/ws/rest/v1/patientqueueing/nonpatientqueue' \
-  -d 'displayName=Jane Smith' \
-  -d 'phoneNumber=+1234567890' \
-  -d 'locationTo=b1e39c4d-1234-5678-9abc-def456789013' \
-  -d 'queueRoom=c1e39c4d-1234-5678-9abc-def456789014'
+  -d '{
+        "displayName": "Jane Smith",
+        "phoneNumber": "+1234567890",
+        "currentLocation": "b1e39c4d-1234-5678-9abc-def456789013",
+        "locationTo": "b1e39c4d-1234-5678-9abc-def456789013",
+        "queueRoom": "c1e39c4d-1234-5678-9abc-def456789014"
+      }
 ```
 
 ---
@@ -399,12 +406,15 @@ curl -X GET \
 
 **Example**:
 ```bash
-curl -X POST \
+curl -X POST -H 'Content-Type: application/json' \
   'http://localhost:8080/openmrs/ws/rest/v1/patientqueueing/nonpatientqueue' \
-  -d 'displayName=Jane Smith' \
-  -d 'phoneNumber=+1234567890' \
-  -d 'locationTo=b1e39c4d-1234-5678-9abc-def456789013' \
-  -d 'queueRoom=c1e39c4d-1234-5678-9abc-def456789014'
+  -d '{
+        "displayName": "Jane Smith",
+        "phoneNumber": "+1234567890",
+        "currentLocation": "b1e39c4d-1234-5678-9abc-def456789013",
+        "locationTo": "b1e39c4d-1234-5678-9abc-def456789013",
+        "queueRoom": "c1e39c4d-1234-5678-9abc-def456789014"
+      }
 ```
 
 ### Update Non-Patient Queue
@@ -425,10 +435,9 @@ curl -X POST \
 
 **Example**:
 ```bash
-curl -X PUT \
+curl -X PUT -H 'Content-Type: application/json' \
   'http://localhost:8080/openmrs/ws/rest/v1/patientqueueing/nonpatientqueue/a1e39c4d-1234-5678-9abc-def456789015' \
-  -d 'priority=2' \
-  -d 'comment=Updated priority'
+  -d '{"priority": 2, "comment": "Updated priority"}'
 ```
 
 ### Search Non-Patient Queues
@@ -450,6 +459,92 @@ curl -X PUT \
 ```bash
 curl -X GET \
   'http://localhost:8080/openmrs/ws/rest/v1/patientqueueing/nonpatientqueue?q=search&ticketNumber=21/04/2026-LOC-TYPE-001'
+```
+
+---
+
+## Provider Dashboard
+
+The unified dashboard resource for a queue room: one list covering patient and non-patient
+entries, and the status transitions (call, hold, recall, skip, no-show, transfer, complete)
+enforced by the service's transition rules.
+
+### List a Room's Queue
+
+**Endpoint**: `GET /ws/rest/v1/patientqueueing/providerqueuebylocation?uuid=<roomUuid>`
+
+**Parameters**:
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| uuid | string | Yes | UUID of the queue room location |
+
+**Response**: Paged list of `ProviderQueueEntry` (patient and non-patient entries merged,
+sorted by status, then priority high-to-low, then FIFO). Each entry carries:
+`uuid`, `queueNumber`, `displayName`, `identifiedBy`, `currentLocation`, `serviceLocation`,
+`status`, `priority`, `dateCreated`, `patient`, `sourceType` (`PATIENT_QUEUE` or null),
+`locationToUuid`, `queueRoomUuid`, `comment`, `action`.
+
+**Returned status values**: `WAITING`, `CALLED`, `IN_SERVICE`, `HOLD`, `NO_SHOW`,
+`COMPLETED`, `TRANSFERRED`, `CANCELLED` (patient `PENDING`/`PICKED`/`ON_HOLD` are normalized
+to `WAITING`/`CALLED`/`HOLD`).
+
+**Requires**: `Task: patientqueueing.viewQueue`
+
+### Update an Entry (call, hold, recall, skip, no-show, complete)
+
+**Endpoint**: `PUT /ws/rest/v1/patientqueueing/providerqueuebylocation/:uuid`
+
+**Request Body** (all fields optional):
+```json
+{
+  "status": "CALLED",
+  "priority": 2,
+  "comment": "Called to consultation room",
+  "sourceType": "PATIENT_QUEUE"
+}
+```
+
+- `status` accepts `WAITING` (skip back to waiting), `CALLED`, `IN_SERVICE`, `HOLD`,
+  `NO_SHOW` and `COMPLETED`. Transitions that are illegal from the entry's current status are
+  rejected with 400 — e.g. calling a transferred entry, or completing one directly from
+  WAITING (non-patient).
+- `sourceType`: `PATIENT_QUEUE` for patient entries; omit for non-patient entries. Only
+  needed when the uuid alone cannot disambiguate.
+
+**Requires**: `Task: patientqueueing.manageQueue`
+
+**Example**:
+```bash
+curl -X PUT -H 'Content-Type: application/json' \
+  'http://localhost:8080/openmrs/ws/rest/v1/patientqueueing/providerqueuebylocation/a1e39c4d-1234-5678-9abc-def456789015' \
+  -d '{"status": "CALLED", "sourceType": "PATIENT_QUEUE"}'
+```
+
+### Transfer an Entry (FORWARD)
+
+**Endpoint**: `PUT /ws/rest/v1/patientqueueing/providerqueuebylocation/:uuid`
+
+Send `action: "FORWARD"` with the destination: the current entry is closed as TRANSFERRED
+(keeping its source room for history) and a new entry is created at the destination.
+
+**Request Body**:
+```json
+{
+  "action": "FORWARD",
+  "sourceType": "PATIENT_QUEUE",
+  "locationToUuid": "b1e39c4d-1234-5678-9abc-def456789013",
+  "queueRoomUuid": "c1e39c4d-1234-5678-9abc-def456789014",
+  "comment": "Sent to laboratory"
+}
+```
+
+**Response**: the new entry at the destination (status `WAITING`)
+
+**Example**:
+```bash
+curl -X PUT -H 'Content-Type: application/json' \
+  'http://localhost:8080/openmrs/ws/rest/v1/patientqueueing/providerqueuebylocation/a1e39c4d-1234-5678-9abc-def456789015' \
+  -d '{"action": "FORWARD", "sourceType": "PATIENT_QUEUE", "locationToUuid": "b1e39c4d-1234-5678-9abc-def456789013", "queueRoomUuid": "c1e39c4d-1234-5678-9abc-def456789014"}'
 ```
 
 ---

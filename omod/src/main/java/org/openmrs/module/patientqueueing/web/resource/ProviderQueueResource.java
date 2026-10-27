@@ -323,8 +323,8 @@ public class ProviderQueueResource extends DelegatingCrudResource<ProviderQueueE
 		try {
 			return NonPatientQueue.NonPatientQueueStatus.valueOf(s);
 		}
-		catch (Exception e) {
-			return NonPatientQueue.NonPatientQueueStatus.WAITING;
+		catch (IllegalArgumentException e) {
+			throw new IllegalArgumentException("Unsupported status for a non-patient queue entry: " + s);
 		}
 	}
 	

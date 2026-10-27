@@ -86,9 +86,10 @@ public class QueueKioskResource extends DelegatingCrudResource<SimpleObject> {
 				long totalTime = 0;
 				int count = 0;
 				for (PatientQueue pq : this.completedToday) {
-					// Measure actual service time (check-in -> completed), not last edit time
-					if (pq.getDateCreated() != null && pq.getDateCompleted() != null) {
-						totalTime += pq.getDateCompleted().getTime() - pq.getDateCreated().getTime();
+					// Measure service time (called -> completed); timing from check-in adds
+					// each patient's own wait, which the position multiplier already counts
+					if (pq.getDatePicked() != null && pq.getDateCompleted() != null) {
+						totalTime += pq.getDateCompleted().getTime() - pq.getDatePicked().getTime();
 						count++;
 					}
 				}
@@ -100,8 +101,8 @@ public class QueueKioskResource extends DelegatingCrudResource<SimpleObject> {
 				long totalTime = 0;
 				int count = 0;
 				for (NonPatientQueue npq : this.completedNonPatientsToday) {
-					if (npq.getDateCreated() != null && npq.getEndedAt() != null) {
-						totalTime += npq.getEndedAt().getTime() - npq.getDateCreated().getTime();
+					if (npq.getCalledAt() != null && npq.getEndedAt() != null) {
+						totalTime += npq.getEndedAt().getTime() - npq.getCalledAt().getTime();
 						count++;
 					}
 				}

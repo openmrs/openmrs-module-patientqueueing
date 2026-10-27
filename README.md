@@ -67,6 +67,15 @@ GET    /ws/rest/v1/patientqueue/:uuid           - Get by UUID (existing)
 PUT    /ws/rest/v1/patientqueue/:uuid           - Update (existing)
 ```
 
+### Provider Dashboard
+```
+GET    /ws/rest/v1/patientqueueing/providerqueuebylocation?uuid=<roomUuid>  - Unified room list
+PUT    /ws/rest/v1/patientqueueing/providerqueuebylocation/:uuid            - Call/hold/recall/skip/no-show/complete
+PUT    /ws/rest/v1/patientqueueing/providerqueuebylocation/:uuid            - Transfer (action=FORWARD)
+```
+See [API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md) "Provider Dashboard" for accepted status
+values and request bodies.
+
 ---
 
 ## Quick Start
@@ -131,20 +140,26 @@ Assign them by editing the roles in **Admin → Roles**, or by adding the privil
 
 #### Patient Check-in
 ```bash
-curl -X POST \
+curl -X POST -H 'Content-Type: application/json' \
   'http://localhost:8080/openmrs/ws/rest/v1/patientqueueing/checkin' \
-  -d 'patient=a9e39c4d-1234-5678-9abc-def456789012' \
-  -d 'locationTo=b1e39c4d-1234-5678-9abc-def456789013' \
-  -d 'visitType=d1e39c4d-1234-5678-9abc-def456789015' \
-  -d 'queueRoom=c1e39c4d-1234-5678-9abc-def456789014'
+  -d '{
+        "patient": "a9e39c4d-1234-5678-9abc-def456789012",
+        "locationTo": "b1e39c4d-1234-5678-9abc-def456789013",
+        "visitType": "d1e39c4d-1234-5678-9abc-def456789015",
+        "queueRoom": "c1e39c4d-1234-5678-9abc-def456789014"
+      }'
 ```
 
 #### Non-Patient Check-in
 ```bash
-curl -X POST \
+curl -X POST -H 'Content-Type: application/json' \
   'http://localhost:8080/openmrs/ws/rest/v1/patientqueueing/selfcheckin' \
-  -d 'displayName=Jane Smith' \
-  -d 'location=b1e39c4d-1234-5678-9abc-def456789013'
+  -d '{
+        "displayName": "Jane Smith",
+        "currentLocation": "b1e39c4d-1234-5678-9abc-def456789013",
+        "locationTo": "b1e39c4d-1234-5678-9abc-def456789013",
+        "queueRoom": "c1e39c4d-1234-5678-9abc-def456789014"
+      }'
 ```
 
 #### Queue Display

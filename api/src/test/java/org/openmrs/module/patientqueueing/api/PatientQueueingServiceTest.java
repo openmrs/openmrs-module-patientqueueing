@@ -20,9 +20,11 @@ import org.mockito.MockitoAnnotations;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
+import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.patientqueueing.api.dao.PatientQueueingDao;
 import org.openmrs.module.patientqueueing.api.impl.PatientQueueingServiceImpl;
+import org.openmrs.module.patientqueueing.model.NonPatientQueue;
 import org.openmrs.module.patientqueueing.model.PatientQueue;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.openmrs.util.OpenmrsUtil;
@@ -536,5 +538,154 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 		List capturedLocations = locationsCaptor.getValue();
 		Assert.assertNotNull(capturedLocations);
 		Assert.assertFalse(capturedLocations.isEmpty());
+	}
+	
+	// ===== Transition rule tests (drive the service directly, no REST harness needed) =====
+	
+	private PatientQueue incompleteEntryForPatient10000(Location location) {
+		PatientQueueingService service = Context.getService(PatientQueueingService.class);
+		Patient patient = Context.getPatientService().getPatient(10000);
+		PatientQueue entry = service.getIncompletePatientQueue(patient, location);
+		Assert.assertNotNull("Expected an open queue entry for patient 10000 at the location", entry);
+		return entry;
+	}
+	
+	@Test
+	public void transferPatientQueue_shouldKeepSingleOpenEntry_whenTransferringBackToOriginalLocation() {
+		PatientQueueingService service = Context.getService(PatientQueueingService.class);
+		Patient patient = Context.getPatientService().getPatient(10000);
+		Location roomA = Context.getLocationService().getLocation(1);
+		Location roomB = Context.getLocationService().getLocation(10000);
+		
+		PatientQueue entryA = incompleteEntryForPatient10000(roomA);
+		
+		// Forward A -> B, then B -> A: the destination must end up with exactly one open entry
+		PatientQueue entryB = service.transferPatientQueue(entryA, roomB, null);
+		Assert.assertEquals(PatientQueue.Status.PENDING, entryB.getStatus());
+		PatientQueue entryC = service.transferPatientQueue(entryB, roomA, null);
+		Assert.assertEquals(PatientQueue.Status.PENDING, entryC.getStatus());
+		
+		PatientQueue liveAtA = service.getIncompletePatientQueue(patient, roomA);
+		Assert.assertNotNull(liveAtA);
+		Assert.assertEquals(entryC.getUuid(), liveAtA.getUuid());
+		
+		// The dashboard can still call the patient at A without NonUniqueResultException
+		service.pickPatientQueue(liveAtA, null, null);
+		Assert.assertEquals(PatientQueue.Status.PICKED, service.getPatientQueueByUuid(liveAtA.getUuid()).getStatus());
+	}
+	
+	@Test
+	public void savePatientQue_shouldNotCompleteLiveEntry_whenSavingARowAlreadyClosed() {
+		PatientQueueingService service = Context.getService(PatientQueueingService.class);
+		Patient patient = Context.getPatientService().getPatient(10000);
+		Location roomA = Context.getLocationService().getLocation(1);
+		Location roomB = Context.getLocationService().getLocation(10000);
+		
+		PatientQueue entryA = incompleteEntryForPatient10000(roomA);
+		PatientQueue entryB = service.transferPatientQueue(entryA, roomB, null);
+		PatientQueue entryC = service.transferPatientQueue(entryB, roomA, null);
+		
+		// A comment-only update on the old TRANSFERRED row (room A's dashboard still lists it)
+		// must not complete the patient's live entry at A
+		entryA.setComment("Late note");
+		service.savePatientQue(entryA);
+		
+		PatientQueue liveAtA = service.getIncompletePatientQueue(patient, roomA);
+		Assert.assertNotNull("The live entry at A must survive saving the closed row", liveAtA);
+		Assert.assertEquals(entryC.getUuid(), liveAtA.getUuid());
+		Assert.assertEquals(PatientQueue.Status.PENDING, liveAtA.getStatus());
+	}
+	
+	@Test
+	public void completePatientQueue_shouldRefuseTransferredEntry() {
+		PatientQueueingService service = Context.getService(PatientQueueingService.class);
+		Location roomA = Context.getLocationService().getLocation(1);
+		Location roomB = Context.getLocationService().getLocation(10000);
+		
+		PatientQueue entryA = incompleteEntryForPatient10000(roomA);
+		service.transferPatientQueue(entryA, roomB, null);
+		
+		try {
+			service.completePatientQueue(entryA);
+			Assert.fail("Completing a transferred entry must be refused");
+		}
+		catch (APIException e) {
+			Assert.assertEquals(PatientQueue.Status.TRANSFERRED, service.getPatientQueueByUuid(entryA.getUuid()).getStatus());
+		}
+	}
+	
+	@Test
+	public void patientQueueTransitions_holdRecallNoShowAndReopen() {
+		PatientQueueingService service = Context.getService(PatientQueueingService.class);
+		Location roomA = Context.getLocationService().getLocation(1);
+		
+		PatientQueue entry = incompleteEntryForPatient10000(roomA);
+		
+		entry = service.holdPatientQueue(entry);
+		Assert.assertEquals(PatientQueue.Status.ON_HOLD, entry.getStatus());
+		
+		entry = service.recallPatientQueue(entry, null);
+		Assert.assertEquals(PatientQueue.Status.PICKED, entry.getStatus());
+		
+		entry = service.markPatientQueueNoShow(entry);
+		Assert.assertEquals(PatientQueue.Status.NO_SHOW, entry.getStatus());
+		
+		entry = service.reopenPatientQueue(entry);
+		Assert.assertEquals(PatientQueue.Status.PENDING, entry.getStatus());
+	}
+	
+	@Test
+	public void nonPatientQueueLifecycle_holdRecallNoShowSkipAndComplete() {
+		PatientQueueingService service = Context.getService(PatientQueueingService.class);
+		Location room = Context.getLocationService().getLocation(10000);
+		
+		NonPatientQueue npq = service.createNonPatientQueueEntry("Jane Doe", "+1234567890", null, room, room, room, 1, null);
+		Assert.assertEquals(NonPatientQueue.NonPatientQueueStatus.WAITING, npq.getStatus());
+		
+		npq = service.callNonPatientQueue(npq, null);
+		Assert.assertEquals(NonPatientQueue.NonPatientQueueStatus.CALLED, npq.getStatus());
+		
+		npq = service.holdNonPatientQueue(npq);
+		Assert.assertEquals(NonPatientQueue.NonPatientQueueStatus.HOLD, npq.getStatus());
+		
+		npq = service.recallNonPatientQueue(npq, null);
+		Assert.assertEquals(NonPatientQueue.NonPatientQueueStatus.CALLED, npq.getStatus());
+		
+		npq = service.markNonPatientQueueNoShow(npq);
+		Assert.assertEquals(NonPatientQueue.NonPatientQueueStatus.NO_SHOW, npq.getStatus());
+		
+		npq = service.recallNonPatientQueue(npq, null);
+		Assert.assertEquals(NonPatientQueue.NonPatientQueueStatus.CALLED, npq.getStatus());
+		
+		npq = service.skipNonPatientQueue(npq);
+		Assert.assertEquals(NonPatientQueue.NonPatientQueueStatus.WAITING, npq.getStatus());
+		
+		npq = service.callNonPatientQueue(npq, null);
+		npq = service.markNonPatientQueueArrived(npq);
+		Assert.assertEquals(NonPatientQueue.NonPatientQueueStatus.ARRIVED, npq.getStatus());
+		
+		npq = service.startServingNonPatientQueue(npq, null);
+		Assert.assertEquals(NonPatientQueue.NonPatientQueueStatus.SERVING, npq.getStatus());
+		
+		npq = service.completeNonPatientQueue(npq, null);
+		Assert.assertEquals(NonPatientQueue.NonPatientQueueStatus.COMPLETED, npq.getStatus());
+		Assert.assertNotNull(npq.getEndedAt());
+	}
+	
+	@Test
+	public void transferNonPatientQueue_shouldKeepSourceLocationOnTransferredRow() {
+		PatientQueueingService service = Context.getService(PatientQueueingService.class);
+		Location roomA = Context.getLocationService().getLocation(1);
+		Location roomB = Context.getLocationService().getLocation(10000);
+		
+		NonPatientQueue npq = service.createNonPatientQueueEntry("John Doe", "+1234567890", null, roomA, roomA, null, 1,
+		    null);
+		
+		NonPatientQueue transferred = service.transferNonPatientQueue(npq, roomB, null);
+		
+		Assert.assertEquals(NonPatientQueue.NonPatientQueueStatus.TRANSFERRED, npq.getStatus());
+		Assert.assertEquals(roomA.getUuid(), npq.getLocationTo().getUuid());
+		Assert.assertEquals(NonPatientQueue.NonPatientQueueStatus.WAITING, transferred.getStatus());
+		Assert.assertEquals(roomB.getUuid(), transferred.getLocationTo().getUuid());
 	}
 }

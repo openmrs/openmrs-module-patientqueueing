@@ -64,7 +64,11 @@ public class PatientQueueingServiceImpl extends BaseOpenmrsService implements Pa
 		PatientQueue currentQueue = dao.getIncompletePatientQueue(patientQueue.getPatient(), patientQueue.getLocationTo(),
 		    null);
 		
-		if (currentQueue != null && !patientQueue.equals(currentQueue)) {
+		// Only an open entry replaces the patient's open entry at this location; saving a
+		// completed or transferred row (e.g. a comment on it) must not complete the live one
+		if (currentQueue != null && !patientQueue.equals(currentQueue)
+		        && patientQueue.getStatus() != PatientQueue.Status.COMPLETED
+		        && patientQueue.getStatus() != PatientQueue.Status.TRANSFERRED) {
 			completePatientQueue(currentQueue);
 		}
 		
@@ -99,6 +103,10 @@ public class PatientQueueingServiceImpl extends BaseOpenmrsService implements Pa
 		// Idempotent: re-completing must not overwrite the original completion time
 		if (patientQueue.getStatus() == PatientQueue.Status.COMPLETED) {
 			return patientQueue;
+		}
+		// Completing a transferred row would erase the record that the patient moved
+		if (patientQueue.getStatus() == PatientQueue.Status.TRANSFERRED) {
+			throw new APIException("Cannot complete a transferred queue entry");
 		}
 		
 		patientQueue.setStatus(PatientQueue.Status.COMPLETED);
