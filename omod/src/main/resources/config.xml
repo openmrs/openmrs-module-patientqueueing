@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <module configVersion="1.2">
-	
+
 	<!-- Base Module Properties -->
 	<id>${project.parent.artifactId}</id>
 	<name>${project.parent.name}</name>
@@ -10,13 +10,13 @@
 	<author>METS</author>
 	<description>
 			${project.parent.description}
-	</description>
+		</description>
 
 	<activator>org.openmrs.module.patientqueueing.PatientQueueingActivator</activator>
-	
+
 	<!-- <updateURL>https://modules.openmrs.org/modules/download/@MODULE_ID@/update.rdf</updateURL> -->
 	<!-- /Base Module Properties -->
-	
+
 	<require_version>${openmrsPlatformVersion}</require_version>
 
 	<require_modules>
@@ -45,11 +45,58 @@
 
 	<globalProperty>
 		<property>patientqueueing.clinicianLocationUUIDS</property>
-		<defaultValue>b1a8b05e-3542-4037-bbd3-998ee9c40574,2131aff8-2e2a-480a-b7ab-4ac53250262b,58c57d25-8d39-41ab-8422-108a0c277d98</defaultValue>
-		<description>A comma separated list of location uuids for locations that clinicians operate from</description>
+		<defaultValue></defaultValue>
+		<description>A comma separated list of location uuids for locations that clinicians operate from. Must be configured per implementation as location UUIDs differ between distributions.</description>
 	</globalProperty>
-	
-	
+
+	<globalProperty>
+		<property>patientqueueing.selfCheckInPersonAttributeTypeUuids</property>
+		<defaultValue></defaultValue>
+		<description>Person attribute type UUID for phone number lookup during self check-in (e.g., the Telephone Number attribute type). Must be configured per implementation as attribute type UUIDs differ between distributions. Leave empty to disable phone-based lookup.</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>patientqueueing.selfCheckInIdentifierTypeUuids</property>
+		<defaultValue></defaultValue>
+		<description>Comma-separated list of patient identifier type UUIDs to search during self check-in (e.g., Patient ID, National ID). Must be configured per implementation as identifier type UUIDs differ between distributions.</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>patientqueueing.selfCheckInVisitTypeUuid</property>
+		<defaultValue></defaultValue>
+		<description>Visit type UUID to use when creating visits for patient self check-in (e.g., OPD visit type UUID). Leave empty to skip visit creation.</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>patientqueueing.estimatedWaitMinutesPerPerson</property>
+		<defaultValue>5</defaultValue>
+		<description>Estimated minutes of wait time per person ahead in queue. Used to calculate estimated wait time for self check-in.</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>patientqueueing.providerLocationAttributeTypeUuid</property>
+		<defaultValue></defaultValue>
+		<description>UUID of the provider attribute type that maps a provider to a location (attribute value = location UUID). Used by automatic provider assignment to find providers for a location. Leave empty to fall back to matching each provider's user default location instead. If neither is configured, check-in still succeeds and the patient is queued unassigned.</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>patientqueueing.personLocationAttributeName</property>
+		<defaultValue>defaultLocation</defaultValue>
+		<description>Name of the person attribute type holding a provider's default location UUID, used for provider-location matching when patientqueueing.providerLocationAttributeTypeUuid is not configured.</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>patientqueueing.autoAssignProvider</property>
+		<defaultValue>true</defaultValue>
+		<description>Whether check-in should automatically assign a provider using the configured assignment strategy. Set to false (or pass autoAssignProvider=false on the request) to always queue patients unassigned for manual assignment from the provider dashboard.</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>patientqueueing.defaultVisitTypeUuid</property>
+		<defaultValue></defaultValue>
+		<description>Visit type UUID used when the generic patient check-in endpoint (POST /patientqueueing/checkin) creates a visit and none is supplied on the request. Must be configured per implementation; leave empty only if every request supplies visitType.</description>
+	</globalProperty>
+
 	<!-- Internationalization -->
 	<!-- All message codes should start with @MODULE_ID@.* -->
 
@@ -68,6 +115,31 @@
 		<description>Ability to send Patient To Queue</description>
 	</privilege>
 
+	<privilege>
+		<name>Task: patientqueueing.checkIn</name>
+		<description>Ability to perform patient check-in</description>
+	</privilege>
+
+	<privilege>
+		<name>Task: patientqueueing.manageQueue</name>
+		<description>Ability to manage queue entries (pick, call, hold, recall, skip, no-show, transfer, complete)</description>
+	</privilege>
+
+	<privilege>
+		<name>Task: patientqueueing.viewQueue</name>
+		<description>Ability to view queue status and entries</description>
+	</privilege>
+
+	<privilege>
+		<name>App: patientqueueing.selfCheckIn</name>
+		<description>Ability to access self check-in kiosk</description>
+	</privilege>
+
+	<privilege>
+		<name>App: patientqueueing.queueDisplay</name>
+		<description>Ability to access queue display/kiosk view</description>
+	</privilege>
+
 	<messages>
 		<lang>en</lang>
 		<file>messages.properties</file>
@@ -82,4 +154,3 @@
 	</messages>
 	<!-- /Internationalization -->
 </module>
-
