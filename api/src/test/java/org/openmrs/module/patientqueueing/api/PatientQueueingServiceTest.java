@@ -575,6 +575,27 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 	}
 	
 	@Test
+	public void transferPatientQueue_shouldCompleteTheOpenEntryAtTheDestination() {
+		PatientQueueingService service = Context.getService(PatientQueueingService.class);
+		Patient patient = Context.getPatientService().getPatient(10000);
+		Location roomB = Context.getLocationService().getLocation(10000);
+		
+		// The patient is already queued at B; forwarding A -> B must complete that open
+		// entry, or the destination ends up with two and the next CALLED 500s
+		PatientQueue atB = new PatientQueue();
+		atB.setPatient(patient);
+		atB.setLocationTo(roomB);
+		atB.setStatus(PatientQueue.Status.PENDING);
+		service.savePatientQue(atB);
+		
+		PatientQueue moved = service.transferPatientQueue(incompleteEntryForPatient10000(Context.getLocationService()
+		        .getLocation(1)), roomB, null);
+		
+		Assert.assertEquals(PatientQueue.Status.COMPLETED, atB.getStatus());
+		Assert.assertEquals(moved.getUuid(), service.getIncompletePatientQueue(patient, roomB).getUuid());
+	}
+	
+	@Test
 	public void savePatientQue_shouldNotCompleteLiveEntry_whenSavingARowAlreadyClosed() {
 		PatientQueueingService service = Context.getService(PatientQueueingService.class);
 		Patient patient = Context.getPatientService().getPatient(10000);
@@ -612,6 +633,125 @@ public class PatientQueueingServiceTest extends BaseModuleContextSensitiveTest {
 		catch (APIException e) {
 			Assert.assertEquals(PatientQueue.Status.TRANSFERRED, service.getPatientQueueByUuid(entryA.getUuid()).getStatus());
 		}
+	}
+	
+	// Each illegal transition must be refused, not silently applied (a refusal case per rule)
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void savePatientQue_shouldRefuseNullQueueEntry() {
+		Context.getService(PatientQueueingService.class).savePatientQue(null);
+	}
+	
+	@Test(expected = APIException.class)
+	public void holdPatientQueue_shouldRefuseACompletedEntry() {
+		PatientQueueingService service = Context.getService(PatientQueueingService.class);
+		PatientQueue entry = incompleteEntryForPatient10000(Context.getLocationService().getLocation(1));
+		service.completePatientQueue(entry);
+		service.holdPatientQueue(entry);
+	}
+	
+	@Test(expected = APIException.class)
+	public void holdPatientQueue_shouldRefuseANoShowEntry() {
+		PatientQueueingService service = Context.getService(PatientQueueingService.class);
+		Location roomA = Context.getLocationService().getLocation(1);
+		PatientQueue entry = service.markPatientQueueNoShow(service.pickPatientQueue(incompleteEntryForPatient10000(roomA),
+		    null, null));
+		service.holdPatientQueue(entry);
+	}
+	
+	@Test(expected = APIException.class)
+	public void pickPatientQueue_shouldRefuseATransferredEntry() {
+		PatientQueueingService service = Context.getService(PatientQueueingService.class);
+		Location roomA = Context.getLocationService().getLocation(1);
+		Location roomB = Context.getLocationService().getLocation(10000);
+		PatientQueue entry = incompleteEntryForPatient10000(roomA);
+		service.transferPatientQueue(entry, roomB, null);
+		service.pickPatientQueue(entry, null, null);
+	}
+	
+	@Test(expected = APIException.class)
+	public void recallPatientQueue_shouldRefuseAPendingEntry() {
+		PatientQueueingService service = Context.getService(PatientQueueingService.class);
+		service.recallPatientQueue(incompleteEntryForPatient10000(Context.getLocationService().getLocation(1)), null);
+	}
+	
+	@Test(expected = APIException.class)
+	public void markPatientQueueNoShow_shouldRefuseAPendingEntry() {
+		PatientQueueingService service = Context.getService(PatientQueueingService.class);
+		service.markPatientQueueNoShow(incompleteEntryForPatient10000(Context.getLocationService().getLocation(1)));
+	}
+	
+	@Test(expected = APIException.class)
+	public void reopenPatientQueue_shouldRefuseACompletedEntry() {
+		PatientQueueingService service = Context.getService(PatientQueueingService.class);
+		Location roomA = Context.getLocationService().getLocation(1);
+		PatientQueue entry = incompleteEntryForPatient10000(roomA);
+		service.completePatientQueue(entry);
+		service.reopenPatientQueue(entry);
+	}
+	
+	@Test(expected = APIException.class)
+	public void transferPatientQueue_shouldRefuseACompletedEntry() {
+		PatientQueueingService service = Context.getService(PatientQueueingService.class);
+		Location roomA = Context.getLocationService().getLocation(1);
+		PatientQueue entry = incompleteEntryForPatient10000(roomA);
+		service.completePatientQueue(entry);
+		service.transferPatientQueue(entry, Context.getLocationService().getLocation(10000), null);
+	}
+	
+	@Test(expected = APIException.class)
+	public void callNonPatientQueue_shouldRefuseAnAlreadyCalledEntry() {
+		PatientQueueingService service = Context.getService(PatientQueueingService.class);
+		Location room = Context.getLocationService().getLocation(10000);
+		NonPatientQueue npq = service.createNonPatientQueueEntry("Jane Doe", "+1234567890", null, room, room, room, 1, null);
+		service.callNonPatientQueue(npq, null);
+		service.callNonPatientQueue(npq, null);
+	}
+	
+	@Test(expected = APIException.class)
+	public void startServingNonPatientQueue_shouldRefuseACalledEntry() {
+		PatientQueueingService service = Context.getService(PatientQueueingService.class);
+		Location room = Context.getLocationService().getLocation(10000);
+		NonPatientQueue npq = service.callNonPatientQueue(
+		    service.createNonPatientQueueEntry("Jane Doe", "+1234567890", null, room, room, room, 1, null), null);
+		service.startServingNonPatientQueue(npq, null);
+	}
+	
+	@Test(expected = APIException.class)
+	public void completeNonPatientQueue_shouldRefuseAWaitingEntry() {
+		PatientQueueingService service = Context.getService(PatientQueueingService.class);
+		Location room = Context.getLocationService().getLocation(10000);
+		service.completeNonPatientQueue(
+		    service.createNonPatientQueueEntry("Jane Doe", "+1234567890", null, room, room, room, 1, null), null);
+	}
+	
+	@Test(expected = APIException.class)
+	public void skipNonPatientQueue_shouldRefuseAWaitingEntry() {
+		PatientQueueingService service = Context.getService(PatientQueueingService.class);
+		Location room = Context.getLocationService().getLocation(10000);
+		service.skipNonPatientQueue(service.createNonPatientQueueEntry("Jane Doe", "+1234567890", null, room, room, room, 1,
+		    null));
+	}
+	
+	@Test(expected = APIException.class)
+	public void cancelNonPatientQueue_shouldRefuseACompletedEntry() {
+		PatientQueueingService service = Context.getService(PatientQueueingService.class);
+		Location room = Context.getLocationService().getLocation(10000);
+		NonPatientQueue npq = service.createNonPatientQueueEntry("Jane Doe", "+1234567890", null, room, room, room, 1, null);
+		service.callNonPatientQueue(npq, null);
+		service.markNonPatientQueueArrived(npq);
+		service.startServingNonPatientQueue(npq, null);
+		service.completeNonPatientQueue(npq, null);
+		service.cancelNonPatientQueue(npq);
+	}
+	
+	@Test(expected = APIException.class)
+	public void transferNonPatientQueue_shouldRefuseACancelledEntry() {
+		PatientQueueingService service = Context.getService(PatientQueueingService.class);
+		Location room = Context.getLocationService().getLocation(10000);
+		NonPatientQueue npq = service.createNonPatientQueueEntry("Jane Doe", "+1234567890", null, room, room, room, 1, null);
+		service.cancelNonPatientQueue(npq);
+		service.transferNonPatientQueue(npq, room, null);
 	}
 	
 	@Test

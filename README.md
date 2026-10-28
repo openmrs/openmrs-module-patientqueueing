@@ -55,7 +55,7 @@ GET  /ws/rest/v1/patientqueueing/display            - Display data (now serving,
 GET    /ws/rest/v1/patientqueueing/nonpatientqueue           - List all (with filters)
 GET    /ws/rest/v1/patientqueueing/nonpatientqueue/:uuid     - Get by UUID
 POST   /ws/rest/v1/patientqueueing/nonpatientqueue           - Create new
-PUT    /ws/rest/v1/patientqueueing/nonpatientqueue/:uuid     - Update
+POST   /ws/rest/v1/patientqueueing/nonpatientqueue/:uuid     - Update
 GET    /ws/rest/v1/patientqueueing/nonpatientqueue?q=search  - Search
 ```
 
@@ -64,14 +64,14 @@ GET    /ws/rest/v1/patientqueueing/nonpatientqueue?q=search  - Search
 GET    /ws/rest/v1/patientqueue                 - List all (existing)
 POST   /ws/rest/v1/patientqueue                 - Create new (existing)
 GET    /ws/rest/v1/patientqueue/:uuid           - Get by UUID (existing)
-PUT    /ws/rest/v1/patientqueue/:uuid           - Update (existing)
+POST   /ws/rest/v1/patientqueue/:uuid           - Update (existing)
 ```
 
 ### Provider Dashboard
 ```
-GET    /ws/rest/v1/patientqueueing/providerqueuebylocation?uuid=<roomUuid>  - Unified room list
-PUT    /ws/rest/v1/patientqueueing/providerqueuebylocation/:uuid            - Call/hold/recall/skip/no-show/complete
-PUT    /ws/rest/v1/patientqueueing/providerqueuebylocation/:uuid            - Transfer (action=FORWARD)
+GET  /ws/rest/v1/patientqueueing/providerqueuebylocation?uuid=<roomUuid>  - Unified room list
+POST /ws/rest/v1/patientqueueing/providerqueuebylocation/:uuid            - Call/hold/recall/skip/no-show/complete
+POST /ws/rest/v1/patientqueueing/providerqueuebylocation/:uuid            - Transfer (action=FORWARD)
 ```
 See [API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md) "Provider Dashboard" for accepted status
 values and request bodies.
